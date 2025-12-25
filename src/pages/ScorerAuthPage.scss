@@ -1,18 +1,8 @@
 .scorer-auth {
   max-width: 28rem;
-  margin: 0 auto;
 
-  &__back-link {
-    display: inline-block;
+  &__back-btn {
     margin-bottom: 1rem;
-    color: #2563eb;
-    font-size: 0.875rem;
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-      color: #1d4ed8;
-    }
   }
 
   &__card {
@@ -77,7 +67,7 @@
       gap: 0.25rem;
 
       li {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
       }
     }
   }
@@ -94,7 +84,7 @@
 
   &__pin-input {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     border: 2px solid #d1d5db;
     border-radius: 0.5rem;
     outline: none;
@@ -117,7 +107,7 @@
 
   &__submit-btn {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     background-color: #2563eb;
     color: white;
     border: none;
@@ -139,11 +129,11 @@
   &__warning {
     margin-top: 1rem;
     background-color: #fef3c7;
-    padding: 0.75rem;
+    padding: 0.9rem;
     border-radius: 0.5rem;
 
     p {
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       color: #374151;
       margin: 0;
 
@@ -152,21 +142,4 @@
       }
     }
   }
-
-  &__back-btn {
-    width: 100%;
-    margin-top: 1rem;
-    font-size: 0.875rem;
-    color: #4b5563;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    transition: color 0.2s;
-
-    &:hover {
-      color: #111827;
-    }
-  }
 }
-

@@ -1,21 +1,8 @@
 .create-tournament {
   max-width: 48rem;
-  margin: 0 auto;
 
   &__back-btn {
-    display: inline-block;
     margin-bottom: 1rem;
-    color: #2563eb;
-    font-size: 0.875rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem 0;
-    
-    &:hover {
-      text-decoration: underline;
-      color: #1d4ed8;
-    }
   }
 
   &__title {
@@ -89,7 +76,7 @@
 
   &__input {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     outline: none;
@@ -230,7 +217,7 @@
       background-color: #16a34a;
       color: white;
       font-weight: 600;
-      padding: 0.75rem 1.5rem;
+      padding: 0.9rem 1.5rem;
 
       &:hover:not(:disabled) {
         background-color: #15803d;
@@ -255,7 +242,6 @@
 
 .create-success {
   max-width: 42rem;
-  margin: 0 auto;
 
   &__card {
     background-color: white;
@@ -322,7 +308,7 @@
     font-size: 2.5rem;
     font-weight: 700;
     font-family: "DM Sans", sans-serif;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.9rem;
 
     &--public {
       color: #2563eb;
@@ -348,7 +334,7 @@
   &__copy-actions {
     margin-top: 2rem;
     display: flex;
-    gap: 0.75rem;
+    gap: 0.9rem;
   }
 
   &__copy-btn {
@@ -380,7 +366,7 @@
   &__go-btn {
     width: 100%;
     margin-top: 1rem;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     background-color: #16a34a;
     color: white;
     border: none;
@@ -397,7 +383,7 @@
 
 .login-prompt {
   max-width: 28rem;
-  margin: 0 auto;
+
   text-align: center;
   padding: 3rem 0;
 
@@ -445,7 +431,7 @@
     }
 
     &__rule-card {
-      padding: 0.75rem;
+      padding: 0.9rem;
     }
 
     &__format-grid {
@@ -498,4 +484,3 @@
     }
   }
 }
-

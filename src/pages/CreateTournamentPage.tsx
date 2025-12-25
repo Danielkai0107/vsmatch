@@ -7,6 +7,7 @@ import { getAllSports, getAllFormats } from "../config/sportsData";
 import { generatePinPair } from "../utils/pinCode";
 import type { Sport, TournamentFormat, RuleConfig } from "../types";
 import { SETS_OPTIONS } from "../types";
+import { ArrowLeft } from "lucide-react";
 import "./CreateTournamentPage.scss";
 
 export function CreateTournamentPage() {
@@ -57,12 +58,15 @@ export function CreateTournamentPage() {
 
       // 構建規則配置
       const ruleConfig: RuleConfig = {
-        scoreToWin: setsOption.scoringMode === 'cumulative' ? 0 : scoreToWin, // 累計制不使用單局分數
+        scoreToWin: setsOption.scoringMode === "cumulative" ? 0 : scoreToWin, // 累計制不使用單局分數
         setsToWin: setsOption.setsToWin,
         totalSets: setsOption.totalSets,
         scoringMode: setsOption.scoringMode,
         allowOvertime: setsOption.allowOvertime,
-        tiebreaker: useTiebreaker && setsOption.scoringMode === 'sets' ? { scoreToWin: tiebreakerScore } : null,
+        tiebreaker:
+          useTiebreaker && setsOption.scoringMode === "sets"
+            ? { scoreToWin: tiebreakerScore }
+            : null,
       };
 
       const newTournament = {
@@ -187,7 +191,7 @@ export function CreateTournamentPage() {
         onClick={() => navigate("/")}
         className="create-tournament__back-btn"
       >
-        ← 返回首頁
+        <ArrowLeft />
       </button>
       <h1 className="create-tournament__title">建立新比賽</h1>
 
@@ -222,7 +226,7 @@ export function CreateTournamentPage() {
         {step === 1 && (
           <div className="create-tournament__section">
             <h2>1. 輸入比賽基本資訊</h2>
-            
+
             {/* 比賽名稱 */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -244,7 +248,7 @@ export function CreateTournamentPage() {
                 地區
               </label>
               <div className="create-tournament__grid create-tournament__grid--3cols">
-                {['北部', '中部', '南部'].map((region) => (
+                {["北部", "中部", "南部"].map((region) => (
                   <button
                     key={region}
                     type="button"
@@ -269,7 +273,7 @@ export function CreateTournamentPage() {
                 單位
               </label>
               <div className="create-tournament__grid create-tournament__grid--3cols">
-                {['社團', '學校', '公司', '個人', '業餘'].map((org) => (
+                {["社團", "學校", "公司", "個人", "業餘"].map((org) => (
                   <button
                     key={org}
                     type="button"
@@ -367,9 +371,9 @@ export function CreateTournamentPage() {
                       {option.label}
                     </div>
                     <div className="create-tournament__rule-btn-desc">
-                      {option.scoringMode === 'cumulative'
+                      {option.scoringMode === "cumulative"
                         ? `打滿${option.totalSets}局・總分制`
-                        : option.id === 'single'
+                        : option.id === "single"
                         ? "1局定勝負"
                         : `需贏${option.setsToWin}局`}
                     </div>
@@ -450,9 +454,7 @@ export function CreateTournamentPage() {
                       <ul className="mt-2 space-y-1 list-disc list-inside">
                         <li>所有局的分數會累計加總</li>
                         <li>打完固定局數後，總分高者獲勝</li>
-                        <li>
-                          總分相同時自動進入延長賽，直到分出勝負
-                        </li>
+                        <li>總分相同時自動進入延長賽，直到分出勝負</li>
                       </ul>
                     </div>
                   </div>
@@ -469,8 +471,7 @@ export function CreateTournamentPage() {
                     ?.label
                 }
                 {SETS_OPTIONS.find((opt) => opt.id === selectedSetsOption)
-                  ?.scoringMode === "sets" &&
-                  `，每局打到 ${scoreToWin} 分`}
+                  ?.scoringMode === "sets" && `，每局打到 ${scoreToWin} 分`}
                 {useTiebreaker && `（決勝局 ${tiebreakerScore} 分）`}
               </p>
             </div>

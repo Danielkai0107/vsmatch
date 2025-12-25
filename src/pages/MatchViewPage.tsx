@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { getSportById, getFormatById } from "../config/sportsData";
@@ -13,10 +13,12 @@ import {
 import { getMatchRoundName } from "../utils/bracketLogic";
 import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
+import { ArrowLeft } from "lucide-react";
 import "./MatchViewPage.scss";
 
 export function MatchViewPage() {
   const { tournamentId, matchId } = useParams();
+  const navigate = useNavigate();
   const [match, setMatch] = useState<Match | null>(null);
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,9 +71,12 @@ export function MatchViewPage() {
   if (tournament && tournament.status === "draft") {
     return (
       <div className="match-view-waiting">
-        <Link to={`/tournament/${tournamentId}`} className="back-link">
-          ← 返回對戰表
-        </Link>
+        <button
+          onClick={() => navigate(`/tournament/${tournamentId}`)}
+          className="match-view__back-btn"
+        >
+          <ArrowLeft />
+        </button>
         <div className="waiting-content">
           <div className="waiting-icon"></div>
           <h2>比賽籌備中，即將開始</h2>
@@ -84,9 +89,12 @@ export function MatchViewPage() {
   if (!match || !tournament || !match.player1 || !match.player2) {
     return (
       <div className="match-view-error">
-        <Link to={`/tournament/${tournamentId}`} className="back-link">
-          ← 返回對戰表
-        </Link>
+        <button
+          onClick={() => navigate(`/tournament/${tournamentId}`)}
+          className="match-view__back-btn"
+        >
+          <ArrowLeft />
+        </button>
         <p>找不到比賽資料</p>
       </div>
     );
@@ -109,9 +117,12 @@ export function MatchViewPage() {
 
   return (
     <div className="match-view">
-      <Link to={`/tournament/${tournamentId}`} className="match-view__back">
-        ← 返回對戰表
-      </Link>
+      <button
+        onClick={() => navigate(`/tournament/${tournamentId}`)}
+        className="match-view__back-btn"
+      >
+        <ArrowLeft />
+      </button>
 
       {/* 比賽資訊 */}
       <div className="match-view__header">

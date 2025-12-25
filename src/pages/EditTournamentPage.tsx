@@ -13,6 +13,7 @@ import {
 } from "../config/sportsData";
 import type { Sport, TournamentFormat, RuleConfig } from "../types";
 import { SETS_OPTIONS } from "../types";
+import { ArrowLeft } from "lucide-react";
 import "./CreateTournamentPage.scss";
 
 export function EditTournamentPage() {
@@ -155,7 +156,7 @@ export function EditTournamentPage() {
         onClick={() => navigate("/profile")}
         className="create-tournament__back-btn"
       >
-        ← 返回個人資料
+        <ArrowLeft />
       </button>
       <h1 className="create-tournament__title">編輯比賽</h1>
 

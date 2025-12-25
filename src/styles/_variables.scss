@@ -1,0 +1,60 @@
+// 顏色變數
+$primary-color: #1d4ed8;
+$primary-hover: #0542b9;
+$secondary-color: #6b7280;
+$secondary-hover: #4b5563;
+$success-color: #16a34a;
+$success-hover: #15803d;
+$danger-color: #dc2626;
+$danger-hover: #b91c1c;
+$warning-color: #d97706;
+$warning-hover: #b45309;
+
+// 背景色
+$bg-color: #ffffff;
+$bg-secondary: #f2f4f7;
+$bg-light: #f8f9fa;
+$card-bg: #ffffff;
+$text-bg: #f2f4f7;
+
+// 文字顏色
+$text-color: #000000;
+$text-primary: #000000;
+$text-secondary: #475467;
+$text-tertiary: #cccccc;
+$text-muted: #999999;
+$text-placeholder: #cccccc;
+$text-disabled: #e0e0e0;
+
+// 邊框
+$border-color: #e0e0e0;
+$border-active: $primary-color;
+
+// 狀態顏色
+$accent-color: #72b664; // Green for success/live status
+$success-color: #72b664; // Success color (same as accent)
+$error-color: #ff5252;
+$warning-color: #ff8438;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// 圓角
+$radius-sm: 8px;
+$radius-md: 10px;
+$radius-lg: 12px;
+$radius-pill: 9999px;
+
+// 陰影
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+$shadow-bottom: 0 -2px 8px rgba(0, 0, 0, 0.1);
+
+// Breakpoints
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;

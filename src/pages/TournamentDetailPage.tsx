@@ -1,14 +1,16 @@
-import { useParams, Link } from 'react-router-dom';
-import { useTournamentById, useMatches } from '../hooks/useFirestore';
-import { useTournamentStore } from '../stores/tournamentStore';
-import { useMatchStore } from '../stores/matchStore';
-import { BracketView } from '../components/bracket/BracketView';
-import { getSportById, getFormatById } from '../config/sportsData';
-import { mapPlayersToMatches } from '../utils/bracketLogic';
-import type { Match } from '../types';
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTournamentById, useMatches } from "../hooks/useFirestore";
+import { useTournamentStore } from "../stores/tournamentStore";
+import { useMatchStore } from "../stores/matchStore";
+import { BracketView } from "../components/bracket/BracketView";
+import { getSportById, getFormatById } from "../config/sportsData";
+import { mapPlayersToMatches } from "../utils/bracketLogic";
+import type { Match } from "../types";
+import { ArrowLeft } from "lucide-react";
 
 export function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   useTournamentById(id);
   useMatches(id);
@@ -29,9 +31,12 @@ export function TournamentDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">找不到此比賽</p>
-        <Link to="/" className="text-blue-600 hover:underline mt-4 inline-block">
-          返回首頁
-        </Link>
+        <button
+          onClick={() => navigate("/")}
+          className="tournament-detail__back-btn mt-4"
+        >
+          <ArrowLeft />
+        </button>
       </div>
     );
   }
@@ -43,16 +48,19 @@ export function TournamentDetailPage() {
   const displayMatches =
     Object.keys(matches).length > 0
       ? matches
-      : (format
-      ? mapPlayersToMatches(format, currentTournament.players)
-      : {}) as Record<string, Match>;
+      : ((format
+          ? mapPlayersToMatches(format, currentTournament.players)
+          : {}) as Record<string, Match>);
 
   return (
     <div>
-      <Link to="/" className="inline-block mb-4 text-blue-600 hover:underline">
-        ← 返回首頁
-      </Link>
-      
+      <button 
+        onClick={() => navigate("/")}
+        className="tournament-detail__back-btn mb-4"
+      >
+        <ArrowLeft />
+      </button>
+
       {/* 簡化的頂部資訊區 - 只顯示基本資訊 */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex items-start justify-between mb-4">
@@ -67,9 +75,9 @@ export function TournamentDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">
-                  {currentTournament.status === 'draft'
+                  {currentTournament.status === "draft"
                     ? "報名中"
-                    : currentTournament.status === 'live'
+                    : currentTournament.status === "live"
                     ? "進行中"
                     : "已結束"}
                 </span>
@@ -90,7 +98,7 @@ export function TournamentDetailPage() {
         </div>
 
         {/* 報名按鈕 - 只在籌備階段顯示 */}
-        {currentTournament.status === 'draft' && (
+        {currentTournament.status === "draft" && (
           <Link
             to="/join"
             state={{ pin: currentTournament.pin }}
@@ -108,11 +116,10 @@ export function TournamentDetailPage() {
           <BracketView
             format={format}
             matches={displayMatches}
-            tournamentId={id || ''}
+            tournamentId={id || ""}
           />
         </div>
       )}
     </div>
   );
 }
-

@@ -1,5 +1,17 @@
 // 共用樣式類別
 
+html {
+  font-size: 14px;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
 .loading {
   text-align: center;
   padding: 3rem 0;
@@ -9,7 +21,7 @@
     width: 3rem;
     height: 3rem;
     border: 2px solid transparent;
-    border-bottom-color: #2563eb;
+    border-bottom-color: $primary-color;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -30,14 +42,10 @@
   }
 
   &__link {
-    color: #2563eb;
+    color: $primary-color;
     text-decoration: none;
     display: inline-block;
     margin-top: 1rem;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 }
 
@@ -54,47 +62,47 @@
   text-align: center;
 
   &--primary {
-    background-color: #2563eb;
+    background-color: $primary-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: $primary-hover;
     }
   }
 
   &--secondary {
-    background-color: #6b7280;
+    background-color: $secondary-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: #4b5563;
+      background-color: $secondary-hover;
     }
   }
 
   &--success {
-    background-color: #16a34a;
+    background-color: $success-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: #15803d;
+      background-color: $success-hover;
     }
   }
 
   &--danger {
-    background-color: #dc2626;
+    background-color: $danger-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: #b91c1c;
+      background-color: $danger-hover;
     }
   }
 
   &--warning {
-    background-color: #d97706;
+    background-color: $warning-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: #b45309;
+      background-color: $warning-hover;
     }
   }
 
@@ -107,7 +115,7 @@
 
 // 通用狀態徽章
 .badge {
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.9rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -137,3 +145,43 @@
   }
 }
 
+// 統一的返回按鈕樣式 - 40px 圓形白底灰框
+.create-tournament__back-btn,
+.score-page__back-btn,
+.match-view__back-btn,
+.manage-page__back-btn,
+.tournament-detail__back-btn,
+.scorer-auth__back-btn,
+.profile-page__back-btn,
+.join-page__back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #6b7280;
+  }
+
+  &:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+
+    svg {
+      color: #374151;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}

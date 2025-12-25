@@ -4,18 +4,8 @@
   padding: 2rem;
   color: white;
 
-  &__back {
-    display: inline-block;
-    color: white;
-    text-decoration: none;
-    font-size: 1rem;
+  &__back-btn {
     margin-bottom: 1rem;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 
   &__header {
@@ -93,7 +83,7 @@
   grid-template-columns: 1fr auto 1fr;
   gap: 2rem;
   max-width: 1200px;
-  margin: 0 auto;
+
   background: rgba(255, 255, 255, 0.15);
   padding: 3rem;
   border-radius: 2rem;
@@ -149,7 +139,7 @@
     font-size: 2rem;
     font-weight: 700;
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    padding: 0.75rem 2rem;
+    padding: 0.9rem 2rem;
     border-radius: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   }
@@ -184,7 +174,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
+  padding: 0.9rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 
   &:last-child {
@@ -214,20 +204,6 @@
   justify-content: center;
   color: white;
   padding: 2rem;
-
-  .back-link {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    color: white;
-    text-decoration: none;
-    font-size: 1rem;
-    opacity: 0.8;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
 }
 
 .waiting-content {
@@ -252,7 +228,8 @@
 
 // 動畫
 @keyframes pulse-border {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
   }
   50% {
@@ -261,13 +238,14 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5), 
-                 0 0 20px rgba(251, 191, 36, 0.5);
+  0%,
+  100% {
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(251, 191, 36, 0.5);
   }
   50% {
-    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5), 
-                 0 0 40px rgba(251, 191, 36, 0.8);
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(251, 191, 36, 0.8);
   }
 }
 
@@ -317,4 +295,3 @@
     }
   }
 }
-

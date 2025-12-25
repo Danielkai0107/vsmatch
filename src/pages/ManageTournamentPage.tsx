@@ -9,6 +9,7 @@ import { generatePin } from "../utils/pinCode";
 import { getSportById, getFormatById } from "../config/sportsData";
 import { mapPlayersToMatches } from "../utils/bracketLogic";
 import { getSetsFormatLabel } from "../types";
+import { ArrowLeft } from "lucide-react";
 
 export function ManageTournamentPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,9 +31,12 @@ export function ManageTournamentPage() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">您沒有權限管理此比賽</p>
-        <Link to="/profile" className="text-blue-600 hover:underline mt-4 inline-block">
-          返回個人資料
-        </Link>
+        <button
+          onClick={() => navigate("/profile")}
+          className="manage-page__back-btn mt-4"
+        >
+          <ArrowLeft />
+        </button>
       </div>
     );
   }
@@ -43,9 +47,7 @@ export function ManageTournamentPage() {
   const handleStartTournament = async () => {
     if (!id) return;
 
-    if (
-      !confirm("確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。")
-    ) {
+    if (!confirm("確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。")) {
       return;
     }
 
@@ -141,12 +143,12 @@ export function ManageTournamentPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <Link
-        to="/profile"
-        className="inline-block mb-4 text-blue-600 hover:underline text-sm"
+      <button
+        onClick={() => navigate("/profile")}
+        className="manage-page__back-btn mb-4"
       >
-        ← 返回個人資料
-      </Link>
+        <ArrowLeft />
+      </button>
       <h1 className="text-3xl font-bold text-gray-900 mb-6">管理比賽</h1>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -222,7 +224,7 @@ export function ManageTournamentPage() {
                 <span>計分 PIN 碼（私密）</span>
                 <button
                   onClick={() => setShowScorerPin(!showScorerPin)}
-                  className="text-xs text-red-600 hover:underline font-semibold"
+                  className="text-xs text-red-600 font-semibold"
                 >
                   {showScorerPin ? "隱藏" : "顯示"}
                 </button>
@@ -308,4 +310,3 @@ export function ManageTournamentPage() {
     </div>
   );
 }
-

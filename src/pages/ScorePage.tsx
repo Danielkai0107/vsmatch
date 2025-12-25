@@ -19,6 +19,7 @@ import { progressWinner } from "../utils/progressionLogic";
 import { getMatchRoundName } from "../utils/bracketLogic";
 import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
+import { ArrowLeft } from "lucide-react";
 
 export function ScorePage() {
   const { tournamentId, matchId } = useParams();
@@ -162,7 +163,7 @@ export function ScorePage() {
       // 累計制特殊邏輯
       if (rule.scoringMode === "cumulative") {
         const completedSetsCount = newSets.length;
-        
+
         // 如果還沒打完固定局數，繼續下一局
         if (completedSetsCount < rule.totalSets) {
           newSets.push(createNewSet());
@@ -184,7 +185,7 @@ export function ScorePage() {
 
         // 打完固定局數，檢查總分
         const { p1, p2 } = getCumulativeScore(newSets);
-        
+
         if (p1 === p2) {
           // 總分相同，需要延長賽
           if (rule.allowOvertime) {
@@ -214,9 +215,7 @@ export function ScorePage() {
         }
 
         // 總分不同，比賽結束
-        alert(
-          `比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`
-        );
+        alert(`比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`);
         return;
       }
 
@@ -310,9 +309,9 @@ export function ScorePage() {
       <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate(`/tournament/${tournamentId}`)}
-          className="text-blue-600 hover:underline text-sm mb-4"
+          className="score-page__back-btn"
         >
-          ← 返回對戰表
+          <ArrowLeft />
         </button>
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <div className="text-6xl mb-4">⏳</div>
@@ -338,9 +337,9 @@ export function ScorePage() {
       <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate(`/tournament/${tournamentId}`)}
-          className="text-blue-600 hover:underline text-sm mb-4"
+          className="score-page__back-btn"
         >
-          ← 返回對戰表
+          <ArrowLeft />
         </button>
         <div className="text-center py-12">
           <p className="text-gray-600">找不到比賽或選手資料</p>
@@ -353,15 +352,19 @@ export function ScorePage() {
   const format = getFormatById(tournament.config.formatId);
   const roundName = format ? getMatchRoundName(format, matchId!) : "";
   const currentSet = match.sets[match.currentSet];
-  
+
   // 根據計分模式計算顯示數據
   const isCumulative = rule?.scoringMode === "cumulative";
   const setsWon = getSetsWon(match.sets, match.currentSet);
-  const cumulativeScore = isCumulative ? getCumulativeScore(match.sets.slice(0, match.currentSet)) : null;
+  const cumulativeScore = isCumulative
+    ? getCumulativeScore(match.sets.slice(0, match.currentSet))
+    : null;
   const isOvertimeMode = rule && isInOvertime(rule, match.currentSet);
   const currentSetName = rule ? getCurrentSetName(rule, match.currentSet) : "";
-  
-  const matchComplete = rule ? isMatchComplete(match.sets, rule, match.currentSet) : false;
+
+  const matchComplete = rule
+    ? isMatchComplete(match.sets, rule, match.currentSet)
+    : false;
   const targetScore =
     rule && currentSet
       ? getCurrentSetTarget(match.sets, rule, match.currentSet)
@@ -373,9 +376,9 @@ export function ScorePage() {
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <button
           onClick={() => navigate(`/tournament/${tournamentId}`)}
-          className="text-blue-600 hover:underline text-sm mb-2"
+          className="score-page__back-btn"
         >
-          ← 返回對戰表
+          <ArrowLeft />
         </button>
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">
           {roundName}
@@ -435,9 +438,7 @@ export function ScorePage() {
             </div>
           </div>
           <div className="text-center px-4">
-            <div className="text-xs text-gray-600 mb-1">
-              {currentSetName}
-            </div>
+            <div className="text-xs text-gray-600 mb-1">{currentSetName}</div>
             <div className="text-2xl font-bold text-gray-400">VS</div>
           </div>
           <div className="text-center flex-1">

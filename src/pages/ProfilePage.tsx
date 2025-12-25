@@ -1,12 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
+import { ArrowLeft } from "lucide-react";
 import "./ProfilePage.scss";
 
 export function ProfilePage() {
   const { user, firebaseUser } = useAuth();
+  const navigate = useNavigate();
   useTournaments();
   const { tournaments, loading } = useTournamentStore();
 
@@ -15,9 +17,12 @@ export function ProfilePage() {
       <div className="profile-page">
         <div className="profile-page__empty">
           <p>請先登入查看個人資料</p>
-          <Link to="/" className="profile-page__link">
-            返回首頁
-          </Link>
+          <button
+            onClick={() => navigate("/")}
+            className="profile-page__back-btn"
+          >
+            <ArrowLeft />
+          </button>
         </div>
       </div>
     );

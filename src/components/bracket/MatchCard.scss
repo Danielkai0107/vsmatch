@@ -1,7 +1,7 @@
 .match-card {
   border: 2px solid;
   border-radius: 0.5rem;
-  padding: 0.75rem;
+  padding: 0.9rem;
   background-color: white;
   transition: all 0.2s;
 
@@ -31,7 +31,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #6b7280;
     margin-bottom: 0.5rem;
   }
@@ -51,7 +51,7 @@
 
   &__clickable-hint {
     color: #2563eb;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
   }
 
   &__players {
@@ -61,7 +61,7 @@
   }
 
   &__score-info {
-    margin-top: 0.75rem;
+    margin-top: 0.9rem;
     padding: 0.5rem;
     background-color: #f9fafb;
     border-radius: 0.375rem;
@@ -78,7 +78,7 @@
   }
 
   &__label {
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #6b7280;
     font-weight: 500;
   }
@@ -103,7 +103,7 @@
     border-radius: 0.375rem;
 
     span {
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #047857;
     }
@@ -111,16 +111,18 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
-    opacity: .5;
+    opacity: 0.5;
   }
 }
 
 @keyframes pulse-score {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     color: #2563eb;
   }
@@ -129,4 +131,3 @@
     color: #1d4ed8;
   }
 }
-
