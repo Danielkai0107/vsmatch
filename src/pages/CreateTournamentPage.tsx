@@ -200,28 +200,15 @@ export function CreateTournamentPage() {
       <div className="create-tournament__card">
         {/* 步驟指示器 */}
         <div className="create-tournament__stepper">
-          {[1, 2, 3, 4].map((s) => (
-            <div key={s} className="create-tournament__step-item">
-              <div
-                className={`create-tournament__step-circle ${
-                  s <= step
-                    ? "create-tournament__step-circle--active"
-                    : "create-tournament__step-circle--inactive"
-                }`}
-              >
-                {s}
-              </div>
-              {s < 4 && (
-                <div
-                  className={`create-tournament__step-line ${
-                    s < step
-                      ? "create-tournament__step-line--active"
-                      : "create-tournament__step-line--inactive"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
+          <div className="create-tournament__progress-label">
+            步驟 {step}/4
+          </div>
+          <div className="create-tournament__progress-bar">
+            <div
+              className="create-tournament__progress-fill"
+              style={{ width: `${(step / 4) * 100}%` }}
+            />
+          </div>
         </div>
 
         {/* 步驟 1: 輸入比賽基本資訊 */}
