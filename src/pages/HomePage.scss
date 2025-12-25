@@ -151,7 +151,7 @@
 
   &__content {
     background: linear-gradient(130deg, #0542b9 10%, #67a1e8 100%);
-    padding: 3rem 2rem;
+    padding: 3.5rem 2rem 2rem 2rem;
     border-radius: 1rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     max-width: 400px;
@@ -159,15 +159,15 @@
     position: relative;
     text-align: center;
     &--scorer {
-      background: linear-gradient(45deg, #a8b7d5 10%, #ffffff 100%);
+      background: linear-gradient(180deg, #a8b7d5 10%, #ffffff 100%);
       border: 1px solid $border-color;
     }
   }
 
   &__close {
     position: absolute;
-    top: 1.2rem;
-    right: 1.2rem;
+    top: 0.7rem;
+    right: 0.7rem;
     background-color: #fff;
     border: none;
     font-size: 1.5rem;
@@ -221,7 +221,7 @@
     }
 
     &::placeholder {
-      color: #9ca3af;
+      color: $text-secondary;
       font-weight: 400;
       letter-spacing: normal;
     }

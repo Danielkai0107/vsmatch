@@ -181,11 +181,9 @@ export function HomePage() {
             >
               ✕
             </button>
-            <div className="pin-modal__logo">報名 PIN</div>
-            <p className="pin-modal__subtitle">請輸入比賽 PIN 碼報名參賽</p>
             <input
               type="text"
-              placeholder="輸入 6 位數 PIN"
+              placeholder="報名 PIN 碼"
               value={pinInput}
               onChange={(e) => {
                 setPinInput(e.target.value.replace(/\D/g, "").slice(0, 6));
@@ -197,6 +195,7 @@ export function HomePage() {
               maxLength={6}
               autoFocus
             />
+
             {pinError && <p className="pin-modal__error">{pinError}</p>}
             <button
               onClick={handleJoinWithPin}
@@ -226,15 +225,9 @@ export function HomePage() {
             >
               ✕
             </button>
-            <div className="pin-modal__logo pin-modal__logo--scorer">
-              計分 PIN
-            </div>
-            <p className="pin-modal__subtitle pin-modal__subtitle--scorer">
-              請輸入主辦人提供的計分 PIN 碼
-            </p>
             <input
               type="text"
-              placeholder="輸入 6 位數 PIN"
+              placeholder="計分 PIN 碼"
               value={scorerPinInput}
               onChange={(e) => {
                 setScorerPinInput(
