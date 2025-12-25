@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { usePopup } from "../contexts/PopupContext";
 import { findTournamentByPin } from "../utils/pinCode";
 import { getSportById, getFormatById } from "../config/sportsData";
 import type { Tournament } from "../types";
@@ -11,6 +12,7 @@ import "./JoinPage.scss";
 export function JoinPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showPopup } = usePopup();
   const initialPin = (location.state as { pin?: string })?.pin || "";
 
   const [playerName, setPlayerName] = useState("");
@@ -88,7 +90,7 @@ export function JoinPage() {
         }),
       });
 
-      alert("報名成功！");
+      showPopup("報名成功！", "success");
       navigate(`/tournament/${tournament.id}`);
     } catch (error) {
       console.error("Error joining tournament:", error);

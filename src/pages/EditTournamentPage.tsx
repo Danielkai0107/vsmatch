@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopup } from "../contexts/PopupContext";
 import { db } from "../lib/firebase";
 import { doc, updateDoc, Timestamp } from "firebase/firestore";
 import { useTournamentById } from "../hooks/useFirestore";
@@ -20,6 +21,7 @@ export function EditTournamentPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showPopup } = usePopup();
 
   useTournamentById(id);
   const { currentTournament } = useTournamentStore();
@@ -129,11 +131,11 @@ export function EditTournamentPage() {
         updatedAt: Timestamp.now(),
       });
 
-      alert("更新成功！");
+      showPopup("更新成功！", "success");
       navigate("/profile");
     } catch (error) {
       console.error("Error updating tournament:", error);
-      alert("更新失敗，請重試");
+      showPopup("更新失敗，請重試", "error");
     } finally {
       setLoading(false);
     }

@@ -1,13 +1,17 @@
 .layout {
   min-height: 100vh;
   background-color: #f9fafb;
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   &__main {
+    max-width: 80rem;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    max-width: 80rem;
     padding: 48px 40px 48px 40px;
     @media (max-width: $breakpoint-mobile) {
       padding: 48px 1.2rem 48px 1.2rem;

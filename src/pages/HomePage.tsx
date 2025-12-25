@@ -4,6 +4,7 @@ import { TournamentCard } from "../components/TournamentCard";
 import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopup } from "../contexts/PopupContext";
 import { SquareKanban, Trophy, Plus } from "lucide-react";
 import {
   findTournamentByScorerPin,
@@ -17,6 +18,7 @@ export function HomePage() {
 
   const { tournaments, loading } = useTournamentStore();
   const { user, signInWithGoogle } = useAuth();
+  const { showPopup, showConfirm } = usePopup();
   const [showPinModal, setShowPinModal] = useState(false);
   const [showScorerPinModal, setShowScorerPinModal] = useState(false);
   const [pinInput, setPinInput] = useState("");
@@ -33,14 +35,14 @@ export function HomePage() {
   const handleCreateTournament = async () => {
     if (!user) {
       // 未登入，提示登入
-      if (confirm("需要登入才能創建賽事，是否立即登入？")) {
+      showConfirm("需要登入才能創建賽事，是否立即登入？", async () => {
         try {
           await signInWithGoogle();
         } catch (error) {
           console.error("Login failed:", error);
-          alert("登入失敗，請重試");
+          showPopup("登入失敗，請重試", "error");
         }
-      }
+      });
       return;
     }
 

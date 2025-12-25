@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopup } from "../contexts/PopupContext";
 import { db } from "../lib/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { getAllSports, getAllFormats } from "../config/sportsData";
@@ -13,6 +14,7 @@ import "./CreateTournamentPage.scss";
 export function CreateTournamentPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showPopup } = usePopup();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -96,7 +98,7 @@ export function CreateTournamentPage() {
       });
     } catch (error) {
       console.error("Error creating tournament:", error);
-      alert("建立比賽失敗，請重試");
+      showPopup("建立比賽失敗，請重試", "error");
     } finally {
       setLoading(false);
     }

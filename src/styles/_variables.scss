@@ -58,3 +58,15 @@ $shadow-bottom: 0 -2px 8px rgba(0, 0, 0, 0.1);
 // Breakpoints
 $breakpoint-mobile: 768px;
 $breakpoint-tablet: 1024px;
+
+// Popup 組件顏色
+$primary: $primary-color;
+$primary-dark: $primary-hover;
+$info: #3b82f6;
+$info-light: #dbeafe;
+$success: $success-color;
+$success-light: #dcfce7;
+$warning: $warning-color;
+$warning-light: #fef3c7;
+$danger: $danger-color;
+$danger-light: #fee2e2;

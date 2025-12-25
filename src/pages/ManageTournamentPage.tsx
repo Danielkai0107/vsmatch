@@ -5,6 +5,7 @@ import { db } from "../lib/firebase";
 import { useTournamentById } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopup } from "../contexts/PopupContext";
 import { generatePin } from "../utils/pinCode";
 import { getSportById, getFormatById } from "../config/sportsData";
 import { mapPlayersToMatches } from "../utils/bracketLogic";
@@ -15,6 +16,7 @@ export function ManageTournamentPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showPopup, showConfirm } = usePopup();
   const [loading, setLoading] = useState(false);
   const [showScorerPin, setShowScorerPin] = useState(false);
 
@@ -47,98 +49,94 @@ export function ManageTournamentPage() {
   const handleStartTournament = async () => {
     if (!id) return;
 
-    if (!confirm("確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。")) {
-      return;
-    }
+    showConfirm("確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。", async () => {
+      setLoading(true);
 
-    setLoading(true);
-
-    try {
-      const format = getFormatById(currentTournament.config.formatId);
-      if (!format) {
-        alert("找不到比賽格式");
-        return;
-      }
-
-      // 生成對戰表
-      const initialMatches = mapPlayersToMatches(
-        format,
-        currentTournament.players
-      );
-
-      // 將每場比賽保存到 Firestore 的 matches 子集合
-      const savePromises = Object.entries(initialMatches).map(
-        ([matchId, match]) => {
-          const matchRef = doc(db, "tournaments", id, "matches", matchId);
-          return setDoc(matchRef, {
-            ...match,
-            matchId,
-            tournamentId: id,
-          });
+      try {
+        const format = getFormatById(currentTournament.config.formatId);
+        if (!format) {
+          showPopup("找不到比賽格式", "error");
+          setLoading(false);
+          return;
         }
-      );
 
-      await Promise.all(savePromises);
+        // 生成對戰表
+        const initialMatches = mapPlayersToMatches(
+          format,
+          currentTournament.players
+        );
 
-      // 更新比賽狀態為 live
-      await updateDoc(doc(db, "tournaments", id), {
-        status: "live",
-      });
+        // 將每場比賽保存到 Firestore 的 matches 子集合
+        const savePromises = Object.entries(initialMatches).map(
+          ([matchId, match]) => {
+            const matchRef = doc(db, "tournaments", id, "matches", matchId);
+            return setDoc(matchRef, {
+              ...match,
+              matchId,
+              tournamentId: id,
+            });
+          }
+        );
 
-      alert("比賽已開始！");
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error starting tournament:", error);
-      alert("開始比賽失敗，請重試");
-    } finally {
-      setLoading(false);
-    }
+        await Promise.all(savePromises);
+
+        // 更新比賽狀態為 live
+        await updateDoc(doc(db, "tournaments", id), {
+          status: "live",
+        });
+
+        showPopup("比賽已開始！", "success");
+        navigate("/profile");
+      } catch (error) {
+        console.error("Error starting tournament:", error);
+        showPopup("開始比賽失敗，請重試", "error");
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   const handleRegenerateScorerPin = async () => {
     if (!id) return;
-    if (
-      !confirm(
-        "確定要重新生成計分 PIN 碼嗎？已授權的計分員需要重新輸入新的 PIN。"
-      )
-    ) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const newScorerPin = await generatePin();
-      await updateDoc(doc(db, "tournaments", id), {
-        scorerPin: newScorerPin,
-      });
-      alert(`新的計分 PIN 碼：${newScorerPin}`);
-      // 重新載入頁面以更新 PIN
-      window.location.reload();
-    } catch (error) {
-      console.error("Error regenerating scorer PIN:", error);
-      alert("重新生成失敗");
-    } finally {
-      setLoading(false);
-    }
+    
+    showConfirm(
+      "確定要重新生成計分 PIN 碼嗎？已授權的計分員需要重新輸入新的 PIN。",
+      async () => {
+        setLoading(true);
+        try {
+          const newScorerPin = await generatePin();
+          await updateDoc(doc(db, "tournaments", id), {
+            scorerPin: newScorerPin,
+          });
+          showPopup(`新的計分 PIN 碼：${newScorerPin}`, "success");
+          // 重新載入頁面以更新 PIN
+          window.location.reload();
+        } catch (error) {
+          console.error("Error regenerating scorer PIN:", error);
+          showPopup("重新生成失敗", "error");
+        } finally {
+          setLoading(false);
+        }
+      }
+    );
   };
 
   const handleDelete = async () => {
     if (!id) return;
-    if (!confirm("確定要刪除此比賽嗎？此操作無法復原！")) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await deleteDoc(doc(db, "tournaments", id));
-      alert("比賽已刪除");
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error deleting tournament:", error);
-      alert("刪除失敗");
-    } finally {
-      setLoading(false);
-    }
+    
+    showConfirm("確定要刪除此比賽嗎？此操作無法復原！", async () => {
+      setLoading(true);
+      try {
+        await deleteDoc(doc(db, "tournaments", id));
+        showPopup("比賽已刪除", "success");
+        navigate("/profile");
+      } catch (error) {
+        console.error("Error deleting tournament:", error);
+        showPopup("刪除失敗", "error");
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   return (

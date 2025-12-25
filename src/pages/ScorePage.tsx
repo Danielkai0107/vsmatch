@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { usePermissionStore } from "../stores/permissionStore";
+import { usePopup } from "../contexts/PopupContext";
 import { getFormatById } from "../config/sportsData";
 import {
   createNewSet,
@@ -24,6 +25,7 @@ import { ArrowLeft } from "lucide-react";
 export function ScorePage() {
   const { tournamentId, matchId } = useParams();
   const navigate = useNavigate();
+  const { showPopup, showConfirm } = usePopup();
   const hasScorePermission = usePermissionStore((state) =>
     state.hasScorePermission(tournamentId || "")
   );
@@ -113,7 +115,7 @@ export function ScorePage() {
 
     // 檢查是否有分數
     if (currentSet.p1Score === 0 && currentSet.p2Score === 0) {
-      alert("尚未有任何分數，無法結束本局");
+      showPopup("尚未有任何分數，無法結束本局", "warning");
       return;
     }
 
@@ -133,27 +135,35 @@ export function ScorePage() {
       const scoreDiff = Math.abs(currentSet.p1Score - currentSet.p2Score);
 
       if (maxScore < targetScore) {
-        alert(
-          `本局尚未結束！\n目標分數：${targetScore} 分\n當前最高分：${maxScore} 分`
+        showPopup(
+          `本局尚未結束！\n目標分數：${targetScore} 分\n當前最高分：${maxScore} 分`,
+          "warning"
         );
         return;
       }
 
       if (scoreDiff < 2) {
-        alert(
-          `本局尚未結束！\n需要領先至少 2 分才能獲勝\n當前分差：${scoreDiff} 分`
+        showPopup(
+          `本局尚未結束！\n需要領先至少 2 分才能獲勝\n當前分差：${scoreDiff} 分`,
+          "warning"
         );
         return;
       }
     }
 
-    if (
-      !confirm(
-        `確定結束本局嗎？\n當前比分：${currentSet.p1Score}-${currentSet.p2Score}`
-      )
-    ) {
-      return;
-    }
+    showConfirm(
+      `確定結束本局嗎？\n當前比分：${currentSet.p1Score}-${currentSet.p2Score}`,
+      async () => {
+        await executeEndCurrentSet();
+      }
+    );
+  };
+
+  const executeEndCurrentSet = async () => {
+    if (!match || !tournament || !tournamentId || !matchId) return;
+    
+    const rule = tournament.config.rules;
+    if (!rule) return;
 
     setSaving(true);
 
@@ -179,7 +189,7 @@ export function ScorePage() {
           );
 
           setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
-          alert(`本局已結束！進入第${newCurrentSet + 1}局`);
+          showPopup(`本局已結束！進入第${newCurrentSet + 1}局`, "success");
           return;
         }
 
@@ -202,27 +212,28 @@ export function ScorePage() {
             );
 
             setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
-            alert(
+            showPopup(
               `總分平手（${p1}:${p2}）！進入延長賽第${
                 newCurrentSet - rule.totalSets + 1
-              }局`
+              }局`,
+              "info"
             );
             return;
           } else {
-            alert("比賽結束！總分平手，請點擊「結束比賽」按鈕");
+            showPopup("比賽結束！總分平手，請點擊「結束比賽」按鈕", "info");
             return;
           }
         }
 
         // 總分不同，比賽結束
-        alert(`比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`);
+        showPopup(`比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`, "info");
         return;
       }
 
       // 單局制邏輯
       // 檢查是否已經達成整場比賽的勝利條件
       if (isMatchComplete(newSets, rule)) {
-        alert("比賽已結束！請點擊「結束比賽」按鈕確認勝者");
+        showPopup("比賽已結束！請點擊「結束比賽」按鈕確認勝者", "info");
         return;
       }
 
@@ -241,10 +252,10 @@ export function ScorePage() {
       );
 
       setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
-      alert("本局已結束！進入下一局");
+      showPopup("本局已結束！進入下一局", "success");
     } catch (error) {
       console.error("Error ending set:", error);
-      alert("結束本局失敗，請重試");
+      showPopup("結束本局失敗，請重試", "error");
     } finally {
       setSaving(false);
     }
@@ -252,46 +263,51 @@ export function ScorePage() {
 
   const handleEndMatch = async () => {
     if (!match || !tournament || !tournamentId || !matchId) return;
-    if (!confirm("確定要結束此場比賽嗎？")) return;
+    
+    showConfirm("確定要結束此場比賽嗎？", async () => {
+      setSaving(true);
 
-    setSaving(true);
+      try {
+        const rule = tournament.config.rules;
+        if (!rule) return;
 
-    try {
-      const rule = tournament.config.rules;
-      if (!rule) return;
-
-      const winner = getMatchWinner(match.sets, rule);
-      if (!winner) {
-        alert("比賽尚未達到獲勝條件");
-        return;
-      }
-
-      const winnerPlayer = winner === "player1" ? match.player1 : match.player2;
-      if (!winnerPlayer) return;
-
-      // 更新比賽狀態
-      await updateDoc(
-        doc(db, "tournaments", tournamentId, "matches", matchId),
-        {
-          status: "completed",
-          winner: winnerPlayer.name,
+        const winner = getMatchWinner(match.sets, rule);
+        if (!winner) {
+          showPopup("比賽尚未達到獲勝條件", "warning");
+          setSaving(false);
+          return;
         }
-      );
 
-      // 處理晉級
-      const format = getFormatById(tournament.config.formatId);
-      if (format) {
-        await progressWinner(tournamentId, matchId, winnerPlayer, format);
+        const winnerPlayer = winner === "player1" ? match.player1 : match.player2;
+        if (!winnerPlayer) {
+          setSaving(false);
+          return;
+        }
+
+        // 更新比賽狀態
+        await updateDoc(
+          doc(db, "tournaments", tournamentId, "matches", matchId),
+          {
+            status: "completed",
+            winner: winnerPlayer.name,
+          }
+        );
+
+        // 處理晉級
+        const format = getFormatById(tournament.config.formatId);
+        if (format) {
+          await progressWinner(tournamentId, matchId, winnerPlayer, format);
+        }
+
+        showPopup(`比賽結束！勝者：${winnerPlayer.name}`, "success");
+        navigate(`/tournament/${tournamentId}`);
+      } catch (error) {
+        console.error("Error ending match:", error);
+        showPopup("結束比賽失敗", "error");
+      } finally {
+        setSaving(false);
       }
-
-      alert(`比賽結束！勝者：${winnerPlayer.name}`);
-      navigate(`/tournament/${tournamentId}`);
-    } catch (error) {
-      console.error("Error ending match:", error);
-      alert("結束比賽失敗");
-    } finally {
-      setSaving(false);
-    }
+    });
   };
 
   if (loading) {
