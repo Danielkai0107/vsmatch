@@ -20,9 +20,6 @@ export function Navbar() {
               <span className="navbar__loading">載入中...</span>
             ) : user ? (
               <>
-                <Link to="/create" className="navbar__btn navbar__btn--primary">
-                  建立比賽
-                </Link>
                 <div className="navbar__user">
                   <Link to="/profile" className="navbar__user-link">
                     {firebaseUser?.photoURL && (

@@ -5,7 +5,7 @@ import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
 import { usePopup } from "../contexts/PopupContext";
-import { SquareKanban, Trophy, Plus } from "lucide-react";
+import { SquareKanban, Trophy, Plus, X } from "lucide-react";
 import {
   findTournamentByScorerPin,
   findTournamentByPin,
@@ -179,7 +179,7 @@ export function HomePage() {
                 setPinError("");
               }}
             >
-              ✕
+              <X size={20} color="#6b7280" />
             </button>
             <input
               type="text"
@@ -223,7 +223,7 @@ export function HomePage() {
                 setScorerPinError("");
               }}
             >
-              ✕
+              <X size={24} color="#6b7280" />
             </button>
             <input
               type="text"

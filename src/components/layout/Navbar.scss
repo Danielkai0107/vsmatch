@@ -86,6 +86,9 @@
     color: #374151;
     transition: color 0.2s;
     font-weight: 700;
+    @media (max-width: $breakpoint-mobile) {
+      display: none;
+    }
   }
 
   &__btn {
