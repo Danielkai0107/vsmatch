@@ -121,7 +121,7 @@ export function JoinPage() {
           ← 返回首頁
         </Link>
         <div className="join-page__error-state">
-          <div className="error-icon">❌</div>
+          <div className="error-icon"></div>
           <h2>{error || '找不到比賽'}</h2>
           <p>請確認 PIN 碼是否正確</p>
           <button

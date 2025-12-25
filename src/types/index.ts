@@ -65,6 +65,8 @@ export interface Tournament {
   pin: string;           // 比賽 PIN（公開）
   scorerPin: string;     // 計分 PIN（私密）
   name: string;
+  region?: string;       // 地區：北部、中部、南部
+  organization?: string; // 單位：社團、學校、公司、個人、業餘
   organizerId: string;
   status: 'draft' | 'locked' | 'live' | 'finished';
   config: TournamentConfig;

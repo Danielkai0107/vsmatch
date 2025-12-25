@@ -79,7 +79,7 @@ export async function progressWinner(
     await updateDoc(nextMatchRef, updateData);
 
     console.log(
-      `✅ ${winner.name} 晉級到 ${nextMatchId} 的 ${isP1 ? 'P1' : 'P2'} 位置`
+      `${winner.name} 晉級到 ${nextMatchId} 的 ${isP1 ? 'P1' : 'P2'} 位置`
     );
   } catch (error) {
     console.error('晉級處理失敗:', error);

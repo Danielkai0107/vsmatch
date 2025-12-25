@@ -5,37 +5,37 @@ export const SPORTS: SportsData = {
   badminton: {
     id: 'badminton',
     name: '羽球',
-    icon: '🏸',
+    icon: '',
     modes: ['單打', '雙打'],
   },
   basketball: {
     id: 'basketball',
     name: '籃球',
-    icon: '🏀',
+    icon: '',
     modes: ['3x3', '5x5'],
   },
   volleyball: {
     id: 'volleyball',
     name: '排球',
-    icon: '🏐',
+    icon: '',
     modes: ['室內', '沙灘'],
   },
   tennis: {
     id: 'tennis',
     name: '網球',
-    icon: '🎾',
+    icon: '',
     modes: ['單打', '雙打'],
   },
   tableTennis: {
     id: 'tableTennis',
     name: '桌球',
-    icon: '🏓',
+    icon: '',
     modes: ['單打', '雙打'],
   },
   other: {
     id: 'other',
     name: '其他運動',
-    icon: '⚽',
+    icon: '',
     modes: ['通用'],
   },
 };

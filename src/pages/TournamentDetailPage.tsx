@@ -68,10 +68,10 @@ export function TournamentDetailPage() {
               <div className="flex items-center gap-2">
                 <span className="text-sm">
                   {currentTournament.status === 'draft'
-                    ? "📋 報名中"
+                    ? "報名中"
                     : currentTournament.status === 'live'
-                    ? "🔴 進行中"
-                    : "✅ 已結束"}
+                    ? "進行中"
+                    : "已結束"}
                 </span>
               </div>
             </div>

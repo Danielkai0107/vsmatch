@@ -66,7 +66,7 @@ export function ProfilePage() {
 
       {/* 我舉辦的比賽 */}
       <section className="profile-page__section">
-        <h2 className="profile-page__section-title">🏆 我舉辦的比賽</h2>
+        <h2 className="profile-page__section-title">我舉辦的比賽</h2>
         {loading ? (
           <div className="profile-page__loading">載入中...</div>
         ) : myTournaments.length === 0 ? (
@@ -103,19 +103,19 @@ export function ProfilePage() {
                       to={`/tournament/${tournament.id}/manage`}
                       className="tournament-item__btn tournament-item__btn--manage"
                     >
-                      ⚙️ 管理
+                      管理
                     </Link>
                     <Link
                       to={`/tournament/${tournament.id}/edit`}
                       className="tournament-item__btn tournament-item__btn--edit"
                     >
-                      ✏️ 編輯
+                      編輯
                     </Link>
                     <Link
                       to={`/tournament/${tournament.id}`}
                       className="tournament-item__btn tournament-item__btn--view"
                     >
-                      👁️ 預覽
+                      預覽
                     </Link>
                   </div>
                 </div>
@@ -127,7 +127,7 @@ export function ProfilePage() {
 
       {/* 我參加的比賽 */}
       <section className="profile-page__section">
-        <h2 className="profile-page__section-title">🎯 我參加的比賽</h2>
+        <h2 className="profile-page__section-title">我參加的比賽</h2>
         {loading ? (
           <div className="profile-page__loading">載入中...</div>
         ) : joinedTournaments.length === 0 ? (

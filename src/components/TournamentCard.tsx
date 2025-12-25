@@ -72,7 +72,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
     >
       <div className="tournament-card__header">
         <div className="tournament-card__info">
-          <span className="tournament-card__icon">{sport?.icon || '🏆'}</span>
+          <span className="tournament-card__icon">{sport?.icon || ''}</span>
           <div>
             <h3 className="tournament-card__title">
               {tournament.name}

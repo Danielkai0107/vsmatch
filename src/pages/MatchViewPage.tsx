@@ -73,7 +73,7 @@ export function MatchViewPage() {
           ← 返回對戰表
         </Link>
         <div className="waiting-content">
-          <div className="waiting-icon">⏳</div>
+          <div className="waiting-icon"></div>
           <h2>比賽籌備中，即將開始</h2>
           <p>主辦人需要先點擊「開始比賽」按鈕</p>
         </div>
@@ -119,12 +119,12 @@ export function MatchViewPage() {
         <h2 className="match-view__round">{roundName}</h2>
         {match.status === "live" && (
           <div className="match-view__status match-view__status--live">
-            🔴 進行中
+            進行中
           </div>
         )}
         {match.status === "completed" && (
           <div className="match-view__status match-view__status--completed">
-            ✓ 已完成
+            已完成
           </div>
         )}
       </div>
@@ -186,7 +186,7 @@ export function MatchViewPage() {
           )}
           {match.status === "completed" &&
             match.winner === match.player1.name && (
-              <div className="scoreboard__winner-badge">🏆 勝者</div>
+              <div className="scoreboard__winner-badge">勝者</div>
             )}
         </div>
 
@@ -216,7 +216,7 @@ export function MatchViewPage() {
           )}
           {match.status === "completed" &&
             match.winner === match.player2.name && (
-              <div className="scoreboard__winner-badge">🏆 勝者</div>
+              <div className="scoreboard__winner-badge">勝者</div>
             )}
         </div>
       </div>

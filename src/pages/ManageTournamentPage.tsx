@@ -187,13 +187,13 @@ export function ManageTournamentPage() {
               to={`/tournament/${id}/edit`}
               className="flex-1 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-semibold text-center"
             >
-              ✏️ 編輯比賽資料
+              編輯比賽資料
             </Link>
             <Link
               to={`/tournament/${id}`}
               className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-center"
             >
-              👁️ 預覽公開頁面
+              預覽公開頁面
             </Link>
           </div>
         </div>
@@ -280,11 +280,11 @@ export function ManageTournamentPage() {
               disabled={loading || currentTournament.players.length < 2}
               className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-semibold text-lg"
             >
-              {loading ? "處理中..." : "🚀 開始比賽"}
+              {loading ? "處理中..." : "開始比賽"}
             </button>
             {currentTournament.players.length < 2 && (
               <p className="text-sm text-red-600 mt-2 text-center">
-                ⚠️ 至少需要 2 位選手才能開始比賽
+                至少需要 2 位選手才能開始比賽
               </p>
             )}
           </div>
@@ -292,7 +292,7 @@ export function ManageTournamentPage() {
 
         {/* 危險操作 */}
         <div className="p-6 bg-red-50">
-          <h3 className="text-xl font-bold text-red-600 mb-3">⚠️ 危險操作</h3>
+          <h3 className="text-xl font-bold text-red-600 mb-3">危險操作</h3>
           <p className="text-sm text-gray-600 mb-4">
             刪除後無法復原，請謹慎操作
           </p>
@@ -301,7 +301,7 @@ export function ManageTournamentPage() {
             disabled={loading}
             className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 font-semibold"
           >
-            🗑️ 刪除比賽
+            刪除比賽
           </button>
         </div>
       </div>

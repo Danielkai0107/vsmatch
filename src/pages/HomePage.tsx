@@ -120,7 +120,7 @@ export function HomePage() {
             onClick={handleCreateTournament}
             className="action-card action-card--create"
           >
-            <div className="action-card__icon">🏆</div>
+            <div className="action-card__icon"></div>
             <div className="action-card__content">
               <h2 className="action-card__title">創建賽事</h2>
               <p className="action-card__desc">建立並管理你的比賽</p>
@@ -132,7 +132,7 @@ export function HomePage() {
             onClick={() => setShowPinModal(true)}
             className="action-card action-card--join"
           >
-            <div className="action-card__icon">🎯</div>
+            <div className="action-card__icon"></div>
             <div className="action-card__content">
               <h2 className="action-card__title">報名 PIN</h2>
               <p className="action-card__desc">輸入 PIN 碼參加比賽</p>
@@ -144,7 +144,7 @@ export function HomePage() {
             onClick={() => setShowScorerPinModal(true)}
             className="action-card action-card--scorer"
           >
-            <div className="action-card__icon">📊</div>
+            <div className="action-card__icon"></div>
             <div className="action-card__content">
               <h2 className="action-card__title">計分 PIN</h2>
               <p className="action-card__desc">志工計分員登入</p>
@@ -167,7 +167,7 @@ export function HomePage() {
             >
               ✕
             </button>
-            <div className="pin-modal__logo">🎯 報名 PIN</div>
+            <div className="pin-modal__logo">報名 PIN</div>
             <p className="pin-modal__subtitle">
               請輸入比賽 PIN 碼報名參賽
             </p>
@@ -212,7 +212,7 @@ export function HomePage() {
               ✕
             </button>
             <div className="pin-modal__logo pin-modal__logo--scorer">
-              🔒 計分 PIN
+              計分 PIN
             </div>
             <p className="pin-modal__subtitle">
               請輸入主辦人提供的計分 PIN 碼
@@ -240,7 +240,7 @@ export function HomePage() {
               {scorerPinLoading ? '驗證中...' : '計分員登入'}
             </button>
             <p className="pin-modal__note">
-              ⚠️ 如果您是要報名參賽，請使用<strong>報名 PIN</strong>
+              如果您是要報名參賽，請使用<strong>報名 PIN</strong>
             </p>
           </div>
         </div>

@@ -103,7 +103,7 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       {match.status === 'completed' && match.winner && (
         <div className="match-card__winner">
           <span>
-            🏆 勝者: {match.winner}
+            勝者: {match.winner}
           </span>
         </div>
       )}

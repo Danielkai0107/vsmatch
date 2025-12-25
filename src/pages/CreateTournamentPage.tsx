@@ -18,6 +18,8 @@ export function CreateTournamentPage() {
 
   // 表單資料
   const [tournamentName, setTournamentName] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedOrganization, setSelectedOrganization] = useState<string>("");
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [selectedSetsOption, setSelectedSetsOption] = useState<string>("bo3"); // 預設3局2勝
   const [scoreToWin, setScoreToWin] = useState<number>(21); // 預設21分
@@ -67,6 +69,8 @@ export function CreateTournamentPage() {
         pin,
         scorerPin,
         name: tournamentName,
+        region: selectedRegion,
+        organization: selectedOrganization,
         organizerId: user.uid,
         status: "draft",
         config: {
@@ -110,7 +114,7 @@ export function CreateTournamentPage() {
       <div className="create-success">
         <div className="create-success__card">
           <div className="create-success__header">
-            <div className="create-success__icon">✅</div>
+            <div className="create-success__icon"></div>
             <h2 className="create-success__title">比賽建立成功！</h2>
           </div>
 
@@ -118,7 +122,7 @@ export function CreateTournamentPage() {
             {/* 比賽 PIN */}
             <div className="create-success__pin-box create-success__pin-box--public">
               <div className="create-success__pin-header">
-                <span>📌</span>
+                <span></span>
                 <h3>比賽 PIN 碼（公開分享）</h3>
               </div>
               <div className="create-success__pin-code create-success__pin-code--public">
@@ -134,7 +138,7 @@ export function CreateTournamentPage() {
             {/* 計分 PIN */}
             <div className="create-success__pin-box create-success__pin-box--private">
               <div className="create-success__pin-header">
-                <span>🔒</span>
+                <span></span>
                 <h3>計分 PIN 碼（私密保管）</h3>
               </div>
               <div className="create-success__pin-code create-success__pin-code--private">
@@ -214,18 +218,76 @@ export function CreateTournamentPage() {
           ))}
         </div>
 
-        {/* 步驟 1: 輸入比賽名稱 */}
+        {/* 步驟 1: 輸入比賽基本資訊 */}
         {step === 1 && (
           <div className="create-tournament__section">
-            <h2>1. 輸入比賽名稱</h2>
-            <input
-              type="text"
-              placeholder="例如：2025 春季羽球賽"
-              value={tournamentName}
-              onChange={(e) => setTournamentName(e.target.value)}
-              className="create-tournament__input"
-              autoFocus
-            />
+            <h2>1. 輸入比賽基本資訊</h2>
+            
+            {/* 比賽名稱 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                比賽名稱 *
+              </label>
+              <input
+                type="text"
+                placeholder="例如：2025 春季羽球賽"
+                value={tournamentName}
+                onChange={(e) => setTournamentName(e.target.value)}
+                className="create-tournament__input"
+                autoFocus
+              />
+            </div>
+
+            {/* 地區選擇 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                地區
+              </label>
+              <div className="create-tournament__grid create-tournament__grid--3cols">
+                {['北部', '中部', '南部'].map((region) => (
+                  <button
+                    key={region}
+                    type="button"
+                    onClick={() => setSelectedRegion(region)}
+                    className={`create-tournament__select-btn ${
+                      selectedRegion === region
+                        ? "create-tournament__select-btn--selected"
+                        : "create-tournament__select-btn--unselected"
+                    }`}
+                  >
+                    <div className="create-tournament__select-btn-title">
+                      {region}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 單位選擇 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                單位
+              </label>
+              <div className="create-tournament__grid create-tournament__grid--3cols">
+                {['社團', '學校', '公司', '個人', '業餘'].map((org) => (
+                  <button
+                    key={org}
+                    type="button"
+                    onClick={() => setSelectedOrganization(org)}
+                    className={`create-tournament__select-btn ${
+                      selectedOrganization === org
+                        ? "create-tournament__select-btn--selected"
+                        : "create-tournament__select-btn--unselected"
+                    }`}
+                  >
+                    <div className="create-tournament__select-btn-title">
+                      {org}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="create-tournament__actions">
               <button
                 onClick={() => setStep(2)}
@@ -382,7 +444,7 @@ export function CreateTournamentPage() {
               <div className="mb-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 text-xl">ℹ️</span>
+                    <span className="text-blue-600 text-xl"></span>
                     <div className="text-sm text-blue-900">
                       <strong>總分累計制：</strong>
                       <ul className="mt-2 space-y-1 list-disc list-inside">

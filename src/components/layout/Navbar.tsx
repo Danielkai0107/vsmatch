@@ -11,7 +11,7 @@ export function Navbar() {
         <div className="navbar__content">
           <div className="navbar__brand">
             <Link to="/" className="navbar__logo">
-              🏆 VSMatch
+              VSMatch
             </Link>
           </div>
 

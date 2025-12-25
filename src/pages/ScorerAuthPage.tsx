@@ -53,7 +53,7 @@ export function ScorerAuthPage() {
       </Link>
       <div className="scorer-auth__card">
         <div className="scorer-auth__header">
-          <div className="scorer-auth__icon">🔒</div>
+          <div className="scorer-auth__icon"></div>
           <h2 className="scorer-auth__title">
             計分員授權
           </h2>
@@ -64,7 +64,7 @@ export function ScorerAuthPage() {
 
         <div className="scorer-auth__content">
           <div className="scorer-auth__info-box">
-            <p>ℹ️ <strong>說明：</strong></p>
+            <p><strong>說明：</strong></p>
             <ul>
               <li>此 PIN 碼由主辦人提供，與比賽 PIN 不同</li>
               <li>志工計分員可以點擊對戰表上的任何場次進行計分</li>
@@ -104,7 +104,7 @@ export function ScorerAuthPage() {
 
         <div className="scorer-auth__warning">
           <p>
-            ⚠️ 如果您是要<strong>報名參賽</strong>，請使用<strong>比賽 PIN 碼</strong>，不是計分 PIN 碼
+            如果您是要<strong>報名參賽</strong>，請使用<strong>比賽 PIN 碼</strong>，不是計分 PIN 碼
           </p>
         </div>
 

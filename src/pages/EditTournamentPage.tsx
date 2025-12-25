@@ -5,7 +5,12 @@ import { db } from "../lib/firebase";
 import { doc, updateDoc, Timestamp } from "firebase/firestore";
 import { useTournamentById } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
-import { getAllSports, getAllFormats, getSportById, getFormatById } from "../config/sportsData";
+import {
+  getAllSports,
+  getAllFormats,
+  getSportById,
+  getFormatById,
+} from "../config/sportsData";
 import type { Sport, TournamentFormat, RuleConfig } from "../types";
 import { SETS_OPTIONS } from "../types";
 import "./CreateTournamentPage.scss";
@@ -23,12 +28,16 @@ export function EditTournamentPage() {
 
   // 表單資料 - 從現有比賽自動帶入
   const [tournamentName, setTournamentName] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedOrganization, setSelectedOrganization] = useState<string>("");
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [selectedSetsOption, setSelectedSetsOption] = useState<string>("bo3");
   const [scoreToWin, setScoreToWin] = useState<number>(21);
   const [tiebreakerScore, setTiebreakerScore] = useState<number>(15);
   const [useTiebreaker, setUseTiebreaker] = useState<boolean>(false);
-  const [selectedFormat, setSelectedFormat] = useState<TournamentFormat | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<TournamentFormat | null>(
+    null
+  );
 
   const sports = getAllSports();
   const formats = getAllFormats();
@@ -37,7 +46,9 @@ export function EditTournamentPage() {
   useEffect(() => {
     if (currentTournament) {
       setTournamentName(currentTournament.name);
-      
+      setSelectedRegion(currentTournament.region || "");
+      setSelectedOrganization(currentTournament.organization || "");
+
       const sport = getSportById(currentTournament.config.sportId);
       setSelectedSport(sport);
 
@@ -52,7 +63,9 @@ export function EditTournamentPage() {
 
         // 根據 rules 找到對應的 setsOption
         const matchingOption = SETS_OPTIONS.find(
-          opt => opt.setsToWin === rules.setsToWin && opt.totalSets === rules.totalSets
+          (opt) =>
+            opt.setsToWin === rules.setsToWin &&
+            opt.totalSets === rules.totalSets
         );
         if (matchingOption) {
           setSelectedSetsOption(matchingOption.id);
@@ -75,7 +88,7 @@ export function EditTournamentPage() {
     );
   }
 
-  const isLocked = currentTournament.status !== 'draft';
+  const isLocked = currentTournament.status !== "draft";
 
   const handleUpdate = async () => {
     if (!id || !selectedSport || !selectedSetsOption || !selectedFormat) {
@@ -92,16 +105,21 @@ export function EditTournamentPage() {
 
       // 構建規則配置
       const ruleConfig: RuleConfig = {
-        scoreToWin: setsOption.scoringMode === 'cumulative' ? 0 : scoreToWin,
+        scoreToWin: setsOption.scoringMode === "cumulative" ? 0 : scoreToWin,
         setsToWin: setsOption.setsToWin,
         totalSets: setsOption.totalSets,
         scoringMode: setsOption.scoringMode,
         allowOvertime: setsOption.allowOvertime,
-        tiebreaker: useTiebreaker && setsOption.scoringMode === 'sets' ? { scoreToWin: tiebreakerScore } : null,
+        tiebreaker:
+          useTiebreaker && setsOption.scoringMode === "sets"
+            ? { scoreToWin: tiebreakerScore }
+            : null,
       };
 
       await updateDoc(doc(db, "tournaments", id), {
         name: tournamentName,
+        region: selectedRegion,
+        organization: selectedOrganization,
         config: {
           sportId: selectedSport.id,
           formatId: selectedFormat.id,
@@ -119,7 +137,6 @@ export function EditTournamentPage() {
       setLoading(false);
     }
   };
-
 
   // 如果尚未登入
   if (!user) {
@@ -169,18 +186,76 @@ export function EditTournamentPage() {
           ))}
         </div>
 
-        {/* 步驟 1: 比賽名稱 */}
+        {/* 步驟 1: 比賽基本資訊 */}
         {step === 1 && (
           <div className="create-tournament__section">
-            <h2>1. 比賽名稱</h2>
-            <input
-              type="text"
-              placeholder="例如：2025 春季羽球賽"
-              value={tournamentName}
-              onChange={(e) => setTournamentName(e.target.value)}
-              className="create-tournament__input"
-              autoFocus
-            />
+            <h2>1. 比賽基本資訊</h2>
+
+            {/* 比賽名稱 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                比賽名稱 *
+              </label>
+              <input
+                type="text"
+                placeholder="例如：2025 春季羽球賽"
+                value={tournamentName}
+                onChange={(e) => setTournamentName(e.target.value)}
+                className="create-tournament__input"
+                autoFocus
+              />
+            </div>
+
+            {/* 地區選擇 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                地區
+              </label>
+              <div className="create-tournament__grid create-tournament__grid--3cols">
+                {["北部", "中部", "南部"].map((region) => (
+                  <button
+                    key={region}
+                    type="button"
+                    onClick={() => setSelectedRegion(region)}
+                    className={`create-tournament__select-btn ${
+                      selectedRegion === region
+                        ? "create-tournament__select-btn--selected"
+                        : "create-tournament__select-btn--unselected"
+                    }`}
+                  >
+                    <div className="create-tournament__select-btn-title">
+                      {region}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 單位選擇 */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                單位
+              </label>
+              <div className="create-tournament__grid create-tournament__grid--3cols">
+                {["社團", "學校", "公司", "個人", "業餘"].map((org) => (
+                  <button
+                    key={org}
+                    type="button"
+                    onClick={() => setSelectedOrganization(org)}
+                    className={`create-tournament__select-btn ${
+                      selectedOrganization === org
+                        ? "create-tournament__select-btn--selected"
+                        : "create-tournament__select-btn--unselected"
+                    }`}
+                  >
+                    <div className="create-tournament__select-btn-title">
+                      {org}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="create-tournament__actions">
               <button
                 onClick={() => setStep(2)}
@@ -200,7 +275,7 @@ export function EditTournamentPage() {
             {isLocked && (
               <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ 比賽已開始，無法修改運動項目
+                  比賽已開始，無法修改運動項目
                 </p>
               </div>
             )}
@@ -214,7 +289,7 @@ export function EditTournamentPage() {
                     selectedSport?.id === sport.id
                       ? "create-tournament__select-btn--selected"
                       : "create-tournament__select-btn--unselected"
-                  } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   <div className="create-tournament__select-btn-icon">
                     {sport.icon}
@@ -250,7 +325,7 @@ export function EditTournamentPage() {
             {isLocked && (
               <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ 比賽已開始，無法修改規則
+                  比賽已開始，無法修改規則
                 </p>
               </div>
             )}
@@ -264,13 +339,15 @@ export function EditTournamentPage() {
                 {SETS_OPTIONS.map((option) => (
                   <button
                     key={option.id}
-                    onClick={() => !isLocked && setSelectedSetsOption(option.id)}
+                    onClick={() =>
+                      !isLocked && setSelectedSetsOption(option.id)
+                    }
                     disabled={isLocked}
                     className={`create-tournament__rule-btn ${
                       selectedSetsOption === option.id
                         ? "create-tournament__rule-btn--selected"
                         : "create-tournament__rule-btn--unselected"
-                    } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                   >
                     <div className="create-tournament__rule-btn-title">
                       {option.label}
@@ -356,15 +433,13 @@ export function EditTournamentPage() {
               <div className="mb-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 text-xl">ℹ️</span>
+                    <span className="text-blue-600 text-xl"></span>
                     <div className="text-sm text-blue-900">
                       <strong>總分累計制：</strong>
                       <ul className="mt-2 space-y-1 list-disc list-inside">
                         <li>所有局的分數會累計加總</li>
                         <li>打完固定局數後，總分高者獲勝</li>
-                        <li>
-                          總分相同時自動進入延長賽，直到分出勝負
-                        </li>
+                        <li>總分相同時自動進入延長賽，直到分出勝負</li>
                       </ul>
                     </div>
                   </div>
@@ -381,8 +456,7 @@ export function EditTournamentPage() {
                     ?.label
                 }
                 {SETS_OPTIONS.find((opt) => opt.id === selectedSetsOption)
-                  ?.scoringMode === "sets" &&
-                  `，每局打到 ${scoreToWin} 分`}
+                  ?.scoringMode === "sets" && `，每局打到 ${scoreToWin} 分`}
                 {useTiebreaker && `（決勝局 ${tiebreakerScore} 分）`}
               </p>
             </div>
@@ -409,11 +483,11 @@ export function EditTournamentPage() {
         {step === 4 && (
           <div className="create-tournament__section">
             <h2>4. 選擇比賽格式</h2>
-            
+
             {isLocked && (
               <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ 比賽已開始，無法修改比賽格式
+                  比賽已開始，無法修改比賽格式
                 </p>
               </div>
             )}
@@ -428,7 +502,7 @@ export function EditTournamentPage() {
                     selectedFormat?.id === format.id
                       ? "create-tournament__select-btn--selected"
                       : "create-tournament__select-btn--unselected"
-                  } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   <div className="create-tournament__select-btn-title">
                     {format.name}

@@ -202,7 +202,7 @@ export function ScorePage() {
 
             setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
             alert(
-              `⚡ 總分平手（${p1}:${p2}）！進入延長賽第${
+              `總分平手（${p1}:${p2}）！進入延長賽第${
                 newCurrentSet - rule.totalSets + 1
               }局`
             );
@@ -383,7 +383,7 @@ export function ScorePage() {
         <p className="text-xs md:text-sm text-gray-600">
           {!isCumulative && rule?.scoreToWin > 0 && `${rule.scoreToWin}分制 • `}
           {rule ? getSetsFormatLabel(rule) : ""}
-          {isOvertimeMode && " • 🔥 延長賽"}
+          {isOvertimeMode && " • 延長賽"}
         </p>
       </div>
 
@@ -543,7 +543,7 @@ export function ScorePage() {
           {!isCumulative && (
             <div className="text-center mb-3">
               <div className="text-sm md:text-base font-semibold text-gray-700 mb-1">
-                🎯 本局目標：{targetScore} 分
+                本局目標：{targetScore} 分
               </div>
               <div className="text-xs text-gray-500">
                 點擊「+ 得分」立即更新，觀眾即時可見
@@ -558,10 +558,10 @@ export function ScorePage() {
             className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-bold text-base shadow-lg transition-all"
           >
             {saving
-              ? "⏳ 處理中..."
+              ? "處理中..."
               : isCumulative
-              ? `📊 結束${currentSetName}，記錄分數`
-              : "✓ 結束本局，進入下一局"}
+              ? `結束${currentSetName}，記錄分數`
+              : "結束本局，進入下一局"}
           </button>
           <div className="text-xs text-center text-gray-500 mt-2">
             {isCumulative
@@ -607,10 +607,10 @@ export function ScorePage() {
             className="w-full px-4 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-bold text-lg md:text-xl shadow-lg transition-all"
           >
             {saving
-              ? "⏳ 處理中..."
+              ? "處理中..."
               : matchComplete
-              ? "🏆 結束比賽並確認勝者"
-              : "⚠️ 尚未達到獲勝條件"}
+              ? "結束比賽並確認勝者"
+              : "尚未達到獲勝條件"}
           </button>
           {!matchComplete && (
             <p className="text-xs text-center text-gray-500 mt-2">

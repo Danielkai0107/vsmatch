@@ -75,7 +75,7 @@
   &__history-score {
     font-size: 1.5rem;
     font-weight: 700;
-    font-family: 'Courier New', monospace;
+    font-family: "DM Sans", sans-serif;
   }
 
   &__rules {
@@ -130,7 +130,7 @@
   &__sets-won {
     font-size: 4rem;
     font-weight: 900;
-    font-family: 'Impact', sans-serif;
+    font-family: "DM Sans", sans-serif;
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
     line-height: 1;
   }
@@ -138,7 +138,7 @@
   &__current-score {
     font-size: 8rem;
     font-weight: 900;
-    font-family: 'Impact', sans-serif;
+    font-family: "DM Sans", sans-serif;
     color: #fbbf24;
     text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
     animation: pulse-glow 2s ease-in-out infinite;
@@ -166,7 +166,7 @@
     font-size: 3rem;
     font-weight: 900;
     opacity: 0.5;
-    font-family: 'Impact', sans-serif;
+    font-family: "DM Sans", sans-serif;
   }
 
   &__set-info {
