@@ -1,0 +1,501 @@
+.create-tournament {
+  max-width: 48rem;
+  margin: 0 auto;
+
+  &__back-btn {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #2563eb;
+    font-size: 0.875rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    
+    &:hover {
+      text-decoration: underline;
+      color: #1d4ed8;
+    }
+  }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+  }
+
+  &__card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+  }
+
+  &__stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  &__step-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  &__step-circle {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+
+    &--active {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    &--inactive {
+      background-color: #e5e7eb;
+      color: #6b7280;
+    }
+  }
+
+  &__step-line {
+    flex: 1;
+    height: 0.25rem;
+
+    &--active {
+      background-color: #2563eb;
+    }
+
+    &--inactive {
+      background-color: #e5e7eb;
+    }
+  }
+
+  &__section {
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.2s;
+
+    &:focus {
+      ring: 2px solid #3b82f6;
+      border-color: #3b82f6;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    &--2cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &--3cols {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &__select-btn {
+    padding: 1rem;
+    border: 2px solid;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: white;
+    text-align: center;
+
+    &--selected {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+    }
+
+    &--unselected {
+      border-color: #e5e7eb;
+
+      &:hover {
+        border-color: #d1d5db;
+      }
+    }
+
+    &-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    &-title {
+      font-weight: 600;
+      font-size: 1.125rem;
+      margin-bottom: 0.25rem;
+    }
+
+    &-desc {
+      font-size: 0.875rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+    }
+  }
+
+  &__rule-btn {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid;
+    border-radius: 0.5rem;
+    text-align: left;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: white;
+
+    &--selected {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+    }
+
+    &--unselected {
+      border-color: #e5e7eb;
+
+      &:hover {
+        border-color: #d1d5db;
+      }
+    }
+
+    &-title {
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    &-desc {
+      font-size: 0.875rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+    }
+  }
+
+  &__preview {
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+
+    p {
+      font-size: 0.875rem;
+      color: #374151;
+      margin: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  &__btn {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+
+    &--primary {
+      background-color: #2563eb;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: #1d4ed8;
+      }
+    }
+
+    &--success {
+      background-color: #16a34a;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+
+      &:hover:not(:disabled) {
+        background-color: #15803d;
+      }
+    }
+
+    &--secondary {
+      background-color: #e5e7eb;
+      color: #374151;
+
+      &:hover {
+        background-color: #d1d5db;
+      }
+    }
+
+    &:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.create-success {
+  max-width: 42rem;
+  margin: 0 auto;
+
+  &__card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  &__icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  &__pins {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__pin-box {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+
+    &--public {
+      background-color: #eff6ff;
+    }
+
+    &--private {
+      background-color: #fef2f2;
+    }
+  }
+
+  &__pin-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    span {
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+    }
+  }
+
+  &__pin-code {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: monospace;
+    margin-bottom: 0.75rem;
+
+    &--public {
+      color: #2563eb;
+    }
+
+    &--private {
+      color: #dc2626;
+    }
+  }
+
+  &__pin-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      font-size: 0.875rem;
+      color: #374151;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  &__copy-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__copy-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &--public {
+      background-color: #2563eb;
+
+      &:hover {
+        background-color: #1d4ed8;
+      }
+    }
+
+    &--private {
+      background-color: #dc2626;
+
+      &:hover {
+        background-color: #b91c1c;
+      }
+    }
+  }
+
+  &__go-btn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #15803d;
+    }
+  }
+}
+
+.login-prompt {
+  max-width: 28rem;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3rem 0;
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+  }
+
+  &__text {
+    color: #4b5563;
+  }
+}
+
+// RWD
+@media (max-width: 768px) {
+  .create-tournament {
+    padding: 1rem;
+
+    &__title {
+      font-size: 1.5rem;
+    }
+
+    &__card {
+      padding: 1rem;
+    }
+
+    &__step-circle {
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.875rem;
+    }
+
+    &__step-line {
+      height: 2px;
+    }
+
+    &__section-title {
+      font-size: 1rem;
+    }
+
+    &__sport-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &__rule-card {
+      padding: 0.75rem;
+    }
+
+    &__format-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__nav-buttons {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  .create-success {
+    padding: 1rem;
+
+    &__card {
+      padding: 1.5rem;
+    }
+
+    &__icon {
+      font-size: 3rem;
+    }
+
+    &__title {
+      font-size: 1.5rem;
+    }
+
+    &__pin-box {
+      padding: 1rem;
+    }
+
+    &__pin-label {
+      font-size: 0.875rem;
+    }
+
+    &__pin-value {
+      font-size: 1.5rem;
+    }
+
+    &__copy-actions {
+      flex-direction: column;
+    }
+  }
+
+  .login-prompt {
+    padding: 2rem 1rem;
+
+    &__title {
+      font-size: 1.25rem;
+    }
+  }
+}
+

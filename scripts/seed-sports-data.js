@@ -1,0 +1,343 @@
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// 讀取 .env 文件
+function loadEnv() {
+  try {
+    const envPath = join(__dirname, '..', '.env');
+    const envFile = readFileSync(envPath, 'utf-8');
+    const envVars = {};
+    
+    envFile.split('\n').forEach(line => {
+      const trimmedLine = line.trim();
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=');
+        if (key && valueParts.length > 0) {
+          envVars[key.trim()] = valueParts.join('=').trim();
+        }
+      }
+    });
+    
+    return envVars;
+  } catch (error) {
+    console.error('無法讀取 .env 文件:', error.message);
+    return {};
+  }
+}
+
+const env = loadEnv();
+
+// Firebase 配置
+const firebaseConfig = {
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID,
+};
+
+// 驗證配置
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('❌ 錯誤: Firebase 配置不完整。請確保 .env 文件存在並包含所有必要的環境變數。');
+  process.exit(1);
+}
+
+console.log('✓ Firebase 配置已載入');
+console.log(`  Project ID: ${firebaseConfig.projectId}`);
+
+// 初始化 Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 運動資料
+const sportsData = {
+  badminton: {
+    id: "badminton",
+    name: "羽球",
+    icon: "🏸",
+    modes: ["單打", "雙打"],
+    rulePresets: [
+      {
+        id: "21_points",
+        label: "21分制",
+        config: {
+          scoreToWin: 21,
+          setsToWin: 2,
+          tiebreaker: null
+        }
+      },
+      {
+        id: "15_points",
+        label: "15分制",
+        config: {
+          scoreToWin: 15,
+          setsToWin: 2,
+          tiebreaker: null
+        }
+      }
+    ]
+  },
+  basketball: {
+    id: "basketball",
+    name: "籃球",
+    icon: "🏀",
+    modes: ["3x3", "5x5"],
+    rulePresets: [
+      {
+        id: "standard",
+        label: "標準賽制",
+        config: {
+          scoreToWin: 21,
+          setsToWin: 1,
+          tiebreaker: null
+        }
+      }
+    ]
+  },
+  volleyball: {
+    id: "volleyball",
+    name: "排球",
+    icon: "🏐",
+    modes: ["室內", "沙灘"],
+    rulePresets: [
+      {
+        id: "standard",
+        label: "標準賽制",
+        config: {
+          scoreToWin: 25,
+          setsToWin: 3,
+          tiebreaker: {
+            scoreToWin: 15
+          }
+        }
+      }
+    ]
+  },
+  tennis: {
+    id: "tennis",
+    name: "網球",
+    icon: "🎾",
+    modes: ["單打", "雙打"],
+    rulePresets: [
+      {
+        id: "standard",
+        label: "標準賽制",
+        config: {
+          scoreToWin: 6,
+          setsToWin: 2,
+          tiebreaker: {
+            scoreToWin: 7
+          }
+        }
+      }
+    ]
+  }
+};
+
+// 賽制格式資料
+const formatsData = {
+  ko_4: {
+    id: "ko_4",
+    name: "4強單淘汰",
+    type: "knockout",
+    totalSlots: 4,
+    stages: [
+      {
+        round: 1,
+        name: "準決賽",
+        matches: [
+          {
+            id: "r1m1",
+            next: "r2m1",
+            p1_source: 0,
+            p2_source: 1
+          },
+          {
+            id: "r1m2",
+            next: "r2m1",
+            p1_source: 2,
+            p2_source: 3
+          }
+        ]
+      },
+      {
+        round: 2,
+        name: "決賽",
+        matches: [
+          {
+            id: "r2m1",
+            next: null
+          }
+        ]
+      }
+    ]
+  },
+  ko_8: {
+    id: "ko_8",
+    name: "8強單淘汰",
+    type: "knockout",
+    totalSlots: 8,
+    stages: [
+      {
+        round: 1,
+        name: "第一輪",
+        matches: [
+          {
+            id: "r1m1",
+            next: "r2m1",
+            p1_source: 0,
+            p2_source: 1
+          },
+          {
+            id: "r1m2",
+            next: "r2m1",
+            p1_source: 2,
+            p2_source: 3
+          },
+          {
+            id: "r1m3",
+            next: "r2m2",
+            p1_source: 4,
+            p2_source: 5
+          },
+          {
+            id: "r1m4",
+            next: "r2m2",
+            p1_source: 6,
+            p2_source: 7
+          }
+        ]
+      },
+      {
+        round: 2,
+        name: "準決賽",
+        matches: [
+          {
+            id: "r2m1",
+            next: "r3m1"
+          },
+          {
+            id: "r2m2",
+            next: "r3m1"
+          }
+        ]
+      },
+      {
+        round: 3,
+        name: "決賽",
+        matches: [
+          {
+            id: "r3m1",
+            next: null
+          }
+        ]
+      }
+    ]
+  },
+  ko_16: {
+    id: "ko_16",
+    name: "16強單淘汰",
+    type: "knockout",
+    totalSlots: 16,
+    stages: [
+      {
+        round: 1,
+        name: "16強",
+        matches: [
+          {id: "r1m1", next: "r2m1", p1_source: 0, p2_source: 1},
+          {id: "r1m2", next: "r2m1", p1_source: 2, p2_source: 3},
+          {id: "r1m3", next: "r2m2", p1_source: 4, p2_source: 5},
+          {id: "r1m4", next: "r2m2", p1_source: 6, p2_source: 7},
+          {id: "r1m5", next: "r2m3", p1_source: 8, p2_source: 9},
+          {id: "r1m6", next: "r2m3", p1_source: 10, p2_source: 11},
+          {id: "r1m7", next: "r2m4", p1_source: 12, p2_source: 13},
+          {id: "r1m8", next: "r2m4", p1_source: 14, p2_source: 15}
+        ]
+      },
+      {
+        round: 2,
+        name: "8強",
+        matches: [
+          {id: "r2m1", next: "r3m1"},
+          {id: "r2m2", next: "r3m1"},
+          {id: "r2m3", next: "r3m2"},
+          {id: "r2m4", next: "r3m2"}
+        ]
+      },
+      {
+        round: 3,
+        name: "準決賽",
+        matches: [
+          {id: "r3m1", next: "r4m1"},
+          {id: "r3m2", next: "r4m1"}
+        ]
+      },
+      {
+        round: 4,
+        name: "決賽",
+        matches: [
+          {id: "r4m1", next: null}
+        ]
+      }
+    ]
+  }
+};
+
+async function seedSportsData() {
+  console.log('\n========================================');
+  console.log('開始上傳運動資料到 Firestore...');
+  console.log('========================================\n');
+  
+  try {
+    // 上傳運動資料
+    console.log('📋 運動項目:');
+    for (const [sportId, sportData] of Object.entries(sportsData)) {
+      console.log(`  → 正在上傳: ${sportData.name} (${sportId})`);
+      const sportRef = doc(db, 'sports', sportId);
+      await setDoc(sportRef, sportData);
+      console.log(`    ✓ ${sportData.name} 上傳成功`);
+    }
+    
+    console.log('\n📋 賽制格式:');
+    
+    // 上傳賽制格式資料
+    for (const [formatId, formatData] of Object.entries(formatsData)) {
+      console.log(`  → 正在上傳: ${formatData.name} (${formatId})`);
+      const formatRef = doc(db, 'formats', formatId);
+      await setDoc(formatRef, formatData);
+      console.log(`    ✓ ${formatData.name} 上傳成功`);
+    }
+    
+    console.log('\n========================================');
+    console.log('✅ 所有資料上傳完成！');
+    console.log('========================================');
+    console.log(`📊 統計:`);
+    console.log(`   - 運動項目: ${Object.keys(sportsData).length} 個`);
+    console.log(`   - 賽制格式: ${Object.keys(formatsData).length} 個`);
+    console.log('========================================\n');
+    
+  } catch (error) {
+    console.error('\n❌ 上傳資料時發生錯誤:', error);
+    throw error;
+  }
+}
+
+// 執行腳本
+seedSportsData()
+  .then(() => {
+    console.log('腳本執行完成\n');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('腳本執行失敗:', error);
+    process.exit(1);
+  });
+

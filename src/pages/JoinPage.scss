@@ -1,0 +1,275 @@
+.join-page {
+  max-width: 28rem;
+  margin: 0 auto;
+
+  &__back-btn {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #2563eb;
+    font-size: 0.875rem;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+      color: #1d4ed8;
+    }
+  }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  &__card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__form-group {
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &__pin-input-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__pin-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    text-align: center;
+    font-family: monospace;
+    font-size: 1.25rem;
+    transition: all 0.2s;
+
+    &:focus {
+      ring: 2px solid #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    &:disabled {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__search-btn {
+    padding: 0.5rem 1rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #1d4ed8;
+    }
+
+    &:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+
+  &__error {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #dc2626;
+  }
+
+  &__tournament-info {
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  &__tournament-title {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  &__tournament-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4b5563;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+
+    span:first-child {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__tournament-stats {
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+
+  &__name-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.2s;
+
+    &:focus {
+      ring: 2px solid #3b82f6;
+      border-color: #3b82f6;
+    }
+  }
+
+  &__submit-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #15803d;
+    }
+
+    &:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+
+  &__reset-btn {
+    width: 100%;
+    font-size: 0.875rem;
+    color: #4b5563;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #111827;
+    }
+  }
+
+  &__loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 4px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+  }
+
+  &__error-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    .error-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #dc2626;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      color: #6b7280;
+      margin: 0 0 2rem 0;
+    }
+  }
+
+  &__back-home-btn {
+    padding: 0.75rem 2rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #1d4ed8;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// RWD
+@media (max-width: 640px) {
+  .join-page {
+    padding: 1rem;
+
+    &__title {
+      font-size: 1.5rem;
+    }
+
+    &__card {
+      padding: 1rem;
+    }
+
+    &__tournament-title {
+      font-size: 1rem;
+    }
+
+    &__error-state {
+      padding: 2rem 1rem;
+
+      .error-icon {
+        font-size: 3rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+

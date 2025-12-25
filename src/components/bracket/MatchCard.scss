@@ -1,0 +1,132 @@
+.match-card {
+  border: 2px solid;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background-color: white;
+  transition: all 0.2s;
+
+  &--pending {
+    border-color: #d1d5db;
+  }
+
+  &--live {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  &--completed {
+    border-color: #10b981;
+  }
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  &__status {
+    font-weight: 600;
+
+    &--live {
+      color: #2563eb;
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    &--completed {
+      color: #059669;
+    }
+  }
+
+  &__clickable-hint {
+    color: #2563eb;
+    font-size: 0.75rem;
+  }
+
+  &__players {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__score-info {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: #f9fafb;
+    border-radius: 0.375rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__sets,
+  &__current-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #374151;
+
+    &--live {
+      color: #2563eb;
+      font-size: 1rem;
+      animation: pulse-score 2s ease-in-out infinite;
+    }
+  }
+
+  &__winner {
+    margin-top: 0.5rem;
+    text-align: center;
+    padding: 0.375rem;
+    background-color: #d1fae5;
+    border-radius: 0.375rem;
+
+    span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #047857;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+@keyframes pulse-score {
+  0%, 100% {
+    transform: scale(1);
+    color: #2563eb;
+  }
+  50% {
+    transform: scale(1.05);
+    color: #1d4ed8;
+  }
+}
+

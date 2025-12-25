@@ -1,0 +1,15 @@
+.bracket-view {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+
+  &__container {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    min-width: max-content;
+    padding: 0 1rem;
+  }
+}
+

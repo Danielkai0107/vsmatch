@@ -1,0 +1,64 @@
+@import "./common.scss";
+
+// 基礎變數定義
+:root {
+  // 顏色系統
+  --color-background: #ffffff;
+  --color-foreground: #0a0f1e;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0f1e;
+  --color-primary: #1a1f2e;
+  --color-primary-foreground: #f5f8fa;
+  --color-secondary: #f5f8fa;
+  --color-secondary-foreground: #1a1f2e;
+  --color-muted: #f5f8fa;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #f5f8fa;
+  --color-accent-foreground: #1a1f2e;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f5f8fa;
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #0a0f1e;
+
+  // 邊框圓角
+  --radius: 0.5rem;
+}
+
+.dark {
+  --color-background: #0a0f1e;
+  --color-foreground: #f5f8fa;
+  --color-card: #0a0f1e;
+  --color-card-foreground: #f5f8fa;
+  --color-primary: #f5f8fa;
+  --color-primary-foreground: #1a1f2e;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #f5f8fa;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #9ca3af;
+  --color-accent: #1e293b;
+  --color-accent-foreground: #f5f8fa;
+  --color-destructive: #7f1d1d;
+  --color-destructive-foreground: #f5f8fa;
+  --color-border: #1e293b;
+  --color-input: #1e293b;
+  --color-ring: #cbd5e1;
+}
+
+// 全域樣式
+* {
+  border-color: var(--color-border);
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

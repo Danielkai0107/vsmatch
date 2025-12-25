@@ -1,0 +1,202 @@
+@import '../styles/common.scss';
+
+.score-page {
+  max-width: 56rem;
+  margin: 0 auto;
+
+  &__header {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__back-btn {
+    color: #2563eb;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin: 0;
+  }
+
+  &__card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+  }
+
+  &__player {
+    margin-bottom: 2rem;
+  }
+
+  &__player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+    }
+  }
+
+  &__sets-won {
+    text-align: right;
+
+    &-label {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    &-count {
+      font-size: 1.875rem;
+      font-weight: 700;
+
+      &--player1 {
+        color: #2563eb;
+      }
+
+      &--player2 {
+        color: #dc2626;
+      }
+    }
+  }
+
+  &__score-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__score-display {
+    flex: 1;
+    text-align: center;
+    font-size: 4rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  &__score-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__score-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &--player1 {
+      background-color: #2563eb;
+      color: white;
+
+      &:hover {
+        background-color: #1d4ed8;
+      }
+    }
+
+    &--player2 {
+      background-color: #dc2626;
+      color: white;
+
+      &:hover {
+        background-color: #b91c1c;
+      }
+    }
+
+    &--undo {
+      background-color: #e5e7eb;
+      color: #374151;
+
+      &:hover:not(:disabled) {
+        background-color: #d1d5db;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__divider {
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 0;
+    margin: 2rem 0;
+  }
+
+  &__current-info {
+    text-align: center;
+
+    &-separator {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #d1d5db;
+    }
+
+    &-target {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+
+    &-history {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+  }
+
+  &__end-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #15803d;
+    }
+
+    &:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+}
+

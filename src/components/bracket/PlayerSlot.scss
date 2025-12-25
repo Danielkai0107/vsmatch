@@ -1,0 +1,23 @@
+.player-slot {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+
+  &--empty {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+  }
+
+  &--default {
+    background-color: white;
+    color: #111827;
+  }
+
+  &--winner {
+    background-color: #d1fae5;
+    color: #065f46;
+    font-weight: 600;
+  }
+}
+
