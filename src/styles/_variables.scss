@@ -45,10 +45,7 @@ $spacing-xl: 32px;
 $spacing-xxl: 48px;
 
 // 圓角
-$radius-sm: 8px;
-$radius-md: 10px;
-$radius-lg: 12px;
-$radius-pill: 9999px;
+$border-radius: 16px;
 
 // 陰影
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -70,3 +67,7 @@ $warning: $warning-color;
 $warning-light: #fef3c7;
 $danger: $danger-color;
 $danger-light: #fee2e2;
+
+$blue-gradient: linear-gradient(30deg, #003eb6 0%, #6eafff 100%);
+$green-gradient: linear-gradient(30deg, #a9f700 0%, #f3ffd7 100%);
+$light-gradient: linear-gradient(10deg, #b9c9e8 0%, #ffffff 100%);

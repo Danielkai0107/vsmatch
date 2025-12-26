@@ -1,66 +1,72 @@
-import type { SportsData, FormatsData } from '../types';
+import type { SportsData, FormatsData } from "../types";
 
 // 運動資料 - 簡化版，移除預設規則
 export const SPORTS: SportsData = {
   badminton: {
-    id: 'badminton',
-    name: '羽球',
-    icon: '',
-    modes: ['單打', '雙打'],
+    id: "badminton",
+    name: "羽球",
+    icon: "",
+    modes: ["單打", "雙打"],
   },
   basketball: {
-    id: 'basketball',
-    name: '籃球',
-    icon: '',
-    modes: ['3x3', '5x5'],
+    id: "basketball",
+    name: "籃球",
+    icon: "",
+    modes: ["3x3", "5x5"],
   },
   volleyball: {
-    id: 'volleyball',
-    name: '排球',
-    icon: '',
-    modes: ['室內', '沙灘'],
+    id: "volleyball",
+    name: "排球",
+    icon: "",
+    modes: ["室內", "沙灘"],
   },
   tennis: {
-    id: 'tennis',
-    name: '網球',
-    icon: '',
-    modes: ['單打', '雙打'],
+    id: "tennis",
+    name: "網球",
+    icon: "",
+    modes: ["單打", "雙打"],
   },
   tableTennis: {
-    id: 'tableTennis',
-    name: '桌球',
-    icon: '',
-    modes: ['單打', '雙打'],
+    id: "tableTennis",
+    name: "桌球",
+    icon: "",
+    modes: ["單打", "雙打"],
+  },
+  pickleball: {
+    id: "pickleball",
+    name: "匹克球",
+    icon: "",
+    modes: ["單打", "雙打"],
   },
   other: {
-    id: 'other',
-    name: '其他運動',
-    icon: '',
-    modes: ['通用'],
+    id: "other",
+    name: "其他運動",
+    icon: "",
+    modes: ["通用"],
   },
 };
 
 // 賽制格式資料
 export const FORMATS: FormatsData = {
   ko_4: {
-    id: 'ko_4',
-    name: '4強單淘汰',
-    type: 'knockout',
+    id: "ko_4",
+    name: "4 強單淘汰",
+    type: "knockout",
     totalSlots: 4,
     stages: [
       {
         round: 1,
-        name: '準決賽',
+        name: "準決賽",
         matches: [
           {
-            id: 'r1m1',
-            next: 'r2m1',
+            id: "r1m1",
+            next: "r2m1",
             p1_source: 0,
             p2_source: 1,
           },
           {
-            id: 'r1m2',
-            next: 'r2m1',
+            id: "r1m2",
+            next: "r2m1",
             p1_source: 2,
             p2_source: 3,
           },
@@ -68,10 +74,10 @@ export const FORMATS: FormatsData = {
       },
       {
         round: 2,
-        name: '決賽',
+        name: "決賽",
         matches: [
           {
-            id: 'r2m1',
+            id: "r2m1",
             next: null,
           },
         ],
@@ -79,36 +85,36 @@ export const FORMATS: FormatsData = {
     ],
   },
   ko_8: {
-    id: 'ko_8',
-    name: '8強單淘汰',
-    type: 'knockout',
+    id: "ko_8",
+    name: "8 強單淘汰",
+    type: "knockout",
     totalSlots: 8,
     stages: [
       {
         round: 1,
-        name: '第一輪',
+        name: "第一輪",
         matches: [
           {
-            id: 'r1m1',
-            next: 'r2m1',
+            id: "r1m1",
+            next: "r2m1",
             p1_source: 0,
             p2_source: 1,
           },
           {
-            id: 'r1m2',
-            next: 'r2m1',
+            id: "r1m2",
+            next: "r2m1",
             p1_source: 2,
             p2_source: 3,
           },
           {
-            id: 'r1m3',
-            next: 'r2m2',
+            id: "r1m3",
+            next: "r2m2",
             p1_source: 4,
             p2_source: 5,
           },
           {
-            id: 'r1m4',
-            next: 'r2m2',
+            id: "r1m4",
+            next: "r2m2",
             p1_source: 6,
             p2_source: 7,
           },
@@ -116,24 +122,24 @@ export const FORMATS: FormatsData = {
       },
       {
         round: 2,
-        name: '準決賽',
+        name: "準決賽",
         matches: [
           {
-            id: 'r2m1',
-            next: 'r3m1',
+            id: "r2m1",
+            next: "r3m1",
           },
           {
-            id: 'r2m2',
-            next: 'r3m1',
+            id: "r2m2",
+            next: "r3m1",
           },
         ],
       },
       {
         round: 3,
-        name: '決賽',
+        name: "決賽",
         matches: [
           {
-            id: 'r3m1',
+            id: "r3m1",
             next: null,
           },
         ],
@@ -141,48 +147,48 @@ export const FORMATS: FormatsData = {
     ],
   },
   ko_16: {
-    id: 'ko_16',
-    name: '16強單淘汰',
-    type: 'knockout',
+    id: "ko_16",
+    name: "16 強單淘汰",
+    type: "knockout",
     totalSlots: 16,
     stages: [
       {
         round: 1,
-        name: '16強',
+        name: "16強",
         matches: [
-          { id: 'r1m1', next: 'r2m1', p1_source: 0, p2_source: 1 },
-          { id: 'r1m2', next: 'r2m1', p1_source: 2, p2_source: 3 },
-          { id: 'r1m3', next: 'r2m2', p1_source: 4, p2_source: 5 },
-          { id: 'r1m4', next: 'r2m2', p1_source: 6, p2_source: 7 },
-          { id: 'r1m5', next: 'r2m3', p1_source: 8, p2_source: 9 },
-          { id: 'r1m6', next: 'r2m3', p1_source: 10, p2_source: 11 },
-          { id: 'r1m7', next: 'r2m4', p1_source: 12, p2_source: 13 },
-          { id: 'r1m8', next: 'r2m4', p1_source: 14, p2_source: 15 },
+          { id: "r1m1", next: "r2m1", p1_source: 0, p2_source: 1 },
+          { id: "r1m2", next: "r2m1", p1_source: 2, p2_source: 3 },
+          { id: "r1m3", next: "r2m2", p1_source: 4, p2_source: 5 },
+          { id: "r1m4", next: "r2m2", p1_source: 6, p2_source: 7 },
+          { id: "r1m5", next: "r2m3", p1_source: 8, p2_source: 9 },
+          { id: "r1m6", next: "r2m3", p1_source: 10, p2_source: 11 },
+          { id: "r1m7", next: "r2m4", p1_source: 12, p2_source: 13 },
+          { id: "r1m8", next: "r2m4", p1_source: 14, p2_source: 15 },
         ],
       },
       {
         round: 2,
-        name: '8強',
+        name: "8強",
         matches: [
-          { id: 'r2m1', next: 'r3m1' },
-          { id: 'r2m2', next: 'r3m1' },
-          { id: 'r2m3', next: 'r3m2' },
-          { id: 'r2m4', next: 'r3m2' },
+          { id: "r2m1", next: "r3m1" },
+          { id: "r2m2", next: "r3m1" },
+          { id: "r2m3", next: "r3m2" },
+          { id: "r2m4", next: "r3m2" },
         ],
       },
       {
         round: 3,
-        name: '準決賽',
+        name: "準決賽",
         matches: [
-          { id: 'r3m1', next: 'r4m1' },
-          { id: 'r3m2', next: 'r4m1' },
+          { id: "r3m1", next: "r4m1" },
+          { id: "r3m2", next: "r4m1" },
         ],
       },
       {
         round: 4,
-        name: '決賽',
-        matches: [{ id: 'r4m1', next: null }],
-        },
+        name: "決賽",
+        matches: [{ id: "r4m1", next: null }],
+      },
     ],
   },
 };
@@ -206,4 +212,3 @@ export function getAllSports() {
 export function getAllFormats() {
   return Object.values(FORMATS);
 }
-

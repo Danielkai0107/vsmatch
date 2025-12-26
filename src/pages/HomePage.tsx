@@ -139,12 +139,16 @@ export function HomePage() {
             onClick={() => setShowPinModal(true)}
             className="action-card action-card--join"
           >
-            <div className="action-card__icon">
-              <Trophy size={24} color="white" />
+            <div className="action-card__icon action-card__icon--join">
+              <Trophy size={24} color="#000000" />
             </div>
             <div className="action-card__content">
-              <h2 className="action-card__title">報名</h2>
-              <p className="action-card__desc">輸入 PIN 碼參加比賽</p>
+              <h2 className="action-card__title action-card__title--join">
+                報名
+              </h2>
+              <p className="action-card__desc action-card__desc--join">
+                輸入 PIN 碼參加比賽
+              </p>
             </div>
           </button>
 
@@ -153,12 +157,16 @@ export function HomePage() {
             onClick={() => setShowScorerPinModal(true)}
             className="action-card action-card--scorer"
           >
-            <div className="action-card__icon">
-              <SquareKanban size={24} color="white" />
+            <div className="action-card__icon action-card__icon--scorer">
+              <SquareKanban size={24} color="#000000" />
             </div>
             <div className="action-card__content">
-              <h2 className="action-card__title">計分</h2>
-              <p className="action-card__desc">志工計分員登入</p>
+              <h2 className="action-card__title action-card__title--scorer">
+                計分
+              </h2>
+              <p className="action-card__desc action-card__desc--scorer">
+                志工計分員登入
+              </p>
             </div>
           </button>
         </div>

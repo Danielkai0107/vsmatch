@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { PopupProvider } from './contexts/PopupContext';
 import { Layout } from './components/layout/Layout';
@@ -13,11 +14,23 @@ import { ScorePage } from './pages/ScorePage';
 import { MatchViewPage } from './pages/MatchViewPage';
 import { ProfilePage } from './pages/ProfilePage';
 
+// 切換路由時自動滾動到頂部
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <AuthProvider>
       <PopupProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />

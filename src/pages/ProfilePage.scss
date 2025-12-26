@@ -213,7 +213,7 @@
 
   &__actions {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
 
@@ -221,10 +221,23 @@
     padding: 0.5rem 0.9rem;
     border-radius: 0.5rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+
+    &--pin {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+      }
+    }
 
     &--manage {
       background: #e0e7ff;

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
+import { PinModal } from "../components/ui/PinModal";
 import { ArrowLeft } from "lucide-react";
 import "./ProfilePage.scss";
 
@@ -11,6 +13,13 @@ export function ProfilePage() {
   const navigate = useNavigate();
   useTournaments();
   const { tournaments, loading } = useTournamentStore();
+  
+  // PIN 彈窗狀態
+  const [selectedTournamentPins, setSelectedTournamentPins] = useState<{
+    pin: string;
+    scorerPin: string;
+    tournamentId: string;
+  } | null>(null);
 
   if (!user) {
     return (
@@ -104,6 +113,18 @@ export function ProfilePage() {
                     {sport?.name} • {tournament.players.length} 人報名
                   </p>
                   <div className="tournament-item__actions">
+                    <button
+                      onClick={() =>
+                        setSelectedTournamentPins({
+                          pin: tournament.pin,
+                          scorerPin: tournament.scorerPin,
+                          tournamentId: tournament.id,
+                        })
+                      }
+                      className="tournament-item__btn tournament-item__btn--pin"
+                    >
+                      查看 PIN
+                    </button>
                     <Link
                       to={`/tournament/${tournament.id}/manage`}
                       className="tournament-item__btn tournament-item__btn--manage"
@@ -178,6 +199,16 @@ export function ProfilePage() {
           </div>
         )}
       </section>
+
+      {/* PIN 碼彈窗 */}
+      {selectedTournamentPins && (
+        <PinModal
+          pin={selectedTournamentPins.pin}
+          scorerPin={selectedTournamentPins.scorerPin}
+          tournamentId={selectedTournamentPins.tournamentId}
+          onClose={() => setSelectedTournamentPins(null)}
+        />
+      )}
     </div>
   );
 }
