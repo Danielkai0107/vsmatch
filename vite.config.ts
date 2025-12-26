@@ -10,6 +10,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true, // 允許透過 IP 訪問
+    port: 5173,
+  },
   css: {
     preprocessorOptions: {
       scss: {

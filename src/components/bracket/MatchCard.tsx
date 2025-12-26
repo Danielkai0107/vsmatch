@@ -70,6 +70,19 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     >
       <div className="match-card__header">
         <span>{roundName}</span>
+        {match.sets && match.sets.length > 0 && (
+          <div className="match-card__value">
+            {/* 當前局數 */}
+            <span className="match-card__round-name">
+              {formatSetScore(match.sets)}
+            </span>
+          </div>
+        )}
+        {match.status === "pending" && (
+          <span className="match-card__status match-card__status--pending">
+            未開始
+          </span>
+        )}
         {match.status === "live" && (
           <span className="match-card__status match-card__status--live">
             進行中
@@ -92,41 +105,40 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
           )}
       </div>
 
-      <div className="match-card__players">
-        <PlayerSlot
-          player={match.player1 || null}
-          isWinner={match.winner === match.player1?.name}
-        />
-        <PlayerSlot
-          player={match.player2 || null}
-          isWinner={match.winner === match.player2?.name}
-        />
-      </div>
-
-      {match.sets && match.sets.length > 0 && (
-        <div className="match-card__score-info">
-          {/* 顯示獲勝局數 */}
-          <div className="match-card__sets">
-            <span className="match-card__label">局數:</span>
-            <span className="match-card__value">
-              {formatSetScore(match.sets)}
-            </span>
-          </div>
-
-          {/* 如果比賽進行中，顯示當前局分數 */}
-          {match.status === "live" &&
-            match.currentSet !== undefined &&
-            match.sets[match.currentSet] && (
-              <div className="match-card__current-score">
-                <span className="match-card__label">當前:</span>
-                <span className="match-card__value match-card__value--live">
-                  {match.sets[match.currentSet].p1Score}-
-                  {match.sets[match.currentSet].p2Score}
-                </span>
-              </div>
-            )}
+      <div className="match-card__score">
+        <div className="match-card__players">
+          <PlayerSlot
+            player={match.player1 || null}
+            isWinner={match.winner === match.player1?.name}
+          />
         </div>
-      )}
+        <div className="match-card__score-info">
+          {match.sets && match.sets.length > 0 ? (
+            <div>
+              {/* 如果比賽進行中，顯示當前局分數 */}
+              {match.status === "live" &&
+                match.currentSet !== undefined &&
+                match.sets[match.currentSet] && (
+                  <span className="match-card__value match-card__value--live">
+                    {match.sets[match.currentSet].p1Score}-
+                    {match.sets[match.currentSet].p2Score}
+                  </span>
+                )}
+            </div>
+          ) : (
+            <div>
+              <span className="match-card__value match-card__value--vs">V.S.</span>
+            </div>
+          )}
+        </div>
+
+        <div className="match-card__players">
+          <PlayerSlot
+            player={match.player2 || null}
+            isWinner={match.winner === match.player2?.name}
+          />
+        </div>
+      </div>
 
       {match.status === "completed" && match.winner && (
         <div className="match-card__winner">
