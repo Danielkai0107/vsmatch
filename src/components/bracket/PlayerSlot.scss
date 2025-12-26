@@ -1,17 +1,18 @@
 .player-slot {
-  padding: 0.5rem 0.9rem;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   transition: all 0.2s;
 
   &--empty {
-    background-color: #f3f4f6;
-    color: #9ca3af;
+    // background-color: #f3f4f6;
+    color: $text-muted;
   }
 
   &--default {
+    font-size: 1.2rem;
     background-color: white;
-    color: #111827;
+    color: #000;
+    font-weight: 700;
   }
 
   &--winner {

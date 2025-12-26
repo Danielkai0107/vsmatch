@@ -60,6 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
+      // 強制顯示帳號選擇畫面，不記住上次使用的帳號
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);

@@ -9,8 +9,11 @@ import { usePopup } from "../contexts/PopupContext";
 import { generatePin } from "../utils/pinCode";
 import { getSportById, getFormatById } from "../config/sportsData";
 import { mapPlayersToMatches } from "../utils/bracketLogic";
+import { processAllByes } from "../utils/progressionLogic";
 import { getSetsFormatLabel } from "../types";
+import type { Match } from "../types";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 
 export function ManageTournamentPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +27,7 @@ export function ManageTournamentPage() {
   const { currentTournament } = useTournamentStore();
 
   if (!currentTournament) {
-    return <div className="text-center py-12">載入中...</div>;
+    return <Loading fullScreen text="載入中..." />;
   }
 
   const isOrganizer = user?.uid === currentTournament.organizerId;
@@ -84,6 +87,14 @@ export function ManageTournamentPage() {
         await updateDoc(doc(db, "tournaments", id), {
           status: "live",
         });
+
+        // 處理所有輪空比賽（BYE）
+        try {
+          await processAllByes(id, initialMatches as Record<string, Match>, format);
+          console.log("輪空處理完成");
+        } catch (error) {
+          console.error("處理輪空時發生錯誤:", error);
+        }
 
         showPopup("比賽已開始！", "success");
         navigate("/profile");

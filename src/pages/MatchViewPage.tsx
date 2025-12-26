@@ -14,6 +14,7 @@ import { getMatchRoundName } from "../utils/bracketLogic";
 import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 import "./MatchViewPage.scss";
 
 export function MatchViewPage() {
@@ -21,7 +22,20 @@ export function MatchViewPage() {
   const navigate = useNavigate();
   const [match, setMatch] = useState<Match | null>(null);
   const [tournament, setTournament] = useState<Tournament | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [matchLoading, setMatchLoading] = useState(true);
+  const [tournamentLoading, setTournamentLoading] = useState(true);
+
+  // 自動返回對戰表：只有當兩者都載入完成且確實找不到資料時才返回
+  useEffect(() => {
+    if (
+      !matchLoading &&
+      !tournamentLoading &&
+      (!match || !tournament || !match.player1 || !match.player2)
+    ) {
+      console.log("找不到比賽資料，自動返回對戰表");
+      navigate(`/tournament/${tournamentId}`, { replace: true });
+    }
+  }, [matchLoading, tournamentLoading, match, tournament, tournamentId, navigate]);
 
   // 載入比賽和場次資料（即時監聽）
   useEffect(() => {
@@ -29,9 +43,15 @@ export function MatchViewPage() {
 
     // 載入比賽資料
     const loadTournament = async () => {
-      const tournamentSnap = await getDoc(doc(db, "tournaments", tournamentId));
-      if (tournamentSnap.exists()) {
-        setTournament(tournamentSnap.data() as Tournament);
+      try {
+        const tournamentSnap = await getDoc(doc(db, "tournaments", tournamentId));
+        if (tournamentSnap.exists()) {
+          setTournament(tournamentSnap.data() as Tournament);
+        }
+      } catch (error) {
+        console.error("Error fetching tournament:", error);
+      } finally {
+        setTournamentLoading(false);
       }
     };
 
@@ -44,27 +64,20 @@ export function MatchViewPage() {
         if (matchSnap.exists()) {
           const matchData = matchSnap.data() as Match;
           setMatch(matchData);
-          setLoading(false);
-        } else {
-          setLoading(false);
         }
+        setMatchLoading(false);
       },
       (error) => {
         console.error("Error fetching match:", error);
-        setLoading(false);
+        setMatchLoading(false);
       }
     );
 
     return () => unsubscribe();
   }, [tournamentId, matchId]);
 
-  if (loading) {
-    return (
-      <div className="match-view-loading">
-        <div className="spinner"></div>
-        <p>載入中...</p>
-      </div>
-    );
+  if (matchLoading || tournamentLoading) {
+    return <Loading fullScreen text="載入中..." />;
   }
 
   // 比賽還在籌備階段
@@ -86,18 +99,9 @@ export function MatchViewPage() {
     );
   }
 
+  // 如果找不到資料，返回 null（useEffect 會自動導航）
   if (!match || !tournament || !match.player1 || !match.player2) {
-    return (
-      <div className="match-view-error">
-        <button
-          onClick={() => navigate(`/tournament/${tournamentId}`)}
-          className="match-view__back-btn"
-        >
-          <ArrowLeft />
-        </button>
-        <p>找不到比賽資料</p>
-      </div>
-    );
+    return null;
   }
 
   const sport = getSportById(tournament.config.sportId);

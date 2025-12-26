@@ -190,3 +190,10 @@ select {
     transform: scale(0.95);
   }
 }
+
+.d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}

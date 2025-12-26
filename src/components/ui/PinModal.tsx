@@ -7,8 +7,9 @@ import "./PinModal.scss";
 interface PinModalProps {
   pin: string;
   scorerPin: string;
-  tournamentId: string;
+  tournamentId?: string; // 可選：如果提供則顯示「查看比賽」按鈕
   onClose: () => void;
+  initialSlide?: number; // 0 = 報名碼, 1 = 計分碼
 }
 
 export function PinModal({
@@ -16,10 +17,11 @@ export function PinModal({
   scorerPin,
   tournamentId,
   onClose,
+  initialSlide = 0,
 }: PinModalProps) {
   const navigate = useNavigate();
   const { showPopup } = usePopup();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(initialSlide);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
@@ -124,15 +126,17 @@ export function PinModal({
                   <li>可以公開張貼</li>
                 </ul>
                 <div className="pin-modal__actions">
-                  <button
-                    onClick={() => {
-                      navigate(`/tournament/${tournamentId}`);
-                      onClose();
-                    }}
-                    className="pin-modal__btn pin-modal__btn--outline"
-                  >
-                    查看比賽
-                  </button>
+                  {tournamentId && (
+                    <button
+                      onClick={() => {
+                        navigate(`/tournament/${tournamentId}`);
+                        onClose();
+                      }}
+                      className="pin-modal__btn pin-modal__btn--outline"
+                    >
+                      查看比賽
+                    </button>
+                  )}
                   <button
                     onClick={() => handleCopyPin(pin, "比賽")}
                     className="pin-modal__btn pin-modal__btn--primary"

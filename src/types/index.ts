@@ -57,7 +57,8 @@ export interface FormatMatch {
 export interface Player {
   name: string;
   index: number;
-  id?: string;
+  id?: string; // 向後兼容
+  userId?: string; // 登入使用者的 userId（如果有登入）
 }
 
 // 比賽

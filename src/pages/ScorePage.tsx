@@ -21,6 +21,7 @@ import { getMatchRoundName } from "../utils/bracketLogic";
 import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 
 export function ScorePage() {
   const { tournamentId, matchId } = useParams();
@@ -42,10 +43,31 @@ export function ScorePage() {
     }
   }, [hasScorePermission, tournamentId, navigate]);
 
+  // 自動返回對戰表：如果找不到資料
+  useEffect(() => {
+    if (!loading && (!match || !tournament)) {
+      console.log("找不到比賽資料，自動返回對戰表");
+      navigate(`/tournament/${tournamentId}`);
+    }
+  }, [loading, match, tournament, tournamentId, navigate]);
+
+  // 自動返回對戰表：如果比賽已完成
+  useEffect(() => {
+    if (tournament?.status === "finished") {
+      console.log("比賽已完成，自動返回對戰表");
+      navigate(`/tournament/${tournamentId}`);
+    }
+  }, [tournament?.status, tournamentId, navigate]);
+
   // 載入比賽和場次資料
   useEffect(() => {
     const loadData = async () => {
-      if (!tournamentId || !matchId) return;
+      if (!tournamentId || !matchId) {
+        console.log("缺少 tournamentId 或 matchId");
+        return;
+      }
+
+      console.log("載入比賽資料:", { tournamentId, matchId });
 
       try {
         const [tournamentSnap, matchSnap] = await Promise.all([
@@ -53,18 +75,33 @@ export function ScorePage() {
           getDoc(doc(db, "tournaments", tournamentId, "matches", matchId)),
         ]);
 
+        console.log("比賽文檔存在:", tournamentSnap.exists());
+        console.log("場次文檔存在:", matchSnap.exists());
+
         if (tournamentSnap.exists()) {
-          setTournament(tournamentSnap.data() as Tournament);
+          const tournamentData = tournamentSnap.data() as Tournament;
+          console.log("比賽狀態:", tournamentData.status);
+          setTournament(tournamentData);
+        } else {
+          console.error("找不到比賽文檔");
         }
 
         if (matchSnap.exists()) {
           const matchData = matchSnap.data() as Match;
+          console.log("比賽數據:", {
+            matchId: matchData.matchId,
+            player1: matchData.player1,
+            player2: matchData.player2,
+            status: matchData.status,
+          });
           // 如果沒有局數，初始化第一局
           if (!matchData.sets || matchData.sets.length === 0) {
             matchData.sets = [createNewSet()];
             matchData.currentSet = 0;
           }
           setMatch(matchData);
+        } else {
+          console.error("找不到場次文檔，路徑:", `tournaments/${tournamentId}/matches/${matchId}`);
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -311,12 +348,7 @@ export function ScorePage() {
   };
 
   if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-gray-600">載入中...</p>
-      </div>
-    );
+    return <Loading fullScreen text="載入中..." />;
   }
 
   // 檢查比賽是否還在籌備階段
@@ -348,7 +380,9 @@ export function ScorePage() {
     );
   }
 
-  if (!match || !tournament || !match.player1 || !match.player2) {
+  // 檢查是否為輪空比賽
+  if (match && (!match.player1 || !match.player2)) {
+    const byePlayer = match.player1 || match.player2;
     return (
       <div className="max-w-2xl mx-auto">
         <button
@@ -357,11 +391,34 @@ export function ScorePage() {
         >
           <ArrowLeft />
         </button>
-        <div className="text-center py-12">
-          <p className="text-gray-600">找不到比賽或選手資料</p>
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="text-6xl mb-4">🏆</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            輪空比賽
+          </h2>
+          <p className="text-gray-600 mb-4">
+            此場比賽為輪空（BYE），選手自動晉級
+          </p>
+          {byePlayer && (
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-gray-600 mb-1">晉級選手</p>
+              <p className="text-xl font-bold text-blue-600">{byePlayer.name}</p>
+            </div>
+          )}
+          <button
+            onClick={() => navigate(`/tournament/${tournamentId}`)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            返回對戰表
+          </button>
         </div>
       </div>
     );
+  }
+
+  // 如果找不到資料，返回 null（useEffect 會自動導航）
+  if (!match || !tournament || !match.player1 || !match.player2) {
+    return null;
   }
 
   const rule = tournament.config.rules;

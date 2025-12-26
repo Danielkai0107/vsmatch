@@ -15,6 +15,7 @@ import {
 import type { Sport, TournamentFormat, RuleConfig } from "../types";
 import { SETS_OPTIONS } from "../types";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 import "./CreateTournamentPage.scss";
 
 export function EditTournamentPage() {
@@ -24,10 +25,46 @@ export function EditTournamentPage() {
   const { showPopup } = usePopup();
 
   useTournamentById(id);
-  const { currentTournament } = useTournamentStore();
+  const { currentTournament, loading: tournamentLoading } = useTournamentStore();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+
+  // 追踪載入狀態：只有在真正載入過後才標記為已嘗試
+  useEffect(() => {
+    if (tournamentLoading) {
+      setHasAttemptedLoad(false);
+    } else if (id) {
+      setHasAttemptedLoad(true);
+    }
+  }, [tournamentLoading, id]);
+
+  // 自動返回首頁：如果找不到比賽（只有在真正嘗試載入後才執行）
+  useEffect(() => {
+    if (hasAttemptedLoad && !tournamentLoading && !currentTournament && id) {
+      console.log("找不到比賽，自動返回首頁");
+      // 先導航到首頁
+      navigate("/", { replace: true });
+      // 然後顯示提示訊息
+      setTimeout(() => {
+        showPopup("找不到此比賽", "error");
+      }, 100);
+    }
+  }, [hasAttemptedLoad, tournamentLoading, currentTournament, id, navigate, showPopup]);
+
+  // 自動返回對戰表：如果不是舉辦者
+  useEffect(() => {
+    if (currentTournament && user && user.uid !== currentTournament.organizerId) {
+      console.log("沒有編輯權限，返回對戰表");
+      // 先導航到對戰表
+      navigate(`/tournament/${id}`, { replace: true });
+      // 然後顯示提示訊息
+      setTimeout(() => {
+        showPopup("您沒有權限編輯此比賽", "error");
+      }, 100);
+    }
+  }, [currentTournament, user, id, navigate, showPopup]);
 
   // 表單資料 - 從現有比賽自動帶入
   const [tournamentName, setTournamentName] = useState("");
@@ -77,18 +114,19 @@ export function EditTournamentPage() {
     }
   }, [currentTournament]);
 
+  // 如果正在載入或找不到資料，顯示載入中（useEffect 會自動導航）
+  if (tournamentLoading) {
+    return <Loading fullScreen text="載入中..." />;
+  }
+
   if (!currentTournament) {
-    return <div className="text-center py-12">載入中...</div>;
+    return null;
   }
 
   const isOrganizer = user?.uid === currentTournament.organizerId;
 
   if (!isOrganizer) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">您沒有權限編輯此比賽</p>
-      </div>
-    );
+    return null;
   }
 
   const isLocked = currentTournament.status !== "draft";
@@ -132,7 +170,7 @@ export function EditTournamentPage() {
       });
 
       showPopup("更新成功！", "success");
-      navigate("/profile");
+      navigate(`/tournament/${id}`);
     } catch (error) {
       console.error("Error updating tournament:", error);
       showPopup("更新失敗，請重試", "error");
@@ -161,7 +199,7 @@ export function EditTournamentPage() {
           {/* Header */}
           <div className="create-tournament__header">
             <button
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(`/tournament/${id}`)}
               className="create-tournament__back-btn"
             >
               <ArrowLeft />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { TournamentCard } from "../components/TournamentCard";
 import { useTournaments } from "../hooks/useFirestore";
@@ -11,6 +11,8 @@ import {
   findTournamentByPin,
 } from "../utils/pinCode";
 import { usePermissionStore } from "../stores/permissionStore";
+import { getAllSports } from "../config/sportsData";
+import Loading from "../components/ui/Loading";
 import "./HomePage.scss";
 
 export function HomePage() {
@@ -27,10 +29,23 @@ export function HomePage() {
   const [scorerPinInput, setScorerPinInput] = useState("");
   const [scorerPinError, setScorerPinError] = useState("");
   const [scorerPinLoading, setScorerPinLoading] = useState(false);
+  const [selectedSportFilter, setSelectedSportFilter] = useState<string>("all");
   const navigate = useNavigate();
   const grantScorePermission = usePermissionStore(
     (state) => state.grantScorePermission
   );
+
+  const allSports = getAllSports();
+
+  // 根據運動項目篩選比賽
+  const filteredTournaments = useMemo(() => {
+    if (selectedSportFilter === "all") {
+      return tournaments;
+    }
+    return tournaments.filter(
+      (tournament) => tournament.config.sportId === selectedSportFilter
+    );
+  }, [tournaments, selectedSportFilter]);
 
   const handleCreateTournament = async () => {
     if (!user) {
@@ -69,10 +84,10 @@ export function HomePage() {
           return;
         }
 
-        // 找到比賽，跳轉到報名頁面
+        // 找到比賽，直接跳轉到詳情頁
         setShowPinModal(false);
         setPinInput("");
-        navigate("/join", { state: { pin: pinInput } });
+        navigate(`/tournament/${tournament.id}`);
       } else {
         setPinError("找不到此 PIN 碼，請確認後重試");
       }
@@ -147,7 +162,7 @@ export function HomePage() {
                 報名
               </h2>
               <p className="action-card__desc action-card__desc--join">
-                輸入 PIN 碼參加比賽
+                輸入 PIN 碼查看比賽
               </p>
             </div>
           </button>
@@ -191,7 +206,7 @@ export function HomePage() {
             </button>
             <input
               type="text"
-              placeholder="報名 PIN 碼"
+              placeholder="輸入 6 位數 PIN 碼"
               value={pinInput}
               onChange={(e) => {
                 setPinInput(e.target.value.replace(/\D/g, "").slice(0, 6));
@@ -210,7 +225,7 @@ export function HomePage() {
               disabled={pinInput.length !== 6 || pinLoading}
               className="pin-modal__button"
             >
-              {pinLoading ? "驗證中..." : "進入報名"}
+              {pinLoading ? "驗證中..." : "查看比賽"}
             </button>
           </div>
         </div>
@@ -265,20 +280,37 @@ export function HomePage() {
 
       {/* 比賽列表 */}
       <div className="home-page__section">
-        <h2 className="home-page__section-title">所有比賽</h2>
+        <div className="home-page__section-header">
+          <h2 className="home-page__section-title">所有比賽</h2>
+          
+          {/* 運動項目篩選下拉選單 */}
+          <select
+            value={selectedSportFilter}
+            onChange={(e) => setSelectedSportFilter(e.target.value)}
+            className="home-page__sport-filter"
+          >
+            <option value="all">全部運動</option>
+            {allSports.map((sport) => (
+              <option key={sport.id} value={sport.id}>
+                {sport.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {loading ? (
-          <div className="home-page__loading">
-            <div className="home-page__spinner"></div>
-            <p className="home-page__loading-text">載入中...</p>
-          </div>
+          <Loading fullScreen text="載入中..." />
         ) : tournaments.length === 0 ? (
           <div className="home-page__empty">
             <p className="home-page__empty-text">目前沒有比賽</p>
           </div>
+        ) : filteredTournaments.length === 0 ? (
+          <div className="home-page__empty">
+            <p className="home-page__empty-text">找不到符合的比賽</p>
+          </div>
         ) : (
           <div className="home-page__grid">
-            {tournaments.map((tournament) => (
+            {filteredTournaments.map((tournament) => (
               <TournamentCard key={tournament.id} tournament={tournament} />
             ))}
           </div>

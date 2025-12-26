@@ -208,7 +208,18 @@
   &__info {
     font-size: 0.875rem;
     color: #6b7280;
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__nickname {
+    font-size: 0.875rem;
+    color: #059669;
+    font-weight: 600;
     margin: 0 0 1rem 0;
+    padding: 0.25rem 0.5rem;
+    background: #d1fae5;
+    border-radius: 0.25rem;
+    display: inline-block;
   }
 
   &__actions {

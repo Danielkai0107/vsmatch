@@ -1,19 +1,30 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useAuth } from "../contexts/AuthContext";
 import { usePopup } from "../contexts/PopupContext";
 import { findTournamentByPin } from "../utils/pinCode";
 import { getSportById, getFormatById } from "../config/sportsData";
 import type { Tournament } from "../types";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 import "./JoinPage.scss";
 
 export function JoinPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const { showPopup } = usePopup();
-  const initialPin = (location.state as { pin?: string })?.pin || "";
+  
+  // 支持兩種方式獲取 pin：
+  // 1. 從 URL 查詢參數（掃描 QR code）
+  // 2. 從 location.state（通過 Link 組件）
+  const initialPin = 
+    searchParams.get("pin") || 
+    (location.state as { pin?: string })?.pin || 
+    "";
 
   const [playerName, setPlayerName] = useState("");
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -83,11 +94,15 @@ export function JoinPage() {
     try {
       const tournamentRef = doc(db, "tournaments", tournament.id);
 
+      // 構建 player 物件，如果有登入則記錄 userId
+      const playerData = {
+        name: playerName.trim(),
+        index: tournament.players.length,
+        ...(user ? { userId: user.uid } : {}), // 如果有登入，記錄 userId
+      };
+
       await updateDoc(tournamentRef, {
-        players: arrayUnion({
-          name: playerName.trim(),
-          index: tournament.players.length,
-        }),
+        players: arrayUnion(playerData),
       });
 
       showPopup("報名成功！", "success");
@@ -104,20 +119,7 @@ export function JoinPage() {
   const format = tournament ? getFormatById(tournament.config.formatId) : null;
 
   if (loading) {
-    return (
-      <div className="join-page">
-        <button 
-          onClick={() => navigate("/")}
-          className="join-page__back-btn"
-        >
-          <ArrowLeft />
-        </button>
-        <div className="join-page__loading">
-          <div className="spinner"></div>
-          <p>載入比賽資料中...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen text="載入比賽資料中..." />;
   }
 
   if (error || !tournament) {

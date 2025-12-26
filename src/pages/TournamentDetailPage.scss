@@ -1,167 +1,704 @@
-@import "../styles/common.scss";
+@import "../styles/variables";
 
 .tournament-detail {
+  width: 100dvw;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
   &__header {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
-
-  &__info {
-    h1 {
-      font-size: 1.875rem;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 0.5rem;
-    }
-  }
-
-  &__sport {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #4b5563;
-
-    span:first-child {
-      font-size: 1.5rem;
-    }
-  }
-
-  &__pins {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  &__pin-box {
+    justify-content: space-between;
+    height: 60px;
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #ffffff;
 
-    &--public {
-      background-color: #eff6ff;
-    }
-
-    &--private {
-      background-color: #fef2f2;
+    @media (min-width: $breakpoint-mobile) {
+      position: relative;
     }
   }
 
-  &__pin-label {
+  &__organizer-actions {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     align-items: center;
-    font-size: 0.875rem;
-    color: #4b5563;
-    margin-bottom: 0.25rem;
   }
 
-  &__pin-toggle {
-    font-size: 0.9rem;
-    color: #dc2626;
-    background: none;
+  &__join-btn {
+    background-color: $primary-color;
+    color: white;
     border: none;
-    cursor: pointer;
-    padding: 0;
-  }
-
-  &__pin-code {
-    font-size: 1.5rem;
-    font-weight: 700;
-    font-family: "DM Sans", sans-serif;
-    margin-bottom: 0.25rem;
-
-    &--public {
-      color: #2563eb;
-    }
-
-    &--private {
-      color: #dc2626;
-    }
-  }
-
-  &__pin-desc {
-    font-size: 0.9rem;
-    color: #6b7280;
-  }
-
-  &__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.9rem;
-  }
-
-  &__scorer-active {
+    border-radius: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: #d1fae5;
-    color: #065f46;
-    border-radius: 0.5rem;
+    font-size: 0.9rem;
     font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: darken($primary-color, 5%);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      transform: translateY(-50%) translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(-50%) translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    // 當在 organizer-actions 容器內時，移除 absolute 定位
+    .tournament-detail__organizer-actions & {
+      position: static;
+      transform: none;
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
 
-  &__bracket {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+  &__scorer-btn {
+    background-color: #8b5cf6;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
 
-    h2 {
+    &:hover:not(:disabled) {
+      background-color: #7c3aed;
+    }
+
+    &:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+
+      &:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+
+  &__delete-btn {
+    background-color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    &:hover:not(:disabled) {
+      background-color: #dc2626;
+    }
+
+    &:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+
+      &:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+
+  &__start-btn {
+    background-color: #10b981;
+
+    &:hover:not(:disabled) {
+      background-color: darken(#10b981, 5%);
+    }
+
+    &:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+
+      &:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  &__msg {
+    width: 100%;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    animation: slideInDown 0.5s ease-out;
+    // 報名中狀態（藍色 - 充滿活力）
+    &--draft {
+      background: linear-gradient(270deg, #3b82f6, #60a5fa, #3b82f6);
+      background-size: 200% 100%;
+      animation: slideInDown 0.5s ease-out, gradientShift 3s ease infinite,
+        pulse 2s ease-in-out infinite;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(59, 130, 246, 0.3);
+    }
+
+    // 進行中狀態（綠色 - 活躍中）
+    &--live {
+      background: linear-gradient(270deg, #10b981, #34d399, #10b981);
+      background-size: 200% 100%;
+      animation: slideInDown 0.5s ease-out, gradientShift 3s ease infinite;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(16, 185, 129, 0.3);
+    }
+
+    // 鎖定狀態（橙色 - 準備開始）
+    &--locked {
+      background: linear-gradient(270deg, #f59e0b, #fbbf24, #f59e0b);
+      background-size: 200% 100%;
+      animation: slideInDown 0.5s ease-out, gradientShift 3s ease infinite;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(245, 158, 11, 0.3);
+    }
+
+    // 已結束狀態（深灰色 - 完成）
+    &--finished,
+    &--completed {
+      background: linear-gradient(270deg, #6b7280, #9ca3af, #6b7280);
+      background-size: 200% 100%;
+      animation: slideInDown 0.5s ease-out;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    // 光暈效果
+    &::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.2) 0%,
+        transparent 70%
+      );
+      animation: rotate 4s linear infinite;
+      opacity: 0.5;
+    }
+
+    // 文字在最上層
+    & > * {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  // 動畫定義
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 0 0 rgba($primary-color, 0.7);
+    }
+    50% {
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 0 8px rgba($primary-color, 0);
+    }
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  &__title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .info-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+
+    &__left {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid $border-color;
+    }
+
+    &__right {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    &__sport {
+      width: 100%;
+      font-size: 1.7rem;
+      font-weight: 700;
+      font-family: "DM Sans", sans-serif;
+      color: #000000;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    &__details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    &__detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    &__detail-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #6b7280;
+      min-width: 30px;
+    }
+
+    &__detail-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #111827;
+      padding: 0.25rem 0.75rem;
+      background-color: #f3f4f6;
+      border-radius: 0.375rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    &__status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid $border-color;
+
+      // 報名中狀態（藍色）
+      &--draft {
+        // background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        // box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+
+        &::before {
+          content: "●";
+          animation: blink 1.5s ease-in-out infinite;
+          color: #3b82f6;
+        }
+      }
+
+      // 進行中狀態（綠色）
+      &--live {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+
+        &::before {
+          content: "▶";
+          animation: pulse-icon 1s ease-in-out infinite;
+          color: #10b981;
+          font-size: 0.7rem;
+        }
+      }
+
+      // 已結束狀態（灰色）
+      &--finished,
+      &--completed {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        color: #4b5563;
+        box-shadow: 0 2px 4px rgba(107, 114, 128, 0.1);
+
+        &::before {
+          content: "✓";
+          color: #6b7280;
+          font-size: 0.9rem;
+        }
+      }
+
+      // 鎖定狀態（黃色）
+      &--locked {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+
+        &::before {
+          content: "🔒";
+          font-size: 0.8rem;
+        }
+      }
+    }
+
+    // 閃爍動畫（報名中的點）
+    @keyframes blink {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    // 脈動圖標動畫（進行中）
+    @keyframes pulse-icon {
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+    }
+
+    &__quota {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
       font-size: 1.5rem;
       font-weight: 700;
       color: #111827;
       margin-bottom: 1rem;
     }
+
+    &__quota-current {
+      color: $primary-color;
+    }
+
+    &__quota-separator {
+      color: #9ca3af;
+      font-size: 1.3rem;
+    }
+
+    &__quota-max {
+      color: #6b7280;
+    }
+
+    &__quota-label {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #6b7280;
+      margin-left: 0.25rem;
+    }
+
+    &__pin-QR {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      svg {
+        width: 120px;
+        height: 120px;
+      }
+    }
+    &__pin {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-family: "DM Sans", sans-serif;
+      color: $primary-color;
+    }
+  }
+
+  .bracket-view-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  // 固定在底部的報名按鈕
+  &__floating-join-btn {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, $primary-color 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateX(-50%) translateY(-4px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5);
+    }
+
+    &:active {
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    @media (max-width: $breakpoint-mobile) {
+      bottom: 1.5rem;
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+  }
+
+  // 固定在底部的已報名標記
+  &__floating-joined-badge {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 9999px;
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    @media (max-width: $breakpoint-mobile) {
+      bottom: 1.5rem;
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+  }
+
+  // 懸浮資訊按鈕
+  &__floating-info-btn {
+    position: fixed;
+    bottom: 1.4rem;
+    right: 1rem;
+    padding: 0;
+    color: #111827;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: white;
+    border: 1px solid $border-color;
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.09);
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
+
+  &__floating-info-qr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    svg {
+      width: 70px;
+      height: 70px;
+    }
+  }
+
+  &__floating-info-pin {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: "DM Sans", sans-serif;
+    color: #111827;
+    text-align: center;
   }
 }
 
-// RWD
-@media (max-width: 768px) {
-  .tournament-detail {
-    &__header {
-      padding: 1rem;
+// 資訊彈窗
+.info-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.info-modal {
+  background: white;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  &__close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: #e5e7eb;
+    color: #6b7280;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #d1d5db;
+      color: #111827;
     }
 
-    &__top {
-      flex-direction: column;
-      gap: 1rem;
+    &:active {
+      transform: scale(0.95);
     }
+  }
 
-    &__info h1 {
-      font-size: 1.5rem;
-    }
+  &__content {
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
 
-    &__pin-code {
-      font-size: 1.25rem;
-    }
+  @media (max-width: $breakpoint-mobile) {
+    max-width: 100%;
+    max-height: 90vh;
+    margin: 0.5rem;
+  }
+}
 
-    &__actions {
-      flex-direction: column;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
-      > * {
-        width: 100%;
-        text-align: center;
-      }
-    }
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
-    &__bracket {
-      padding: 1rem;
-
-      h2 {
-        font-size: 1.25rem;
-      }
-    }
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
   }
 }

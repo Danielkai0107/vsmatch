@@ -36,7 +36,6 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="create" element={<CreateTournamentPage />} />
-              <Route path="tournament/:id" element={<TournamentDetailPage />} />
               <Route path="tournament/:id/edit" element={<EditTournamentPage />} />
               <Route path="tournament/:id/manage" element={<ManageTournamentPage />} />
               <Route path="tournament/:id/scorer" element={<ScorerAuthPage />} />
@@ -44,6 +43,7 @@ function App() {
               <Route path="score/:tournamentId/:matchId" element={<ScorePage />} />
               <Route path="match/:tournamentId/:matchId" element={<MatchViewPage />} />
             </Route>
+            <Route path="tournament/:id" element={<TournamentDetailPage />} />
           </Routes>
         </BrowserRouter>
       </PopupProvider>

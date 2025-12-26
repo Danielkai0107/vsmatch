@@ -6,6 +6,7 @@ import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
 import { PinModal } from "../components/ui/PinModal";
 import { ArrowLeft } from "lucide-react";
+import Loading from "../components/ui/Loading";
 import "./ProfilePage.scss";
 
 export function ProfilePage() {
@@ -13,7 +14,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   useTournaments();
   const { tournaments, loading } = useTournamentStore();
-  
+
   // PIN 彈窗狀態
   const [selectedTournamentPins, setSelectedTournamentPins] = useState<{
     pin: string;
@@ -38,13 +39,11 @@ export function ProfilePage() {
   }
 
   // 我舉辦的比賽
-  const myTournaments = tournaments.filter(
-    (t) => t.organizerId === user.uid
-  );
+  const myTournaments = tournaments.filter((t) => t.organizerId === user.uid);
 
-  // 我參加的比賽（檢查 players 列表）
+  // 我參加的比賽（檢查 players 列表中的 userId）
   const joinedTournaments = tournaments.filter((t) =>
-    t.players.some((p) => p.id === user.uid)
+    t.players.some((p) => p.userId === user.uid || p.id === user.uid)
   );
 
   return (
@@ -66,7 +65,9 @@ export function ProfilePage() {
 
         <div className="profile-page__stats">
           <div className="profile-page__stat">
-            <div className="profile-page__stat-value">{myTournaments.length}</div>
+            <div className="profile-page__stat-value">
+              {myTournaments.length}
+            </div>
             <div className="profile-page__stat-label">舉辦比賽</div>
           </div>
           <div className="profile-page__stat">
@@ -82,7 +83,7 @@ export function ProfilePage() {
       <section className="profile-page__section">
         <h2 className="profile-page__section-title">我舉辦的比賽</h2>
         {loading ? (
-          <div className="profile-page__loading">載入中...</div>
+          <Loading text="載入中..." />
         ) : myTournaments.length === 0 ? (
           <div className="profile-page__empty-section">
             <p>還沒有舉辦過比賽</p>
@@ -126,22 +127,10 @@ export function ProfilePage() {
                       查看 PIN
                     </button>
                     <Link
-                      to={`/tournament/${tournament.id}/manage`}
-                      className="tournament-item__btn tournament-item__btn--manage"
-                    >
-                      管理
-                    </Link>
-                    <Link
-                      to={`/tournament/${tournament.id}/edit`}
-                      className="tournament-item__btn tournament-item__btn--edit"
-                    >
-                      編輯
-                    </Link>
-                    <Link
                       to={`/tournament/${tournament.id}`}
                       className="tournament-item__btn tournament-item__btn--view"
                     >
-                      預覽
+                      查看比賽
                     </Link>
                   </div>
                 </div>
@@ -155,7 +144,7 @@ export function ProfilePage() {
       <section className="profile-page__section">
         <h2 className="profile-page__section-title">我參加的比賽</h2>
         {loading ? (
-          <div className="profile-page__loading">載入中...</div>
+          <Loading text="載入中..." />
         ) : joinedTournaments.length === 0 ? (
           <div className="profile-page__empty-section">
             <p>還沒有參加過比賽</p>
@@ -167,6 +156,12 @@ export function ProfilePage() {
           <div className="profile-page__grid">
             {joinedTournaments.map((tournament) => {
               const sport = getSportById(tournament.config.sportId);
+              // 找到該使用者在此比賽中使用的暱稱
+              const myPlayerData = tournament.players.find(
+                (p) => p.userId === user.uid || p.id === user.uid
+              );
+              const myNickname = myPlayerData?.name || "未知";
+
               return (
                 <div key={tournament.id} className="tournament-item">
                   <div className="tournament-item__header">
@@ -184,6 +179,9 @@ export function ProfilePage() {
                   <h3 className="tournament-item__name">{tournament.name}</h3>
                   <p className="tournament-item__info">
                     {sport?.name} • {tournament.players.length} 人報名
+                  </p>
+                  <p className="tournament-item__nickname">
+                    參賽名稱：{myNickname}
                   </p>
                   <div className="tournament-item__actions">
                     <Link
@@ -212,4 +210,3 @@ export function ProfilePage() {
     </div>
   );
 }
-

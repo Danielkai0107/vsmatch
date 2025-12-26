@@ -1,7 +1,7 @@
 .match-card {
-  border: 2px solid;
-  border-radius: 0.5rem;
-  padding: 0.9rem;
+  border: 1px solid;
+  border-radius: $border-radius;
+  padding: 0.9rem 1.2rem;
   background-color: white;
   transition: all 0.2s;
 
@@ -41,11 +41,18 @@
 
     &--live {
       color: #2563eb;
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
     &--completed {
       color: #059669;
+    }
+
+    &--bye {
+      color: #d97706;
+      font-size: 0.8rem;
+      background-color: #fef3c7;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
     }
   }
 
