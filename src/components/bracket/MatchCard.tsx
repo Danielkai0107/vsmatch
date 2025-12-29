@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import type { Match } from "../../types";
-import { PlayerSlot } from "./PlayerSlot";
 import {
   formatSetScore,
   getCumulativeScore,
   getCurrentSetName,
+  getSetsWon,
 } from "../../utils/scoringLogic";
 import { usePermissionStore } from "../../stores/permissionStore";
 import { useTournamentStore } from "../../stores/tournamentStore";
@@ -21,13 +21,20 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
   const hasScorePermission = usePermissionStore((state) =>
     state.hasScorePermission(tournamentId)
   );
-  const currentTournament = useTournamentStore((state) => state.currentTournament);
+  const currentTournament = useTournamentStore(
+    (state) => state.currentTournament
+  );
 
   const rule = currentTournament?.config.rules;
   const isCumulative = rule?.scoringMode === "cumulative";
   const sportId = currentTournament?.config.sportId;
 
   const getStatusClass = () => {
+    // 輪空比賽使用 pending 樣式
+    if (isBye) {
+      return "match-card--pending";
+    }
+
     switch (match.status) {
       case "live":
         return "match-card--live";
@@ -41,29 +48,18 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
   const handleClick = () => {
     if (!match.matchId) return;
 
-    // 檢查是否為輪空比賽（缺少任一選手）
     const isBye = !match.player1 || !match.player2;
-
-    // 輪空比賽不可點擊
     if (isBye) return;
-
-    // 已完成的比賽不可點擊
     if (match.status === "completed") return;
 
-    // 計分員進入計分頁面 (不論是 pending 還是 live)
     if (hasScorePermission) {
       navigate(`/score/${tournamentId}/${match.matchId}`);
-    }
-    // 觀眾進入進行中的比賽觀看頁面
-    else if (match.status === "live") {
+    } else if (match.status === "live") {
       navigate(`/match/${tournamentId}/${match.matchId}`);
     }
   };
 
-  // 檢查是否為輪空比賽
   const isBye = !match.player1 || !match.player2;
-
-  // 只有未完成且非輪空的比賽可以點擊
   const isClickable =
     !isBye &&
     match.status !== "completed" &&
@@ -71,73 +67,126 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       (match.status === "pending" || match.status === "live")) ||
       match.status === "live");
 
-  // 計算比分顯示內容
-  const renderScoreInfo = () => {
-    if (!match.sets || match.sets.length === 0) {
-      return (
-        <span className="match-card__value match-card__value--vs">V.S.</span>
-      );
+  // 渲染標題狀態標籤
+  const renderHeaderBadge = () => {
+    if (!match.sets || match.sets.length === 0) return null;
+
+    if (match.status === "completed") return "Final";
+
+    if (match.status === "live" && match.currentSet !== undefined) {
+      const setNumber = match.currentSet + 1;
+      if (isCumulative && sportId === "basketball") {
+        return `Q${setNumber}`; // Quarter 1, Quarter 2...
+      } else {
+        return `G${setNumber}`; // Game 1, Game 2...
+      }
     }
 
+    return null;
+  };
+
+  // 渲染每一局/節的分數
+  const renderSetScores = (playerIndex: 1 | 2) => {
+    if (!match.sets || match.sets.length === 0) return null;
+
+    return match.sets.map((set, index) => {
+      const score = playerIndex === 1 ? set.p1Score : set.p2Score;
+      const opponentScore = playerIndex === 1 ? set.p2Score : set.p1Score;
+      const isCurrentSet = index === match.currentSet && match.status === "live";
+      const isWonSet = score > opponentScore;
+      const isCompletedSet =
+        match.status === "completed" ||
+        (match.status === "live" && index < (match.currentSet || 0));
+
+      let className = "match-card__set-score";
+
+      if (isCurrentSet) {
+        // 正在進行的局：藍色高亮
+        className += " match-card__set-score--current";
+      } else if (isCompletedSet) {
+        // 已完成的局：根據勝負決定顏色
+        if (isWonSet) {
+          className += " match-card__set-score--won";
+        } else {
+          className += " match-card__set-score--lost";
+        }
+      } else {
+        // 未來的局（不應該出現，但以防萬一）
+        className += " match-card__set-score--empty";
+      }
+
+      return (
+        <span key={index} className={className}>
+          {score}
+        </span>
+      );
+    });
+  };
+
+  // 渲染最終總計（局數或總分）
+  const renderFinalScore = (playerIndex: 1 | 2) => {
+    if (!match.sets || match.sets.length === 0) return <span>-</span>;
+
+    const isWinner =
+      match.winner ===
+      (playerIndex === 1 ? match.player1?.name : match.player2?.name);
+
     if (isCumulative) {
-      // 累計制：顯示總分
-      const total = getCumulativeScore(match.sets);
+      // 總分制：顯示累計總分
+      // live 時包含當前節，completed 時包含所有節
+      const setsToCount =
+        match.status === "completed"
+          ? match.sets
+          : match.sets.slice(0, (match.currentSet || 0) + 1);
+      const total = getCumulativeScore(setsToCount);
+      const score = playerIndex === 1 ? total.p1 : total.p2;
+
       return (
         <span
-          className={`match-card__value ${
-            match.status === "live" ? "match-card__value--live" : ""
+          className={`match-card__total-score ${
+            match.status === "completed" && isWinner
+              ? "match-card__total-score--winner"
+              : ""
           }`}
         >
-          {total.p1}-{total.p2}
+          {score}
         </span>
       );
     } else {
-      // 單局制：顯示當前局分數 (live) 或 顯示勝者資訊 (已在底部顯示，這裡可以考慮顯示最終比分)
-      if (match.status === "live" && match.currentSet !== undefined) {
-        const current = match.sets[match.currentSet];
-        if (current) {
-          return (
-            <span className="match-card__value match-card__value--live">
-              {current.p1Score}-{current.p2Score}
-            </span>
-          );
-        }
-      } else if (match.status === "completed") {
-        // 單局制已完成：可以在這裡顯示最終比分概覽，例如 "21-15, 21-18" 或保持簡潔
-        // 根據使用者要求 1：顯示最終比分
-        // 對於 sets 模式，我們應該顯示局數比
-        const setsWon = formatSetScore(match.sets);
-        return <span className="match-card__value">{setsWon}</span>;
-      }
-    }
+      // 單局制：顯示勝局數（排除當前進行中的局）
+      const setsWon = getSetsWon(
+        match.sets,
+        match.status === "live" ? match.currentSet : undefined
+      );
+      const score = playerIndex === 1 ? setsWon.p1 : setsWon.p2;
 
-    return <span className="match-card__value match-card__value--vs">V.S.</span>;
+      return (
+        <span
+          className={`match-card__total-score ${
+            match.status === "completed" && isWinner
+              ? "match-card__total-score--winner"
+              : ""
+          }`}
+        >
+          {score}
+        </span>
+      );
+    }
   };
 
-  // 頂部狀態標籤顯示
-  const renderRoundBadge = () => {
-    if (!match.sets || match.sets.length === 0) return null;
+  // 填充空白格子（當局數未滿時）
+  const renderEmptySlots = () => {
+    if (!match.sets || !rule) return null;
 
-    if (isCumulative && rule) {
-      // 累計制：顯示 "第X節" 或 "完賽"
-      if (match.status === "completed") return "完賽";
+    const currentSetsCount = match.sets.length;
+    const totalSets = rule.totalSets;
+    const emptySlotsCount = Math.max(0, totalSets - currentSetsCount);
 
-      // 檢查是否所有預定局數都已打完（且沒進入延長賽或不需延長賽）
-      if (match.currentSet !== undefined && match.currentSet >= match.sets.length) {
-        return "待確認";
-      }
-
-      return getCurrentSetName(rule, match.currentSet || 0, sportId);
-    }
-
-    // 單局制：顯示局數比 (如 2-1)
-    if (match.status === "completed") return formatSetScore(match.sets);
-
-    // 進行中：排除當前局
-    return formatSetScore(
-      match.sets,
-      match.status === "live" ? match.currentSet : undefined
-    );
+    return Array.from({ length: emptySlotsCount }).map((_, index) => (
+      <span key={`empty-${index}`} className="match-card__set-score--empty">
+        -
+      </span>
+    ));
   };
 
   return (
@@ -147,12 +196,11 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       }`}
       onClick={handleClick}
     >
+      {/* 頭部 */}
       <div className="match-card__header">
-        <span>{roundName}</span>
+        <span className="match-card__round">{roundName}</span>
         {match.sets && match.sets.length > 0 && (
-          <div className="match-card__value">
-            <span className="match-card__round-name">{renderRoundBadge()}</span>
-          </div>
+          <span className="match-card__period">{renderHeaderBadge()}</span>
         )}
         {match.status === "pending" && (
           <span className="match-card__status match-card__status--pending">
@@ -165,7 +213,7 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
           </span>
         )}
         {match.status === "completed" && isBye && (
-          <span className="match-card__status match-card__status--bye">
+          <span className="match-card__status match-card__status--pending">
             輪空
           </span>
         )}
@@ -181,28 +229,74 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
           )}
       </div>
 
-      <div className="match-card__score">
-        <div className="match-card__players">
-          <PlayerSlot
-            player={match.player1 || null}
-            isWinner={match.winner === match.player1?.name}
-          />
+      {/* 比分區域 - 統一格式 */}
+      <div className="match-card__scores">
+        {/* 選手 1 */}
+        <div className="match-card__player-row">
+          <div
+            className={`match-card__player-name ${
+              match.winner === match.player1?.name
+                ? "match-card__player-name--winner"
+                : !match.player1?.name
+                ? "match-card__player-name--pending"
+                : ""
+            }`}
+          >
+            {match.player1?.name || "待定"}
+          </div>
+          <div className="match-card__player-sets">
+            {match.sets && match.sets.length > 0 ? (
+              <>
+                {renderSetScores(1)}
+                {match.status !== "completed" && renderEmptySlots()}
+              </>
+            ) : (
+              // 未開始時也顯示空白格子
+              rule && Array.from({ length: rule.totalSets }).map((_, index) => (
+                <span key={`empty-${index}`} className="match-card__set-score--empty">
+                  -
+                </span>
+              ))
+            )}
+          </div>
+          <div className="match-card__player-total">
+            {renderFinalScore(1)}
+          </div>
         </div>
-        <div className="match-card__score-info">{renderScoreInfo()}</div>
 
-        <div className="match-card__players">
-          <PlayerSlot
-            player={match.player2 || null}
-            isWinner={match.winner === match.player2?.name}
-          />
+        {/* 選手 2 */}
+        <div className="match-card__player-row">
+          <div
+            className={`match-card__player-name ${
+              match.winner === match.player2?.name
+                ? "match-card__player-name--winner"
+                : !match.player2?.name
+                ? "match-card__player-name--pending"
+                : ""
+            }`}
+          >
+            {match.player2?.name || "待定"}
+          </div>
+          <div className="match-card__player-sets">
+            {match.sets && match.sets.length > 0 ? (
+              <>
+                {renderSetScores(2)}
+                {match.status !== "completed" && renderEmptySlots()}
+              </>
+            ) : (
+              // 未開始時也顯示空白格子
+              rule && Array.from({ length: rule.totalSets }).map((_, index) => (
+                <span key={`empty-${index}`} className="match-card__set-score--empty">
+                  -
+                </span>
+              ))
+            )}
+          </div>
+          <div className="match-card__player-total">
+            {renderFinalScore(2)}
+          </div>
         </div>
       </div>
-
-      {match.status === "completed" && match.winner && (
-        <div className="match-card__winner">
-          <span>勝者: {match.winner}</span>
-        </div>
-      )}
     </div>
   );
 }
