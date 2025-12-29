@@ -1,8 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import type { Match } from "../../types";
 import { PlayerSlot } from "./PlayerSlot";
-import { formatSetScore } from "../../utils/scoringLogic";
+import {
+  formatSetScore,
+  getCumulativeScore,
+  getCurrentSetName,
+} from "../../utils/scoringLogic";
 import { usePermissionStore } from "../../stores/permissionStore";
+import { useTournamentStore } from "../../stores/tournamentStore";
 import "./MatchCard.scss";
 
 interface MatchCardProps {
@@ -16,6 +21,11 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
   const hasScorePermission = usePermissionStore((state) =>
     state.hasScorePermission(tournamentId)
   );
+  const currentTournament = useTournamentStore((state) => state.currentTournament);
+
+  const rule = currentTournament?.config.rules;
+  const isCumulative = rule?.scoringMode === "cumulative";
+  const sportId = currentTournament?.config.sportId;
 
   const getStatusClass = () => {
     switch (match.status) {
@@ -61,6 +71,75 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       (match.status === "pending" || match.status === "live")) ||
       match.status === "live");
 
+  // 計算比分顯示內容
+  const renderScoreInfo = () => {
+    if (!match.sets || match.sets.length === 0) {
+      return (
+        <span className="match-card__value match-card__value--vs">V.S.</span>
+      );
+    }
+
+    if (isCumulative) {
+      // 累計制：顯示總分
+      const total = getCumulativeScore(match.sets);
+      return (
+        <span
+          className={`match-card__value ${
+            match.status === "live" ? "match-card__value--live" : ""
+          }`}
+        >
+          {total.p1}-{total.p2}
+        </span>
+      );
+    } else {
+      // 單局制：顯示當前局分數 (live) 或 顯示勝者資訊 (已在底部顯示，這裡可以考慮顯示最終比分)
+      if (match.status === "live" && match.currentSet !== undefined) {
+        const current = match.sets[match.currentSet];
+        if (current) {
+          return (
+            <span className="match-card__value match-card__value--live">
+              {current.p1Score}-{current.p2Score}
+            </span>
+          );
+        }
+      } else if (match.status === "completed") {
+        // 單局制已完成：可以在這裡顯示最終比分概覽，例如 "21-15, 21-18" 或保持簡潔
+        // 根據使用者要求 1：顯示最終比分
+        // 對於 sets 模式，我們應該顯示局數比
+        const setsWon = formatSetScore(match.sets);
+        return <span className="match-card__value">{setsWon}</span>;
+      }
+    }
+
+    return <span className="match-card__value match-card__value--vs">V.S.</span>;
+  };
+
+  // 頂部狀態標籤顯示
+  const renderRoundBadge = () => {
+    if (!match.sets || match.sets.length === 0) return null;
+
+    if (isCumulative && rule) {
+      // 累計制：顯示 "第X節" 或 "完賽"
+      if (match.status === "completed") return "完賽";
+
+      // 檢查是否所有預定局數都已打完（且沒進入延長賽或不需延長賽）
+      if (match.currentSet !== undefined && match.currentSet >= match.sets.length) {
+        return "待確認";
+      }
+
+      return getCurrentSetName(rule, match.currentSet || 0, sportId);
+    }
+
+    // 單局制：顯示局數比 (如 2-1)
+    if (match.status === "completed") return formatSetScore(match.sets);
+
+    // 進行中：排除當前局
+    return formatSetScore(
+      match.sets,
+      match.status === "live" ? match.currentSet : undefined
+    );
+  };
+
   return (
     <div
       className={`match-card ${getStatusClass()} ${
@@ -72,13 +151,7 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
         <span>{roundName}</span>
         {match.sets && match.sets.length > 0 && (
           <div className="match-card__value">
-            {/* 當前已結束局數比分 */}
-            <span className="match-card__round-name">
-              {formatSetScore(
-                match.sets,
-                match.status === "live" ? match.currentSet : undefined
-              )}
-            </span>
+            <span className="match-card__round-name">{renderRoundBadge()}</span>
           </div>
         )}
         {match.status === "pending" && (
@@ -115,25 +188,7 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
             isWinner={match.winner === match.player1?.name}
           />
         </div>
-        <div className="match-card__score-info">
-          {match.sets && match.sets.length > 0 ? (
-            <div>
-              {/* 如果比賽進行中，顯示當前局分數 */}
-              {match.status === "live" &&
-                match.currentSet !== undefined &&
-                match.sets[match.currentSet] && (
-                  <span className="match-card__value match-card__value--live">
-                    {match.sets[match.currentSet].p1Score}-
-                    {match.sets[match.currentSet].p2Score}
-                  </span>
-                )}
-            </div>
-          ) : (
-            <div>
-              <span className="match-card__value match-card__value--vs">V.S.</span>
-            </div>
-          )}
-        </div>
+        <div className="match-card__score-info">{renderScoreInfo()}</div>
 
         <div className="match-card__players">
           <PlayerSlot
