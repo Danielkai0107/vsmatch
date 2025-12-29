@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Match } from "../../types";
 import {
-  formatSetScore,
   getCumulativeScore,
-  getCurrentSetName,
   getSetsWon,
 } from "../../utils/scoringLogic";
 import { usePermissionStore } from "../../stores/permissionStore";

@@ -3,7 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 
   &__header {
@@ -39,14 +39,9 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-
+    justify-content: flex-start;
     flex: 1;
-
-    // 手機版：調整間距
-    @media (max-width: 768px) {
-      gap: 1rem;
-    }
+    gap: 1rem;
   }
 
   &__match-wrapper {

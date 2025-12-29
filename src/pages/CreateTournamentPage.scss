@@ -431,18 +431,16 @@
     justify-content: center;
     flex-wrap: wrap;
     gap: 0.5rem;
+    color: $text-secondary;
 
     &--selected {
       border-color: #2563eb;
       background-color: #eff6ff;
+      color: #000000;
     }
 
     &--unselected {
       border-color: #e5e7eb;
-
-      &:hover {
-        border-color: #d1d5db;
-      }
     }
 
     &-icon {
@@ -470,18 +468,16 @@
     transition: all 0.2s;
     cursor: pointer;
     background: white;
+    color: $text-secondary;
 
     &--selected {
       border-color: #2563eb;
       background-color: #eff6ff;
+      color: #000000;
     }
 
     &--unselected {
       border-color: #e5e7eb;
-
-      &:hover {
-        border-color: #d1d5db;
-      }
     }
 
     &-title {
