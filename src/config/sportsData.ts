@@ -1,48 +1,34 @@
 import type { SportsData, FormatsData } from "../types";
 
-// 運動資料 - 簡化版，移除預設規則
+// 運動資料 - 僅保留羽球與籃球，並預設規則
 export const SPORTS: SportsData = {
   badminton: {
     id: "badminton",
     name: "羽球",
     icon: "",
     modes: ["單打", "雙打"],
+    defaultRules: {
+      scoringMode: "sets",
+      scoreToWin: 21,
+      setsToWin: 2,
+      totalSets: 3,
+      allowOvertime: false,
+      tiebreaker: { scoreToWin: 21 },
+    },
   },
   basketball: {
     id: "basketball",
     name: "籃球",
     icon: "",
     modes: ["3x3", "5x5"],
-  },
-  volleyball: {
-    id: "volleyball",
-    name: "排球",
-    icon: "",
-    modes: ["室內", "沙灘"],
-  },
-  tennis: {
-    id: "tennis",
-    name: "網球",
-    icon: "",
-    modes: ["單打", "雙打"],
-  },
-  tableTennis: {
-    id: "tableTennis",
-    name: "桌球",
-    icon: "",
-    modes: ["單打", "雙打"],
-  },
-  pickleball: {
-    id: "pickleball",
-    name: "匹克球",
-    icon: "",
-    modes: ["單打", "雙打"],
-  },
-  other: {
-    id: "other",
-    name: "其他運動",
-    icon: "",
-    modes: ["通用"],
+    defaultRules: {
+      scoringMode: "cumulative",
+      scoreToWin: 0,
+      setsToWin: 0,
+      totalSets: 4,
+      allowOvertime: true,
+      tiebreaker: null,
+    },
   },
 };
 

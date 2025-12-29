@@ -22,6 +22,7 @@ import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
 import { ArrowLeft } from "lucide-react";
 import Loading from "../components/ui/Loading";
+import "./ScorePage.scss";
 
 export function ScorePage() {
   const { tournamentId, matchId } = useParams();
@@ -101,7 +102,10 @@ export function ScorePage() {
           }
           setMatch(matchData);
         } else {
-          console.error("找不到場次文檔，路徑:", `tournaments/${tournamentId}/matches/${matchId}`);
+          console.error(
+            "找不到場次文檔，路徑:",
+            `tournaments/${tournamentId}/matches/${matchId}`
+          );
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -198,7 +202,7 @@ export function ScorePage() {
 
   const executeEndCurrentSet = async () => {
     if (!match || !tournament || !tournamentId || !matchId) return;
-    
+
     const rule = tournament.config.rules;
     if (!rule) return;
 
@@ -211,7 +215,7 @@ export function ScorePage() {
       if (rule.scoringMode === "cumulative") {
         const completedSetsCount = newSets.length;
 
-        // 如果還沒打完固定局數，繼續下一局
+        // 1. 如果還沒打完固定局數，繼續下一局
         if (completedSetsCount < rule.totalSets) {
           newSets.push(createNewSet());
           const newCurrentSet = newSets.length - 1;
@@ -226,50 +230,75 @@ export function ScorePage() {
           );
 
           setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
-          showPopup(`本局已結束！進入第${newCurrentSet + 1}局`, "success");
+          showPopup(
+            `本${isBasketball ? "節" : "局"}已結束！進入${getCurrentSetName(
+              rule,
+              newCurrentSet,
+              tournament?.config.sportId
+            )}`,
+            "success"
+          );
           return;
         }
 
-        // 打完固定局數，檢查總分
+        // 2. 打完固定局數，檢查總分
         const { p1, p2 } = getCumulativeScore(newSets);
 
-        if (p1 === p2) {
-          // 總分相同，需要延長賽
-          if (rule.allowOvertime) {
-            newSets.push(createNewSet());
-            const newCurrentSet = newSets.length - 1;
+        if (p1 === p2 && rule.allowOvertime) {
+          // 總分相同，進入延長賽
+          newSets.push(createNewSet());
+          const newCurrentSet = newSets.length - 1;
 
-            await updateDoc(
-              doc(db, "tournaments", tournamentId, "matches", matchId),
-              {
-                sets: newSets,
-                currentSet: newCurrentSet,
-                status: "live",
-              }
-            );
+          await updateDoc(
+            doc(db, "tournaments", tournamentId, "matches", matchId),
+            {
+              sets: newSets,
+              currentSet: newCurrentSet,
+              status: "live",
+            }
+          );
 
-            setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
-            showPopup(
-              `總分平手（${p1}:${p2}）！進入延長賽第${
-                newCurrentSet - rule.totalSets + 1
-              }局`,
-              "info"
-            );
-            return;
-          } else {
-            showPopup("比賽結束！總分平手，請點擊「結束比賽」按鈕", "info");
-            return;
-          }
+          setMatch({ ...match, sets: newSets, currentSet: newCurrentSet });
+          showPopup(
+            `總分平手（${p1}:${p2}）！進入${getCurrentSetName(
+              rule,
+              newCurrentSet,
+              tournament?.config.sportId
+            )}`,
+            "info"
+          );
+          return;
         }
 
-        // 總分不同，比賽結束
-        showPopup(`比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`, "info");
+        // 3. 總分不同，或不允許延長賽，比賽真正結束
+        // 推進 currentSet 到 sets.length，標記所有局已完成
+        const finalCurrentSet = newSets.length;
+        await updateDoc(
+          doc(db, "tournaments", tournamentId, "matches", matchId),
+          {
+            currentSet: finalCurrentSet,
+          }
+        );
+
+        setMatch({ ...match, currentSet: finalCurrentSet });
+        showPopup(
+          `比賽已結束！總分 ${p1}:${p2}\n請點擊「結束比賽」按鈕確認勝者`,
+          "info"
+        );
         return;
       }
 
       // 單局制邏輯
       // 檢查是否已經達成整場比賽的勝利條件
       if (isMatchComplete(newSets, rule)) {
+        const finalCurrentSet = newSets.length;
+        await updateDoc(
+          doc(db, "tournaments", tournamentId, "matches", matchId),
+          {
+            currentSet: finalCurrentSet,
+          }
+        );
+        setMatch({ ...match, currentSet: finalCurrentSet });
         showPopup("比賽已結束！請點擊「結束比賽」按鈕確認勝者", "info");
         return;
       }
@@ -300,7 +329,7 @@ export function ScorePage() {
 
   const handleEndMatch = async () => {
     if (!match || !tournament || !tournamentId || !matchId) return;
-    
+
     showConfirm("確定要結束此場比賽嗎？", async () => {
       setSaving(true);
 
@@ -315,7 +344,8 @@ export function ScorePage() {
           return;
         }
 
-        const winnerPlayer = winner === "player1" ? match.player1 : match.player2;
+        const winnerPlayer =
+          winner === "player1" ? match.player1 : match.player2;
         if (!winnerPlayer) {
           setSaving(false);
           return;
@@ -393,16 +423,16 @@ export function ScorePage() {
         </button>
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <div className="text-6xl mb-4">🏆</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            輪空比賽
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">輪空比賽</h2>
           <p className="text-gray-600 mb-4">
             此場比賽為輪空（BYE），選手自動晉級
           </p>
           {byePlayer && (
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <p className="text-sm text-gray-600 mb-1">晉級選手</p>
-              <p className="text-xl font-bold text-blue-600">{byePlayer.name}</p>
+              <p className="text-xl font-bold text-blue-600">
+                {byePlayer.name}
+              </p>
             </div>
           )}
           <button
@@ -433,7 +463,12 @@ export function ScorePage() {
     ? getCumulativeScore(match.sets.slice(0, match.currentSet))
     : null;
   const isOvertimeMode = rule && isInOvertime(rule, match.currentSet);
-  const currentSetName = rule ? getCurrentSetName(rule, match.currentSet) : "";
+  const currentSetName = rule
+    ? getCurrentSetName(rule, match.currentSet, tournament?.config.sportId)
+    : "";
+
+  // 籃球專用：節數顯示
+  const isBasketball = tournament?.config.sportId === "basketball";
 
   const matchComplete = rule
     ? isMatchComplete(match.sets, rule, match.currentSet)
@@ -444,253 +479,211 @@ export function ScorePage() {
       : 0;
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* 頭部 */}
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
+    <div className="score-page-container">
+      {/* 頂部導航欄 */}
+      <div className="score-header">
         <button
           onClick={() => navigate(`/tournament/${tournamentId}`)}
-          className="score-page__back-btn"
+          className="back-button"
         >
-          <ArrowLeft />
+          <ArrowLeft size={20} />
+          <span>返回</span>
         </button>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-          {roundName}
-        </h1>
-        <p className="text-xs md:text-sm text-gray-600">
-          {!isCumulative && rule?.scoreToWin > 0 && `${rule.scoreToWin}分制 • `}
-          {rule ? getSetsFormatLabel(rule) : ""}
-          {isOvertimeMode && " • 延長賽"}
-        </p>
-      </div>
-
-      {/* 比賽狀態資訊 */}
-      <div className="bg-gradient-to-r from-blue-50 to-red-50 rounded-lg p-4 mb-4">
-        {/* 累計制進度條 */}
-        {isCumulative && rule && (
-          <div className="mb-4 pb-3 border-b border-gray-200">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs text-gray-600">比賽進度</span>
-              <span className="text-xs font-semibold text-gray-700">
-                {match.currentSet}/{rule.totalSets}局
-                {isOvertimeMode && " + 延長賽"}
-              </span>
-            </div>
-            <div className="flex gap-1">
-              {Array.from({ length: rule.totalSets }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 flex-1 rounded-full ${
-                    index < match.currentSet
-                      ? "bg-green-500"
-                      : index === match.currentSet
-                      ? "bg-yellow-400 animate-pulse"
-                      : "bg-gray-300"
-                  }`}
-                />
-              ))}
-              {isOvertimeMode &&
-                Array.from({
-                  length: match.currentSet - rule.totalSets + 1,
-                }).map((_, index) => (
-                  <div
-                    key={`ot-${index}`}
-                    className="h-2 w-8 rounded-full bg-orange-500"
-                  />
-                ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-between items-center">
-          <div className="text-center flex-1">
-            <div className="text-xs text-gray-600 mb-1">
-              {isCumulative ? "累計總分" : "獲勝局數"}
-            </div>
-            <div className="text-3xl md:text-4xl font-bold text-blue-600">
-              {isCumulative ? cumulativeScore?.p1 || 0 : setsWon.p1}
-            </div>
-          </div>
-          <div className="text-center px-4">
-            <div className="text-xs text-gray-600 mb-1">{currentSetName}</div>
-            <div className="text-2xl font-bold text-gray-400">VS</div>
-          </div>
-          <div className="text-center flex-1">
-            <div className="text-xs text-gray-600 mb-1">
-              {isCumulative ? "累計總分" : "獲勝局數"}
-            </div>
-            <div className="text-3xl md:text-4xl font-bold text-red-600">
-              {isCumulative ? cumulativeScore?.p2 || 0 : setsWon.p2}
-            </div>
+        <div className="match-info">
+          <h1 className="round-name">{roundName}</h1>
+          <div className="rule-badge">
+            {!isCumulative &&
+              rule?.scoreToWin > 0 &&
+              `${rule.scoreToWin}分制 • `}
+            {rule ? getSetsFormatLabel(rule) : ""}
+            {isOvertimeMode && " • 延長賽"}
           </div>
         </div>
-
-        {/* 各局歷史分數 */}
-        {match.sets.length > 1 && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            {isCumulative ? (
-              <div>
-                <div className="text-xs text-gray-600 mb-2 text-center font-semibold">
-                  各局分數記錄
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {match.sets.slice(0, match.currentSet).map((set, index) => (
-                    <div
-                      key={index}
-                      className="bg-white rounded px-2 py-1 text-center shadow-sm"
-                    >
-                      <div className="text-xs text-gray-500">
-                        {index < rule.totalSets
-                          ? `第${index + 1}局`
-                          : `延長${index - rule.totalSets + 1}`}
-                      </div>
-                      <div className="text-sm font-bold">
-                        <span className="text-blue-600">{set.p1Score}</span>
-                        <span className="text-gray-400 mx-1">-</span>
-                        <span className="text-red-600">{set.p2Score}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-xs text-center text-gray-600">
-                歷史比分：{formatScore(match.sets.slice(0, -1))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* 計分區 */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {/* 選手 1 - 藍方 */}
-        <div className="bg-blue-50 p-4 border-b-4 border-blue-600">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
-            🔵 {match.player1.name}
-          </h2>
-          {currentSet && (
-            <div className="flex items-center justify-between gap-4">
-              <div className="text-5xl md:text-7xl font-bold text-blue-600 flex-1 text-center">
-                {currentSet.p1Score}
+      <div className="score-content">
+        {/* 主要計分看板 */}
+        <div className="scoreboard-card">
+          {/* 進度條 (籃球/累計制) */}
+          {isCumulative && rule && (
+            <div className="game-progress">
+              <div className="progress-label">
+                <span>比賽進度</span>
+                <span className="current-status">
+                  {match.currentSet}/{rule.totalSets}
+                  {isBasketball ? "節" : "局"}
+                  {isOvertimeMode && " + 延長賽"}
+                </span>
               </div>
-              <div className="flex flex-col gap-2 min-w-[100px]">
-                <button
-                  onClick={() => handleScore(1, 1)}
-                  className="px-4 md:px-6 py-3 md:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg md:text-2xl font-bold shadow-lg active:scale-95 transition-transform"
-                >
-                  + 得分
+              <div className="progress-steps">
+                {Array.from({ length: rule.totalSets }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`step-bar ${
+                      index < match.currentSet
+                        ? "completed"
+                        : index === match.currentSet
+                        ? "active"
+                        : "pending"
+                    }`}
+                  />
+                ))}
+                {isOvertimeMode &&
+                  Array.from({
+                    length: match.currentSet - rule.totalSets + 1,
+                  }).map((_, index) => (
+                    <div key={`ot-${index}`} className="step-bar overtime" />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* 核心比分顯示區域 */}
+          <div className="score-main-display">
+            <div className="team-score team-1">
+              <div className="team-label">{isCumulative ? "總分" : "局數"}</div>
+              <div className="score-value">
+                {isCumulative ? cumulativeScore?.p1 || 0 : setsWon.p1}
+              </div>
+            </div>
+
+            <div className="score-divider">
+              <div className="period-name">{currentSetName}</div>
+              <div className="vs-label">VS</div>
+            </div>
+
+            <div className="team-score team-2">
+              <div className="team-label">{isCumulative ? "總分" : "局數"}</div>
+              <div className="score-value">
+                {isCumulative ? cumulativeScore?.p2 || 0 : setsWon.p2}
+              </div>
+            </div>
+          </div>
+
+          {/* 歷史局數比分 */}
+          {match.sets.length > 1 && (
+            <div className="history-scores">
+              <div className="history-label">歷史紀錄</div>
+              <div className="history-list">
+                {match.sets.slice(0, match.currentSet).map((set, index) => (
+                  <div key={index} className="history-item">
+                    <span className="set-num">
+                      {index < rule.totalSets
+                        ? `${index + 1}${isBasketball ? "節" : "局"}`
+                        : `OT${index - rule.totalSets + 1}`}
+                    </span>
+                    <span className="set-score">
+                      {set.p1Score}-{set.p2Score}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {!isCumulative && (
+                <div className="history-summary">
+                  {formatScore(match.sets.slice(0, -1))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 互動計分區 */}
+        <div className="action-area">
+          {/* 選手 1 控制區 */}
+          <div className="player-card p1-card">
+            <div className="player-info">
+              <div className="player-name">
+                <span className="color-indicator"></span>
+                {match.player1.name}
+              </div>
+              <div className="current-points">{currentSet?.p1Score ?? "-"}</div>
+            </div>
+            {currentSet && (
+              <div className="button-group">
+                <button onClick={() => handleScore(1, 1)} className="btn-add">
+                  +1
                 </button>
                 <button
                   onClick={() => handleScore(1, -1)}
                   disabled={currentSet.p1Score === 0}
-                  className="px-4 md:px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="btn-undo"
                 >
-                  ↶ 撤銷
+                  撤銷
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* 當前局資訊與控制 */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 py-4 px-4">
-          {/* 累計制：顯示本局分數 */}
-          {isCumulative && currentSet && (
-            <div className="text-center mb-3 bg-white rounded-lg p-3 shadow-sm">
-              <div className="text-xs text-gray-500 mb-1">本局分數</div>
-              <div className="flex justify-center items-center gap-4">
-                <div className="text-2xl font-bold text-blue-600">
-                  {currentSet.p1Score}
-                </div>
-                <div className="text-gray-400">-</div>
-                <div className="text-2xl font-bold text-red-600">
-                  {currentSet.p2Score}
-                </div>
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                點擊「+ 得分」立即更新分數
-              </div>
-            </div>
-          )}
-
-          {/* 單局制：顯示目標分數 */}
-          {!isCumulative && (
-            <div className="text-center mb-3">
-              <div className="text-sm md:text-base font-semibold text-gray-700 mb-1">
-                本局目標：{targetScore} 分
-              </div>
-              <div className="text-xs text-gray-500">
-                點擊「+ 得分」立即更新，觀眾即時可見
-              </div>
-            </div>
-          )}
-
-          {/* 結束本局按鈕 */}
-          <button
-            onClick={handleEndCurrentSet}
-            disabled={saving}
-            className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-bold text-base shadow-lg transition-all"
-          >
-            {saving
-              ? "處理中..."
-              : isCumulative
-              ? `結束${currentSetName}，記錄分數`
-              : "結束本局，進入下一局"}
-          </button>
-          <div className="text-xs text-center text-gray-500 mt-2">
-            {isCumulative
-              ? "記錄本局分數後，累計總分會更新"
-              : "確認本局結束後，獲勝局數會更新"}
+            )}
           </div>
-        </div>
 
-        {/* 選手 2 - 紅方 */}
-        <div className="bg-red-50 p-4 border-t-4 border-red-600">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
-            🔴 {match.player2.name}
-          </h2>
-          {currentSet && (
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-2 min-w-[100px]">
-                <button
-                  onClick={() => handleScore(2, 1)}
-                  className="px-4 md:px-6 py-3 md:py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg md:text-2xl font-bold shadow-lg active:scale-95 transition-transform"
-                >
-                  + 得分
+          {/* 中間資訊 */}
+          <div className="set-meta">
+            {!isCumulative && currentSet && (
+              <div className="target-info">
+                目標 <span>{targetScore}</span> 分
+              </div>
+            )}
+            {currentSet ? (
+              <button
+                onClick={handleEndCurrentSet}
+                disabled={saving}
+                className="btn-next-set"
+              >
+                {saving
+                  ? "處理中..."
+                  : isCumulative
+                  ? `完成${isBasketball ? "本節" : "本局"}`
+                  : "結束本局"}
+              </button>
+            ) : (
+              <div className="period-name finished">已完賽</div>
+            )}
+          </div>
+
+          {/* 選手 2 控制區 */}
+          <div className="player-card p2-card">
+            <div className="player-info">
+              <div className="player-name">
+                <span className="color-indicator"></span>
+                {match.player2.name}
+              </div>
+              <div className="current-points">{currentSet?.p2Score ?? "-"}</div>
+            </div>
+            {currentSet && (
+              <div className="button-group">
+                <button onClick={() => handleScore(2, 1)} className="btn-add">
+                  +1
                 </button>
                 <button
                   onClick={() => handleScore(2, -1)}
                   disabled={currentSet.p2Score === 0}
-                  className="px-4 md:px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="btn-undo"
                 >
-                  ↶ 撤銷
+                  撤銷
                 </button>
               </div>
-              <div className="text-5xl md:text-7xl font-bold text-red-600 flex-1 text-center">
-                {currentSet.p2Score}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* 結束比賽按鈕 */}
-        <div className="p-4 bg-white border-t-2 border-gray-200">
+        {/* 底部操作 */}
+        <div className="footer-actions">
           <button
             onClick={handleEndMatch}
             disabled={!matchComplete || saving}
-            className="w-full px-4 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-bold text-lg md:text-xl shadow-lg transition-all"
+            className={`btn-finish-match ${matchComplete ? "ready" : ""}`}
           >
             {saving
               ? "處理中..."
               : matchComplete
               ? "結束比賽並確認勝者"
-              : "尚未達到獲勝條件"}
+              : "比賽進行中..."}
           </button>
           {!matchComplete && (
-            <p className="text-xs text-center text-gray-500 mt-2">
+            <p className="status-hint">
               {isCumulative
-                ? `需要打完 ${rule?.totalSets} 局並分出總分勝負`
-                : `需要先達到 ${rule?.setsToWin} 局勝利才能結束比賽`}
+                ? `需打完 ${rule?.totalSets} ${
+                    isBasketball ? "節" : "局"
+                  } 並分出勝負`
+                : `需贏得 ${rule?.setsToWin} 局勝利才能結束`}
             </p>
           )}
         </div>

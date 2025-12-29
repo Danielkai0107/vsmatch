@@ -4,6 +4,7 @@ export interface Sport {
   name: string;
   icon: string;
   modes: string[];
+  defaultRules?: RuleConfig; // 新增：運動項目的預設規則
 }
 
 // 比賽計分模式

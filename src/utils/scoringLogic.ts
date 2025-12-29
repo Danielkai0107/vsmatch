@@ -111,7 +111,7 @@ export function isMatchComplete(
   }
   
   // 單局制
-  const { p1, p2 } = getSetsWon(sets);
+  const { p1, p2 } = getSetsWon(sets, currentSetIndex);
   const setsToWin = rule.setsToWin;
 
   return p1 >= setsToWin || p2 >= setsToWin;
@@ -159,12 +159,13 @@ export function formatScore(sets: SetScore[]): string {
 }
 
 /**
- * 格式化簡短比分（只顯示局數）
+ * 格式化簡短比分（只顯示已結束局數）
  * @param sets 所有局數比分
+ * @param currentSetIndex 當前局的索引（可選）
  * @returns 格式化的局數，例如: "2-1"
  */
-export function formatSetScore(sets: SetScore[]): string {
-  const { p1, p2 } = getSetsWon(sets);
+export function formatSetScore(sets: SetScore[], currentSetIndex?: number): string {
+  const { p1, p2 } = getSetsWon(sets, currentSetIndex);
   return `${p1}-${p2}`;
 }
 
@@ -227,17 +228,22 @@ export function isInOvertime(
  * 獲取當前局的顯示名稱
  * @param rule 規則設定
  * @param currentSetIndex 當前局的索引
- * @returns 局名稱（如"第1局"或"延長賽第1局"）
+ * @param sportId 運動項目ID（可選）
+ * @returns 局名稱（如"第1局"或"第一節"）
  */
 export function getCurrentSetName(
   rule: RuleConfig,
-  currentSetIndex: number
+  currentSetIndex: number,
+  sportId?: string
 ): string {
+  const isBasketball = sportId === 'basketball';
+  const unit = isBasketball ? '節' : '局';
+
   if (isInOvertime(rule, currentSetIndex)) {
     const overtimeNumber = currentSetIndex - rule.totalSets + 1;
-    return `延長賽第${overtimeNumber}局`;
+    return `延長賽第${overtimeNumber}${unit}`;
   }
-  return `第${currentSetIndex + 1}局`;
+  return `第${currentSetIndex + 1}${unit}`;
 }
 
 /**

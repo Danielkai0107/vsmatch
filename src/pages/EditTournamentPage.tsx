@@ -82,6 +82,30 @@ export function EditTournamentPage() {
   const sports = getAllSports();
   const formats = getAllFormats();
 
+  // 當運動項目改變時，自動套用預設規則
+  const handleSportSelect = (sport: Sport) => {
+    if (isLocked) return;
+    setSelectedSport(sport);
+    if (sport.defaultRules) {
+      const { scoringMode, scoreToWin, setsToWin, totalSets, tiebreaker } =
+        sport.defaultRules;
+
+      if (scoringMode === "sets") {
+        setScoreToWin(scoreToWin);
+        setUseTiebreaker(!!tiebreaker);
+        if (tiebreaker) setTiebreakerScore(tiebreaker.scoreToWin);
+        
+        // 自動對應 SETS_OPTIONS ID
+        if (setsToWin === 1) setSelectedSetsOption("single");
+        else if (setsToWin === 2) setSelectedSetsOption("bo3");
+        else if (setsToWin === 3) setSelectedSetsOption("bo5");
+      } else {
+        // 累計制
+        setSelectedSetsOption(totalSets === 4 ? "fixed4" : "fixed9");
+      }
+    }
+  };
+
   // 自動帶入現有資料
   useEffect(() => {
     if (currentTournament) {
@@ -299,7 +323,7 @@ export function EditTournamentPage() {
                     {sports.map((sport) => (
                       <button
                         key={sport.id}
-                        onClick={() => !isLocked && setSelectedSport(sport)}
+                        onClick={() => handleSportSelect(sport)}
                         disabled={isLocked}
                         className={`create-tournament__select-btn ${
                           selectedSport?.id === sport.id
@@ -335,7 +359,9 @@ export function EditTournamentPage() {
                       a. 局數制度
                     </label>
                     <div className="create-tournament__grid create-tournament__grid--3cols">
-                      {SETS_OPTIONS.map((option) => (
+                      {SETS_OPTIONS.filter((opt) => 
+                        selectedSport?.defaultRules?.scoringMode === opt.scoringMode
+                      ).map((option) => (
                         <button
                           key={option.id}
                           onClick={() =>
@@ -386,7 +412,9 @@ export function EditTournamentPage() {
                           <span className="text-gray-600">分</span>
                         </div>
                         <span className="description">
-                          （建議：羽球21、籃球21、排球25、網球6）
+                          {selectedSport?.id === "badminton" 
+                            ? "（羽球標準為 21 分）" 
+                            : "（建議：羽球 21、排球 25、網球 6）"}
                         </span>
                       </div>
                     </div>

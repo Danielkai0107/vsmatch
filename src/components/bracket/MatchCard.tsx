@@ -40,8 +40,8 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     // 已完成的比賽不可點擊
     if (match.status === "completed") return;
 
-    // 計分員進入計分頁面
-    if (hasScorePermission && match.status === "pending") {
+    // 計分員進入計分頁面 (不論是 pending 還是 live)
+    if (hasScorePermission) {
       navigate(`/score/${tournamentId}/${match.matchId}`);
     }
     // 觀眾進入進行中的比賽觀看頁面
@@ -72,9 +72,12 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
         <span>{roundName}</span>
         {match.sets && match.sets.length > 0 && (
           <div className="match-card__value">
-            {/* 當前局數 */}
+            {/* 當前已結束局數比分 */}
             <span className="match-card__round-name">
-              {formatSetScore(match.sets)}
+              {formatSetScore(
+                match.sets,
+                match.status === "live" ? match.currentSet : undefined
+              )}
             </span>
           </div>
         )}

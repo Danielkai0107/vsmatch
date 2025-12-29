@@ -445,8 +445,8 @@ export function TournamentDetailPage() {
         />
       )}
 
-      {/* 固定在底部的報名按鈕（僅在籌備階段且非舉辦者時顯示） */}
-      {!isOrganizer && currentTournament.status === "draft" && !hasJoined && (
+      {/* 固定在底部的報名按鈕（僅在籌備階段且尚未報名時顯示） */}
+      {currentTournament.status === "draft" && !hasJoined && (
         <button
           onClick={() => {
             // 檢查是否已滿人
@@ -464,7 +464,7 @@ export function TournamentDetailPage() {
       )}
 
       {/* 已報名提示（固定在底部） */}
-      {!isOrganizer && currentTournament.status === "draft" && hasJoined && (
+      {currentTournament.status === "draft" && hasJoined && (
         <div className="tournament-detail__floating-joined-badge">已報名</div>
       )}
 
