@@ -49,13 +49,13 @@
   }
 
   &__username {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     margin: 0;
   }
 
   &__email {
-    font-size: 1rem;
+    font-size: 0.85rem;
     opacity: 0.9;
     margin: 0;
   }
@@ -76,14 +76,14 @@
   }
 
   &__stat-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 400;
     line-height: 1;
     color: $text-secondary;
   }
 
   &__stat-label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     margin-top: 0.5rem;
     opacity: 0.9;
     color: $text-secondary;
@@ -111,7 +111,7 @@
     border: 1px solid $border-color;
     border-radius: 40px;
     color: #6b7280;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 400;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -177,7 +177,7 @@
   &__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 2rem;
 
     @media (min-width: 640px) {
       grid-template-columns: repeat(2, 1fr);
@@ -253,7 +253,7 @@
   transition: all 0.3s ease;
   text-decoration: none;
   overflow: hidden;
-  padding: 1.5rem;
+  padding: 1rem;
 
   &:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -271,13 +271,13 @@
   }
 
   &__icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     flex-shrink: 0;
   }
 
   &__name {
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: #111827;
     margin: 0;
     flex: 1;
@@ -287,9 +287,9 @@
   }
 
   &__status {
-    padding: 0.35rem 0.75rem;
+    padding: 0.3rem 0.6rem;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     transition: all 0.3s ease;
     position: relative;
@@ -335,7 +335,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6b7280;
     font-weight: 500;
     margin-top: 1rem;
@@ -343,10 +343,10 @@
   }
 
   &__nickname {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #059669;
     font-weight: 600;
-    padding: 0.4rem 0.6rem;
+    padding: 0.35rem 0.5rem;
     background: #d1fae5;
     border-radius: 0.5rem;
     display: inline-block;

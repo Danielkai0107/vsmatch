@@ -116,14 +116,49 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
       <div className="tournament-card__body">
         <h3 className="tournament-card__title">{tournament.name}</h3>
 
+        {/* 已結束：顯示冠軍和亞軍 */}
+        {tournament.status === "finished" &&
+          (() => {
+            console.log("已結束的比賽:", {
+              name: tournament.name,
+              champion: (tournament as any).champion,
+              runnerUp: (tournament as any).runnerUp,
+            });
+            return (
+              <div className="tournament-card__live-matches">
+                <div className="tournament-card__matches-list">
+                  <div className="tournament-card__match">
+                    <div className="tournament-card__match-players">
+                      {(tournament as any).champion && (
+                        <div className="tournament-card__match-player">
+                          <span className="tournament-card__player-name">
+                            {(tournament as any).champion}
+                          </span>
+                          <span className="tournament-card__player-score tournament-card__player-score--champion">
+                            冠軍
+                          </span>
+                        </div>
+                      )}
+                      {(tournament as any).runnerUp && (
+                        <div className="tournament-card__match-player">
+                          <span className="tournament-card__player-name">
+                            {(tournament as any).runnerUp}
+                          </span>
+                          <span className="tournament-card__player-score tournament-card__player-score--runner">
+                            亞軍
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
         {/* 進行中的場次 */}
-        {liveMatches.length > 0 && (
+        {tournament.status === "live" && liveMatches.length > 0 && (
           <div className="tournament-card__live-matches">
-            {/* <div className="tournament-card__live-header">
-              <span className="tournament-card__live-count">
-                {liveMatches.length} 場
-              </span>
-            </div> */}
             <div className="tournament-card__matches-list">
               {liveMatches.slice(0, 3).map((match) => {
                 const currentSet = match.sets[match.currentSet];

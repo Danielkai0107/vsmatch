@@ -230,6 +230,19 @@ export async function progressWinner(
     if (!nextMatchId) {
       // 這是決賽，沒有下一場比賽，更新比賽狀態為已結束
       console.log("🏆 比賽結束！冠軍：", winner.name);
+      console.log("決賽資料：", {
+        player1: completedMatch.player1?.name,
+        player2: completedMatch.player2?.name,
+        winner: winner.name,
+      });
+
+      // 找出亞軍（決賽的失敗者）
+      const runnerUp =
+        completedMatch.player1?.name === winner.name
+          ? completedMatch.player2?.name
+          : completedMatch.player1?.name;
+
+      console.log("🥈 亞軍：", runnerUp);
 
       try {
         const tournamentRef = doc(db, "tournaments", tournamentId);
@@ -237,8 +250,12 @@ export async function progressWinner(
           status: "finished",
           finishedAt: new Date().toISOString(),
           champion: winner.name,
+          runnerUp: runnerUp || null,
         });
-        console.log("✅ 比賽狀態已更新為已結束");
+        console.log("✅ 比賽狀態已更新為已結束", {
+          champion: winner.name,
+          runnerUp: runnerUp,
+        });
       } catch (error) {
         console.error("更新比賽狀態失敗:", error);
       }
