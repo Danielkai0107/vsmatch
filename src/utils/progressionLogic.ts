@@ -1,7 +1,7 @@
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import type { Match, PlayerRef, TournamentFormat } from '../types';
-import { buildSourceMapping } from './bracketLogic';
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import type { Match, PlayerRef, TournamentFormat } from "../types";
+import { buildSourceMapping } from "./bracketLogic";
 
 /**
  * 只填入下一輪位置，不進行輪空檢查（用於初始化階段）
@@ -20,9 +20,9 @@ async function fillNextMatchOnly(
     // 獲取完成的比賽資料
     const completedMatchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       completedMatchId
     );
     const completedMatchSnap = await getDoc(completedMatchRef);
@@ -58,23 +58,23 @@ async function fillNextMatchOnly(
     // 更新下一場比賽，加入勝者
     const nextMatchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       nextMatchId
     );
-    
-    const updateData = isP1
-      ? { player1: winner }
-      : { player2: winner };
+
+    const updateData = isP1 ? { player1: winner } : { player2: winner };
 
     await updateDoc(nextMatchRef, updateData);
 
     console.log(
-      `✅ ${winner.name} 填入 ${nextMatchId} 的 ${isP1 ? 'P1' : 'P2'} 位置（初始化階段）`
+      `✅ ${winner.name} 填入 ${nextMatchId} 的 ${
+        isP1 ? "P1" : "P2"
+      } 位置（初始化階段）`
     );
   } catch (error) {
-    console.error('填入下一輪失敗:', error);
+    console.error("填入下一輪失敗:", error);
   }
 }
 
@@ -85,15 +85,15 @@ async function fillNextMatchOnly(
  */
 function isMatchConsideredComplete(match: Match): boolean {
   // 1. 比賽已完成
-  if (match.status === 'completed') {
+  if (match.status === "completed") {
     return true;
   }
-  
+
   // 2. 雙方都沒有選手（空的match，永遠不會有比賽）
   if (!match.player1 && !match.player2) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -113,10 +113,12 @@ async function checkAndProcessRoundCompletion(
     // 找出剛完成比賽所在的輪次
     let currentRound = -1;
     let currentStage = null;
-    
+
     for (let i = 0; i < format.stages.length; i++) {
       const stage = format.stages[i];
-      const matchFound = stage.matches.find(m => m.id === completedMatch.matchId);
+      const matchFound = stage.matches.find(
+        (m) => m.id === completedMatch.matchId
+      );
       if (matchFound) {
         currentRound = i;
         currentStage = stage;
@@ -133,9 +135,15 @@ async function checkAndProcessRoundCompletion(
     let allComplete = true;
 
     for (const formatMatch of allMatchesInRound) {
-      const matchRef = doc(db, 'tournaments', tournamentId, 'matches', formatMatch.id);
+      const matchRef = doc(
+        db,
+        "tournaments",
+        tournamentId,
+        "matches",
+        formatMatch.id
+      );
       const matchSnap = await getDoc(matchRef);
-      
+
       if (matchSnap.exists()) {
         const match = matchSnap.data() as Match;
         if (!isMatchConsideredComplete(match)) {
@@ -159,19 +167,25 @@ async function checkAndProcessRoundCompletion(
       console.log(`🔍 檢查第 ${nextRound + 1} 輪的輪空情況...`);
 
       for (const formatMatch of nextStage.matches) {
-        const matchRef = doc(db, 'tournaments', tournamentId, 'matches', formatMatch.id);
+        const matchRef = doc(
+          db,
+          "tournaments",
+          tournamentId,
+          "matches",
+          formatMatch.id
+        );
         const matchSnap = await getDoc(matchRef);
-        
+
         if (matchSnap.exists()) {
           const match = matchSnap.data() as Match;
-          if (match.status === 'pending') {
+          if (match.status === "pending") {
             await handleByeIfNeeded(tournamentId, match, format, false);
           }
         }
       }
     }
   } catch (error) {
-    console.error('檢查輪次完成失敗:', error);
+    console.error("檢查輪次完成失敗:", error);
   }
 }
 
@@ -192,22 +206,22 @@ export async function progressWinner(
     // 獲取完成的比賽資料
     const completedMatchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       completedMatchId
     );
     const completedMatchSnap = await getDoc(completedMatchRef);
 
     if (!completedMatchSnap.exists()) {
-      throw new Error('比賽不存在');
+      throw new Error("比賽不存在");
     }
 
     const completedMatch = completedMatchSnap.data() as Match;
 
     // 確認比賽已完成
-    if (completedMatch.status !== 'completed') {
-      throw new Error('比賽尚未完成');
+    if (completedMatch.status !== "completed") {
+      throw new Error("比賽尚未完成");
     }
 
     // 獲取下一場比賽ID
@@ -215,20 +229,20 @@ export async function progressWinner(
 
     if (!nextMatchId) {
       // 這是決賽，沒有下一場比賽，更新比賽狀態為已結束
-      console.log('🏆 比賽結束！冠軍：', winner.name);
-      
+      console.log("🏆 比賽結束！冠軍：", winner.name);
+
       try {
-        const tournamentRef = doc(db, 'tournaments', tournamentId);
+        const tournamentRef = doc(db, "tournaments", tournamentId);
         await updateDoc(tournamentRef, {
-          status: 'finished',
+          status: "finished",
           finishedAt: new Date().toISOString(),
           champion: winner.name,
         });
-        console.log('✅ 比賽狀態已更新為已結束');
+        console.log("✅ 比賽狀態已更新為已結束");
       } catch (error) {
-        console.error('更新比賽狀態失敗:', error);
+        console.error("更新比賽狀態失敗:", error);
       }
-      
+
       return;
     }
 
@@ -237,7 +251,7 @@ export async function progressWinner(
     const nextMatchMapping = sourceMapping[nextMatchId];
 
     if (!nextMatchMapping) {
-      throw new Error('無法找到下一場比賽的來源映射');
+      throw new Error("無法找到下一場比賽的來源映射");
     }
 
     // 判斷勝者應該進入下一場比賽的 p1 還是 p2
@@ -245,34 +259,32 @@ export async function progressWinner(
     const isP2 = nextMatchMapping.p2_from === completedMatchId;
 
     if (!isP1 && !isP2) {
-      throw new Error('無法確定勝者在下一場比賽的位置');
+      throw new Error("無法確定勝者在下一場比賽的位置");
     }
 
     // 獲取下一場比賽當前狀態
     const nextMatchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       nextMatchId
     );
     const nextMatchSnap = await getDoc(nextMatchRef);
-    
+
     if (!nextMatchSnap.exists()) {
-      throw new Error('下一場比賽不存在');
+      throw new Error("下一場比賽不存在");
     }
 
     const nextMatch = nextMatchSnap.data() as Match;
 
     // 更新下一場比賽，加入勝者
-    const updateData = isP1
-      ? { player1: winner }
-      : { player2: winner };
+    const updateData = isP1 ? { player1: winner } : { player2: winner };
 
     await updateDoc(nextMatchRef, updateData);
 
     console.log(
-      `✅ ${winner.name} 晉級到 ${nextMatchId} 的 ${isP1 ? 'P1' : 'P2'} 位置`
+      `✅ ${winner.name} 晉級到 ${nextMatchId} 的 ${isP1 ? "P1" : "P2"} 位置`
     );
 
     // 檢查下一場比賽雙方選手是否都已就位
@@ -284,13 +296,13 @@ export async function progressWinner(
     if (updatedNextMatch.player1 && updatedNextMatch.player2) {
       console.log(`⚔️ ${nextMatchId} 雙方選手就位，等待比賽開始`);
     } else {
-      console.log(`⏳ ${nextMatchId} 等待另一位選手晉級...`);
+      console.log(`⏳ ${nextMatchId} 等待另一組選手晉級...`);
     }
 
     // 檢查當前輪次是否所有比賽都完成了
     await checkAndProcessRoundCompletion(tournamentId, completedMatch, format);
   } catch (error) {
-    console.error('晉級處理失敗:', error);
+    console.error("晉級處理失敗:", error);
     throw error;
   }
 }
@@ -309,49 +321,59 @@ export async function handleByeIfNeeded(
   format: TournamentFormat,
   isInitializing: boolean = false
 ): Promise<void> {
-  // 如果一位選手存在，另一位不存在，則自動晉級
+  // 如果一組選手存在，另一位不存在，則自動晉級
   if (match.player1 && !match.player2) {
     console.log(`${match.player1.name} 輪空，自動晉級`);
-    
+
     // 更新原比賽狀態為已完成
     const matchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       match.matchId
     );
     await updateDoc(matchRef, {
-      status: 'completed',
+      status: "completed",
       winner: match.player1.name,
     });
-    
+
     // 如果是初始化階段，只填入下一輪位置，不遞歸處理輪空
     if (isInitializing) {
-      await fillNextMatchOnly(tournamentId, match.matchId, match.player1, format);
+      await fillNextMatchOnly(
+        tournamentId,
+        match.matchId,
+        match.player1,
+        format
+      );
     } else {
       // 正常比賽中，使用完整的晉級邏輯（包含遞歸處理輪空）
       await progressWinner(tournamentId, match.matchId, match.player1, format);
     }
   } else if (match.player2 && !match.player1) {
     console.log(`${match.player2.name} 輪空，自動晉級`);
-    
+
     // 更新原比賽狀態為已完成
     const matchRef = doc(
       db,
-      'tournaments',
+      "tournaments",
       tournamentId,
-      'matches',
+      "matches",
       match.matchId
     );
     await updateDoc(matchRef, {
-      status: 'completed',
+      status: "completed",
       winner: match.player2.name,
     });
-    
+
     // 如果是初始化階段，只填入下一輪位置，不遞歸處理輪空
     if (isInitializing) {
-      await fillNextMatchOnly(tournamentId, match.matchId, match.player2, format);
+      await fillNextMatchOnly(
+        tournamentId,
+        match.matchId,
+        match.player2,
+        format
+      );
     } else {
       // 正常比賽中，使用完整的晉級邏輯（包含遞歸處理輪空）
       await progressWinner(tournamentId, match.matchId, match.player2, format);
@@ -372,14 +394,13 @@ export async function processAllByes(
 ): Promise<void> {
   // 只處理第一輪的輪空（有 p1_source 和 p2_source 的比賽）
   const firstRoundMatches = format.stages[0]?.matches || [];
-  
+
   for (const formatMatch of firstRoundMatches) {
     const match = matches[formatMatch.id];
-    if (match && match.status === 'pending') {
+    if (match && match.status === "pending") {
       await handleByeIfNeeded(tournamentId, match, format, true);
     }
   }
-  
-  console.log('✅ 第一輪輪空處理完成');
-}
 
+  console.log("✅ 第一輪輪空處理完成");
+}

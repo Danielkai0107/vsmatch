@@ -52,64 +52,71 @@ export function ManageTournamentPage() {
   const handleStartTournament = async () => {
     if (!id) return;
 
-    showConfirm("確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。", async () => {
-      setLoading(true);
+    showConfirm(
+      "確定要開始比賽嗎？開始後將不再接受報名且無法修改規則。",
+      async () => {
+        setLoading(true);
 
-      try {
-        const format = getFormatById(currentTournament.config.formatId);
-        if (!format) {
-          showPopup("找不到比賽格式", "error");
-          setLoading(false);
-          return;
-        }
-
-        // 生成對戰表
-        const initialMatches = mapPlayersToMatches(
-          format,
-          currentTournament.players
-        );
-
-        // 將每場比賽保存到 Firestore 的 matches 子集合
-        const savePromises = Object.entries(initialMatches).map(
-          ([matchId, match]) => {
-            const matchRef = doc(db, "tournaments", id, "matches", matchId);
-            return setDoc(matchRef, {
-              ...match,
-              matchId,
-              tournamentId: id,
-            });
-          }
-        );
-
-        await Promise.all(savePromises);
-
-        // 更新比賽狀態為 live
-        await updateDoc(doc(db, "tournaments", id), {
-          status: "live",
-        });
-
-        // 處理所有輪空比賽（BYE）
         try {
-          await processAllByes(id, initialMatches as Record<string, Match>, format);
-          console.log("輪空處理完成");
-        } catch (error) {
-          console.error("處理輪空時發生錯誤:", error);
-        }
+          const format = getFormatById(currentTournament.config.formatId);
+          if (!format) {
+            showPopup("找不到比賽格式", "error");
+            setLoading(false);
+            return;
+          }
 
-        showPopup("比賽已開始！", "success");
-        navigate("/profile");
-      } catch (error) {
-        console.error("Error starting tournament:", error);
-        showPopup("開始比賽失敗，請重試", "error");
-      } finally {
-        setLoading(false);
+          // 生成對戰表
+          const initialMatches = mapPlayersToMatches(
+            format,
+            currentTournament.players
+          );
+
+          // 將每場比賽保存到 Firestore 的 matches 子集合
+          const savePromises = Object.entries(initialMatches).map(
+            ([matchId, match]) => {
+              const matchRef = doc(db, "tournaments", id, "matches", matchId);
+              return setDoc(matchRef, {
+                ...match,
+                matchId,
+                tournamentId: id,
+              });
+            }
+          );
+
+          await Promise.all(savePromises);
+
+          // 更新比賽狀態為 live
+          await updateDoc(doc(db, "tournaments", id), {
+            status: "live",
+          });
+
+          // 處理所有輪空比賽（BYE）
+          try {
+            await processAllByes(
+              id,
+              initialMatches as Record<string, Match>,
+              format
+            );
+            console.log("輪空處理完成");
+          } catch (error) {
+            console.error("處理輪空時發生錯誤:", error);
+          }
+
+          showPopup("比賽已開始！", "success");
+          navigate("/profile");
+        } catch (error) {
+          console.error("Error starting tournament:", error);
+          showPopup("開始比賽失敗，請重試", "error");
+        } finally {
+          setLoading(false);
+        }
       }
-    });
+    );
   };
 
   const handleRegenerateScorerPin = async () => {
     if (!id) return;
-    
+
     showConfirm(
       "確定要重新生成計分 PIN 碼嗎？已授權的計分員需要重新輸入新的 PIN。",
       async () => {
@@ -134,7 +141,7 @@ export function ManageTournamentPage() {
 
   const handleDelete = async () => {
     if (!id) return;
-    
+
     showConfirm("確定要刪除此比賽嗎？此操作無法復原！", async () => {
       setLoading(true);
       try {
@@ -295,7 +302,7 @@ export function ManageTournamentPage() {
             </button>
             {currentTournament.players.length < 2 && (
               <p className="text-sm text-red-600 mt-2 text-center">
-                至少需要 2 位選手才能開始比賽
+                至少需要 2 組選手才能開始比賽
               </p>
             )}
           </div>

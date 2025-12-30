@@ -22,7 +22,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { usePopup } from "../contexts/PopupContext";
 import type { Match } from "../types";
 import { getSetsFormatLabel } from "../types";
-import { ArrowLeft, Trash2, ClipboardList } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import Loading from "../components/ui/Loading";
 import "./TournamentDetailPage.scss";
@@ -381,7 +381,6 @@ export function TournamentDetailPage() {
                   className="tournament-detail__join-btn tournament-detail__scorer-btn"
                   title="查看計分碼"
                 >
-                  <ClipboardList size={18} />
                   計分
                 </button>
                 <button
@@ -390,14 +389,7 @@ export function TournamentDetailPage() {
                   className="tournament-detail__join-btn tournament-detail__delete-btn"
                   title="刪除比賽"
                 >
-                  {isDeleting ? (
-                    "刪除中..."
-                  ) : (
-                    <>
-                      <Trash2 size={18} />
-                      刪除
-                    </>
-                  )}
+                  {isDeleting ? "刪除中..." : <>刪除</>}
                 </button>
               </>
             )}
@@ -428,6 +420,7 @@ export function TournamentDetailPage() {
         <PinModal
           pin={currentTournament.pin}
           scorerPin={currentTournament.scorerPin}
+          tournamentId={currentTournament.id}
           onClose={() => setShowPinModal(false)}
           initialSlide={1}
         />

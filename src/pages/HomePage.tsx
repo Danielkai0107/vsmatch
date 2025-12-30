@@ -37,12 +37,18 @@ export function HomePage() {
 
   const allSports = getAllSports();
 
-  // 根據運動項目篩選比賽
+  // 根據運動項目篩選比賽，並且只顯示進行中的比賽
   const filteredTournaments = useMemo(() => {
+    // 先過濾出進行中的比賽
+    const liveTournaments = tournaments.filter(
+      (tournament) => tournament.status === "live"
+    );
+
+    // 再根據運動項目篩選
     if (selectedSportFilter === "all") {
-      return tournaments;
+      return liveTournaments;
     }
-    return tournaments.filter(
+    return liveTournaments.filter(
       (tournament) => tournament.config.sportId === selectedSportFilter
     );
   }, [tournaments, selectedSportFilter]);
@@ -134,6 +140,9 @@ export function HomePage() {
     <div className="home-page">
       {/* 主要操作區塊 */}
       <div className="home-page__hero">
+        <div className="home-page__logo">
+          <h1 className="home-page__logo-text">VsMatch</h1>
+        </div>
         <div className="home-page__actions">
           {/* 創建賽事按鈕 */}
           <button
@@ -159,7 +168,7 @@ export function HomePage() {
             </div>
             <div className="action-card__content">
               <h2 className="action-card__title action-card__title--join">
-                報名
+                我要報名
               </h2>
               <p className="action-card__desc action-card__desc--join">
                 輸入 PIN 碼查看比賽
@@ -177,7 +186,7 @@ export function HomePage() {
             </div>
             <div className="action-card__content">
               <h2 className="action-card__title action-card__title--scorer">
-                計分
+                我要計分
               </h2>
               <p className="action-card__desc action-card__desc--scorer">
                 志工計分員登入
@@ -281,8 +290,8 @@ export function HomePage() {
       {/* 比賽列表 */}
       <div className="home-page__section">
         <div className="home-page__section-header">
-          <h2 className="home-page__section-title">所有比賽</h2>
-          
+          <h2 className="home-page__section-title">進行中的比賽</h2>
+
           {/* 運動項目篩選下拉選單 */}
           <select
             value={selectedSportFilter}

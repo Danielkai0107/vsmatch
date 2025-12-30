@@ -1,8 +1,4 @@
-import type {
-  TournamentFormat,
-  Player,
-  Match,
-} from '../types';
+import type { TournamentFormat, Player, Match } from "../types";
 
 /**
  * 將選手映射到對戰表的比賽位置
@@ -26,7 +22,7 @@ export function mapPlayersToMatches(
         sets: [],
         currentSet: 0,
         winner: null,
-        status: 'pending',
+        status: "pending",
         nextMatchId: formatMatch.next,
       };
 
@@ -47,12 +43,12 @@ export function mapPlayersToMatches(
 
         // 如果雙方選手都存在，狀態改為 pending
         if (p1 && p2) {
-          match.status = 'pending';
+          match.status = "pending";
         }
       }
       // 後續輪次：選手來自前一輪的勝者
       else {
-        match.status = 'pending';
+        match.status = "pending";
       }
 
       matches[formatMatch.id] = match;
@@ -123,11 +119,11 @@ export function getMatchRoundName(
       return stage.name;
     }
   }
-  return '';
+  return "";
 }
 
 /**
- * 檢查比賽是否可以開始（兩位選手都已確定）
+ * 檢查比賽是否可以開始（兩組選手都已確定）
  * @param match 比賽對象
  * @returns 是否可以開始
  */
@@ -147,4 +143,3 @@ export function getAvailableSlots(
 ): number {
   return format.totalSlots - players.length;
 }
-

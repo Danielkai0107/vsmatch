@@ -1,11 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
-import { PinModal } from "../components/ui/PinModal";
-import { ArrowLeft } from "lucide-react";
 import Loading from "../components/ui/Loading";
 import "./ProfilePage.scss";
 
@@ -15,36 +13,65 @@ export function ProfilePage() {
   useTournaments();
   const { tournaments, loading } = useTournamentStore();
 
-  // PIN 彈窗狀態
-  const [selectedTournamentPins, setSelectedTournamentPins] = useState<{
-    pin: string;
-    scorerPin: string;
-    tournamentId: string;
-  } | null>(null);
+  // Tabs 狀態
+  const [activeTab, setActiveTab] = useState<"organized" | "joined">(
+    "organized"
+  );
 
-  if (!user) {
-    return (
-      <div className="profile-page">
-        <div className="profile-page__empty">
-          <p>請先登入查看個人資料</p>
-          <button
-            onClick={() => navigate("/")}
-            className="profile-page__back-btn"
-          >
-            <ArrowLeft />
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // 如果未登入，自動導航到首頁
+  useEffect(() => {
+    if (!user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
+
+  // 滑動狀態
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // 最小滑動距離（px）
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && activeTab === "organized") {
+      setActiveTab("joined");
+    }
+    if (isRightSwipe && activeTab === "joined") {
+      setActiveTab("organized");
+    }
+  };
 
   // 我舉辦的比賽
-  const myTournaments = tournaments.filter((t) => t.organizerId === user.uid);
+  const myTournaments = user
+    ? tournaments.filter((t) => t.organizerId === user.uid)
+    : [];
 
   // 我參加的比賽（檢查 players 列表中的 userId）
-  const joinedTournaments = tournaments.filter((t) =>
-    t.players.some((p) => p.userId === user.uid || p.id === user.uid)
-  );
+  const joinedTournaments = user
+    ? tournaments.filter((t) =>
+        t.players.some((p) => p.userId === user.uid || p.id === user.uid)
+      )
+    : [];
+
+  // 如果沒有登入，不顯示任何內容（navbar 會隱藏 profile 按鈕）
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="profile-page">
@@ -79,134 +106,146 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* 我舉辦的比賽 */}
-      <section className="profile-page__section">
-        <h2 className="profile-page__section-title">我舉辦的比賽</h2>
-        {loading ? (
-          <Loading text="載入中..." />
-        ) : myTournaments.length === 0 ? (
-          <div className="profile-page__empty-section">
-            <p>還沒有舉辦過比賽</p>
-            <Link to="/create" className="profile-page__create-btn">
-              建立第一場比賽
-            </Link>
-          </div>
-        ) : (
-          <div className="profile-page__grid">
-            {myTournaments.map((tournament) => {
-              const sport = getSportById(tournament.config.sportId);
-              return (
-                <div key={tournament.id} className="tournament-item">
-                  <div className="tournament-item__header">
-                    <span className="tournament-item__icon">{sport?.icon}</span>
-                    <span
-                      className={`tournament-item__status tournament-item__status--${tournament.status}`}
-                    >
-                      {tournament.status === "draft"
-                        ? "籌備中"
-                        : tournament.status === "live"
-                        ? "進行中"
-                        : "已結束"}
-                    </span>
-                  </div>
-                  <h3 className="tournament-item__name">{tournament.name}</h3>
-                  <p className="tournament-item__info">
-                    {sport?.name} • {tournament.players.length} 人報名
-                  </p>
-                  <div className="tournament-item__actions">
-                    <button
-                      onClick={() =>
-                        setSelectedTournamentPins({
-                          pin: tournament.pin,
-                          scorerPin: tournament.scorerPin,
-                          tournamentId: tournament.id,
-                        })
-                      }
-                      className="tournament-item__btn tournament-item__btn--pin"
-                    >
-                      查看 PIN
-                    </button>
+      {/* Tabs 切換 */}
+      <div className="profile-page__tabs">
+        <button
+          className={`profile-page__tab ${
+            activeTab === "organized" ? "profile-page__tab--active" : ""
+          }`}
+          onClick={() => setActiveTab("organized")}
+        >
+          我的舉辦
+          {/* <span className="profile-page__tab-count">
+            {myTournaments.length}
+          </span> */}
+        </button>
+        <button
+          className={`profile-page__tab ${
+            activeTab === "joined" ? "profile-page__tab--active" : ""
+          }`}
+          onClick={() => setActiveTab("joined")}
+        >
+          參賽紀錄
+          {/* <span className="profile-page__tab-count">
+            {joinedTournaments.length}
+          </span> */}
+        </button>
+      </div>
+
+      {/* 內容區域 - 支持滑動切換 */}
+      <div
+        className="profile-page__content"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* 我舉辦的比賽 */}
+        {activeTab === "organized" && (
+          <section className="profile-page__section">
+            {loading ? (
+              <Loading text="載入中..." />
+            ) : myTournaments.length === 0 ? (
+              <div className="profile-page__empty-section">
+                <p>還沒有舉辦過比賽</p>
+                <Link to="/create" className="profile-page__create-btn">
+                  建立第一場比賽
+                </Link>
+              </div>
+            ) : (
+              <div className="profile-page__grid">
+                {myTournaments.map((tournament) => {
+                  const sport = getSportById(tournament.config.sportId);
+                  return (
                     <Link
+                      key={tournament.id}
                       to={`/tournament/${tournament.id}`}
-                      className="tournament-item__btn tournament-item__btn--view"
+                      className="tournament-item"
                     >
-                      查看比賽
+                      <div className="tournament-item__header">
+                        <div className="tournament-item__title-row">
+                          <h3 className="tournament-item__name">
+                            {tournament.name}
+                          </h3>
+                          <span
+                            className={`tournament-item__status tournament-item__status--${tournament.status}`}
+                          >
+                            {tournament.status === "draft"
+                              ? "籌備中"
+                              : tournament.status === "live"
+                              ? "進行中"
+                              : "已結束"}
+                          </span>
+                        </div>
+                        <p className="tournament-item__info">
+                          {sport?.name} • {tournament.players.length} 人報名
+                        </p>
+                      </div>
                     </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         )}
-      </section>
 
-      {/* 我參加的比賽 */}
-      <section className="profile-page__section">
-        <h2 className="profile-page__section-title">我參加的比賽</h2>
-        {loading ? (
-          <Loading text="載入中..." />
-        ) : joinedTournaments.length === 0 ? (
-          <div className="profile-page__empty-section">
-            <p>還沒有參加過比賽</p>
-            <Link to="/" className="profile-page__link">
-              前往首頁報名
-            </Link>
-          </div>
-        ) : (
-          <div className="profile-page__grid">
-            {joinedTournaments.map((tournament) => {
-              const sport = getSportById(tournament.config.sportId);
-              // 找到該使用者在此比賽中使用的暱稱
-              const myPlayerData = tournament.players.find(
-                (p) => p.userId === user.uid || p.id === user.uid
-              );
-              const myNickname = myPlayerData?.name || "未知";
+        {/* 我參加的比賽 */}
+        {activeTab === "joined" && (
+          <section className="profile-page__section">
+            {loading ? (
+              <Loading text="載入中..." />
+            ) : joinedTournaments.length === 0 ? (
+              <div className="profile-page__empty-section">
+                <p>還沒有參加過比賽</p>
+                <Link to="/" className="profile-page__link">
+                  前往首頁報名
+                </Link>
+              </div>
+            ) : (
+              <div className="profile-page__grid">
+                {joinedTournaments.map((tournament) => {
+                  const sport = getSportById(tournament.config.sportId);
+                  // 找到該使用者在此比賽中使用的暱稱
+                  const myPlayerData = tournament.players.find(
+                    (p) => p.userId === user.uid || p.id === user.uid
+                  );
+                  const myNickname = myPlayerData?.name || "未知";
 
-              return (
-                <div key={tournament.id} className="tournament-item">
-                  <div className="tournament-item__header">
-                    <span className="tournament-item__icon">{sport?.icon}</span>
-                    <span
-                      className={`tournament-item__status tournament-item__status--${tournament.status}`}
-                    >
-                      {tournament.status === "draft"
-                        ? "籌備中"
-                        : tournament.status === "live"
-                        ? "進行中"
-                        : "已結束"}
-                    </span>
-                  </div>
-                  <h3 className="tournament-item__name">{tournament.name}</h3>
-                  <p className="tournament-item__info">
-                    {sport?.name} • {tournament.players.length} 人報名
-                  </p>
-                  <p className="tournament-item__nickname">
-                    參賽名稱：{myNickname}
-                  </p>
-                  <div className="tournament-item__actions">
+                  return (
                     <Link
+                      key={tournament.id}
                       to={`/tournament/${tournament.id}`}
-                      className="tournament-item__btn tournament-item__btn--view"
+                      className="tournament-item"
                     >
-                      查看比賽
+                      <div className="tournament-item__header">
+                        <div className="tournament-item__title-row">
+                          <h3 className="tournament-item__name">
+                            {tournament.name}
+                          </h3>
+                          <span
+                            className={`tournament-item__status tournament-item__status--${tournament.status}`}
+                          >
+                            {tournament.status === "draft"
+                              ? "籌備中"
+                              : tournament.status === "live"
+                              ? "進行中"
+                              : "已結束"}
+                          </span>
+                        </div>
+                        <p className="tournament-item__info">
+                          {sport?.name} • {tournament.players.length} 人報名
+                        </p>
+                        <p className="tournament-item__nickname">
+                          參賽名稱：{myNickname}
+                        </p>
+                      </div>
                     </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         )}
-      </section>
-
-      {/* PIN 碼彈窗 */}
-      {selectedTournamentPins && (
-        <PinModal
-          pin={selectedTournamentPins.pin}
-          scorerPin={selectedTournamentPins.scorerPin}
-          tournamentId={selectedTournamentPins.tournamentId}
-          onClose={() => setSelectedTournamentPins(null)}
-        />
-      )}
+      </div>
     </div>
   );
 }

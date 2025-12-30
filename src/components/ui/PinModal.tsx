@@ -130,7 +130,6 @@ export function PinModal({
                     <button
                       onClick={() => {
                         navigate(`/tournament/${tournamentId}`);
-                        onClose();
                       }}
                       className="pin-modal__btn pin-modal__btn--outline"
                     >

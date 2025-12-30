@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { doc, updateDoc, arrayRemove } from "firebase/firestore";
+import { db } from "../../lib/firebase";
 import type { Match } from "../../types";
-import {
-  getCumulativeScore,
-  getSetsWon,
-} from "../../utils/scoringLogic";
+import { getCumulativeScore, getSetsWon } from "../../utils/scoringLogic";
 import { usePermissionStore } from "../../stores/permissionStore";
 import { useTournamentStore } from "../../stores/tournamentStore";
+import { usePopup } from "../../contexts/PopupContext";
+import { useAuth } from "../../contexts/AuthContext";
 import "./MatchCard.scss";
 
 interface MatchCardProps {
@@ -16,6 +17,8 @@ interface MatchCardProps {
 
 export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
   const navigate = useNavigate();
+  const { showPopup } = usePopup();
+  const { user } = useAuth();
   const hasScorePermission = usePermissionStore((state) =>
     state.hasScorePermission(tournamentId)
   );
@@ -26,6 +29,7 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
   const rule = currentTournament?.config.rules;
   const isCumulative = rule?.scoringMode === "cumulative";
   const sportId = currentTournament?.config.sportId;
+  const isOrganizer = user?.uid === currentTournament?.organizerId;
 
   const getStatusClass = () => {
     // 輪空比賽使用 pending 樣式
@@ -54,6 +58,49 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       navigate(`/score/${tournamentId}/${match.matchId}`);
     } else if (match.status === "live") {
       navigate(`/match/${tournamentId}/${match.matchId}`);
+    }
+  };
+
+  const handleRemovePlayer = async (
+    playerIndex: 1 | 2,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation(); // 防止觸發卡片點擊事件
+
+    const playerRef = playerIndex === 1 ? match.player1 : match.player2;
+    const playerName = playerRef?.name;
+    if (!playerName || !currentTournament) return;
+
+    // 只允許在賽事還沒開始時移除選手
+    if (
+      currentTournament.status !== "draft" &&
+      currentTournament.status !== "locked"
+    ) {
+      showPopup("比賽已開始，無法移除選手", "error");
+      return;
+    }
+
+    const confirmed = window.confirm(`確定要移除選手「${playerName}」嗎？`);
+    if (!confirmed) return;
+
+    try {
+      // 從賽事的 players 陣列中移除該選手
+      const playerToRemove = currentTournament.players.find(
+        (p) => p.name === playerName
+      );
+
+      if (playerToRemove) {
+        const tournamentRef = doc(db, "tournaments", tournamentId);
+        await updateDoc(tournamentRef, {
+          players: arrayRemove(playerToRemove),
+        });
+        showPopup("選手已移除", "success");
+      } else {
+        showPopup("找不到該選手", "error");
+      }
+    } catch (error) {
+      console.error("移除選手失敗:", error);
+      showPopup("移除選手失敗", "error");
     }
   };
 
@@ -90,7 +137,8 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     return match.sets.map((set, index) => {
       const score = playerIndex === 1 ? set.p1Score : set.p2Score;
       const opponentScore = playerIndex === 1 ? set.p2Score : set.p1Score;
-      const isCurrentSet = index === match.currentSet && match.status === "live";
+      const isCurrentSet =
+        index === match.currentSet && match.status === "live";
       const isWonSet = score > opponentScore;
       const isCompletedSet =
         match.status === "completed" ||
@@ -242,23 +290,42 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
           >
             {match.player1?.name || "待定"}
           </div>
-          <div className="match-card__player-sets">
-            {match.sets && match.sets.length > 0 ? (
-              <>
-                {renderSetScores(1)}
-                {match.status !== "completed" && renderEmptySlots()}
-              </>
-            ) : (
-              // 未開始時也顯示空白格子
-              rule && Array.from({ length: rule.totalSets }).map((_, index) => (
-                <span key={`empty-${index}`} className="match-card__set-score--empty">
-                  -
-                </span>
-              ))
-            )}
-          </div>
-          <div className="match-card__player-total">
-            {renderFinalScore(1)}
+          <div className="match-card__player-scores-wrapper">
+            <div className="match-card__player-sets">
+              {match.sets && match.sets.length > 0 ? (
+                <>
+                  {renderSetScores(1)}
+                  {match.status !== "completed" && renderEmptySlots()}
+                </>
+              ) : (
+                // 未開始時也顯示空白格子
+                rule &&
+                Array.from({ length: rule.totalSets }).map((_, index) => (
+                  <span
+                    key={`empty-${index}`}
+                    className="match-card__set-score--empty"
+                  >
+                    -
+                  </span>
+                ))
+              )}
+            </div>
+            <div className="match-card__player-total">
+              {isOrganizer &&
+              match.player1?.name &&
+              (currentTournament?.status === "draft" ||
+                currentTournament?.status === "locked") ? (
+                <button
+                  className="match-card__remove-btn"
+                  onClick={(e) => handleRemovePlayer(1, e)}
+                  title="移除選手"
+                >
+                  ×
+                </button>
+              ) : (
+                renderFinalScore(1)
+              )}
+            </div>
           </div>
         </div>
 
@@ -275,23 +342,42 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
           >
             {match.player2?.name || "待定"}
           </div>
-          <div className="match-card__player-sets">
-            {match.sets && match.sets.length > 0 ? (
-              <>
-                {renderSetScores(2)}
-                {match.status !== "completed" && renderEmptySlots()}
-              </>
-            ) : (
-              // 未開始時也顯示空白格子
-              rule && Array.from({ length: rule.totalSets }).map((_, index) => (
-                <span key={`empty-${index}`} className="match-card__set-score--empty">
-                  -
-                </span>
-              ))
-            )}
-          </div>
-          <div className="match-card__player-total">
-            {renderFinalScore(2)}
+          <div className="match-card__player-scores-wrapper">
+            <div className="match-card__player-sets">
+              {match.sets && match.sets.length > 0 ? (
+                <>
+                  {renderSetScores(2)}
+                  {match.status !== "completed" && renderEmptySlots()}
+                </>
+              ) : (
+                // 未開始時也顯示空白格子
+                rule &&
+                Array.from({ length: rule.totalSets }).map((_, index) => (
+                  <span
+                    key={`empty-${index}`}
+                    className="match-card__set-score--empty"
+                  >
+                    -
+                  </span>
+                ))
+              )}
+            </div>
+            <div className="match-card__player-total">
+              {isOrganizer &&
+              match.player2?.name &&
+              (currentTournament?.status === "draft" ||
+                currentTournament?.status === "locked") ? (
+                <button
+                  className="match-card__remove-btn"
+                  onClick={(e) => handleRemovePlayer(2, e)}
+                  title="移除選手"
+                >
+                  ×
+                </button>
+              ) : (
+                renderFinalScore(2)
+              )}
+            </div>
           </div>
         </div>
       </div>

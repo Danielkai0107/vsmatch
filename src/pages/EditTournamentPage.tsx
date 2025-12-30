@@ -25,7 +25,8 @@ export function EditTournamentPage() {
   const { showPopup } = usePopup();
 
   useTournamentById(id);
-  const { currentTournament, loading: tournamentLoading } = useTournamentStore();
+  const { currentTournament, loading: tournamentLoading } =
+    useTournamentStore();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -51,11 +52,22 @@ export function EditTournamentPage() {
         showPopup("找不到此比賽", "error");
       }, 100);
     }
-  }, [hasAttemptedLoad, tournamentLoading, currentTournament, id, navigate, showPopup]);
+  }, [
+    hasAttemptedLoad,
+    tournamentLoading,
+    currentTournament,
+    id,
+    navigate,
+    showPopup,
+  ]);
 
   // 自動返回對戰表：如果不是舉辦者
   useEffect(() => {
-    if (currentTournament && user && user.uid !== currentTournament.organizerId) {
+    if (
+      currentTournament &&
+      user &&
+      user.uid !== currentTournament.organizerId
+    ) {
       console.log("沒有編輯權限，返回對戰表");
       // 先導航到對戰表
       navigate(`/tournament/${id}`, { replace: true });
@@ -94,7 +106,7 @@ export function EditTournamentPage() {
         setScoreToWin(scoreToWin);
         setUseTiebreaker(!!tiebreaker);
         if (tiebreaker) setTiebreakerScore(tiebreaker.scoreToWin);
-        
+
         // 自動對應 SETS_OPTIONS ID
         if (setsToWin === 1) setSelectedSetsOption("single");
         else if (setsToWin === 2) setSelectedSetsOption("bo3");
@@ -359,8 +371,10 @@ export function EditTournamentPage() {
                       a. 局數制度
                     </label>
                     <div className="create-tournament__grid create-tournament__grid--3cols">
-                      {SETS_OPTIONS.filter((opt) => 
-                        selectedSport?.defaultRules?.scoringMode === opt.scoringMode
+                      {SETS_OPTIONS.filter(
+                        (opt) =>
+                          selectedSport?.defaultRules?.scoringMode ===
+                          opt.scoringMode
                       ).map((option) => (
                         <button
                           key={option.id}
@@ -412,8 +426,8 @@ export function EditTournamentPage() {
                           <span className="text-gray-600">分</span>
                         </div>
                         <span className="description">
-                          {selectedSport?.id === "badminton" 
-                            ? "（羽球標準為 21 分）" 
+                          {selectedSport?.id === "badminton"
+                            ? "（羽球標準為 21 分）"
                             : "（建議：羽球 21、排球 25、網球 6）"}
                         </span>
                       </div>
@@ -520,7 +534,7 @@ export function EditTournamentPage() {
                       <p>
                         <strong>預覽：</strong> {selectedFormat.name} 共有{" "}
                         {selectedFormat.stages.length} 輪，需要{" "}
-                        {selectedFormat.totalSlots} 位選手。
+                        {selectedFormat.totalSlots} 組選手。
                       </p>
                     </div>
                   )}

@@ -1,25 +1,35 @@
 .profile-page {
-  max-width: 75rem;
-
-  padding: 2rem 1rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding-top: 46px;
+  @media (max-width: $breakpoint-mobile) {
+    padding-top: 0;
+  }
 
   &__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-bottom: 3rem;
-    color: white;
+    width: 100%;
+    color: $primary-color;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     flex-wrap: wrap;
     gap: 2rem;
+    padding: 1rem;
   }
 
   &__user-info {
+    width: 100%;
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 1.5rem;
+    padding-top: 1rem;
   }
 
   &__avatar {
@@ -55,22 +65,96 @@
 
   &__stat {
     text-align: center;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 1rem 2rem;
     border-radius: 0.5rem;
     min-width: 100px;
   }
 
   &__stat-value {
     font-size: 2.5rem;
-    font-weight: 900;
+    font-weight: 400;
     line-height: 1;
+    color: $text-secondary;
   }
 
   &__stat-label {
     font-size: 0.875rem;
     margin-top: 0.5rem;
     opacity: 0.9;
+    color: $text-secondary;
+  }
+
+  &__tabs {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__tab {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border: 1px solid $border-color;
+    border-radius: 40px;
+    color: #6b7280;
+    font-size: 1rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &--active {
+      background: $blue-gradient;
+      border: none;
+      color: #fff;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 62, 182, 0.3),
+        0 3px 8px rgba(0, 62, 182, 0.2);
+    }
+  }
+
+  &__tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    background: #e5e7eb;
+    color: #6b7280;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+
+  &__tab--active &__tab-count {
+    background: linear-gradient(135deg, #5b7ff6 0%, #4961dc 100%);
+    color: white;
+  }
+
+  &__content {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    padding: 0.5rem 1rem 10rem 1rem; // 底部增加 3rem 空間
+    touch-action: pan-y;
+    user-select: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__section {
@@ -139,143 +223,157 @@
   }
 
   &__empty {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    padding: 4rem 1rem;
+    margin-top: 400px;
+    gap: 2rem;
 
     p {
       font-size: 1.125rem;
       color: #6b7280;
-      margin: 0 0 1rem 0;
     }
   }
 }
 
 .tournament-item {
-  background: white;
-  border-radius: 0.9rem;
+  display: block;
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  overflow: hidden;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
 
   &:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transform: translateY(-2px);
   }
 
-  &__header {
+  &__title-row {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
   }
 
   &__icon {
-    font-size: 2rem;
-  }
-
-  &__status {
-    padding: 0.25rem 0.9rem;
-    border-radius: 9999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-
-    &--draft {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    &--live {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    &--finished {
-      background: #dbeafe;
-      color: #1e40af;
-    }
+    font-size: 1.5rem;
+    flex-shrink: 0;
   }
 
   &__name {
-    font-size: 1.25rem;
     font-weight: 700;
+    font-size: 1.25rem;
     color: #111827;
-    margin: 0 0 0.5rem 0;
+    margin: 0;
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  &__status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    // 背景動畫效果
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      animation: shimmer-status 2s infinite;
+    }
+
+    &--draft {
+      background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
+      color: #374151;
+    }
+
+    &--live {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      color: white;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    &--finished {
+      background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+      color: #1e40af;
+    }
+  }
+
   &__info {
     font-size: 0.875rem;
     color: #6b7280;
-    margin: 0 0 0.5rem 0;
+    font-weight: 500;
   }
 
   &__nickname {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
     color: #059669;
     font-weight: 600;
-    margin: 0 0 1rem 0;
-    padding: 0.25rem 0.5rem;
+    padding: 0.4rem 0.6rem;
     background: #d1fae5;
-    border-radius: 0.25rem;
-    display: inline-block;
-  }
-
-  &__actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  &__btn {
-    padding: 0.5rem 0.9rem;
     border-radius: 0.5rem;
-    text-align: center;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
 
-    &--pin {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+}
 
-      &:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-      }
-    }
+// 動畫效果
+@keyframes shimmer-status {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
 
-    &--manage {
-      background: #e0e7ff;
-      color: #4338ca;
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+  }
+}
 
-      &:hover {
-        background: #c7d2fe;
-      }
-    }
-
-    &--edit {
-      background: #fef3c7;
-      color: #92400e;
-
-      &:hover {
-        background: #fde68a;
-      }
-    }
-
-    &--view {
-      background: #dbeafe;
-      color: #1e40af;
-
-      &:hover {
-        background: #bfdbfe;
-      }
-    }
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -298,6 +396,21 @@
     &__avatar {
       width: 4rem;
       height: 4rem;
+    }
+
+    &__tabs {
+      gap: 0.5rem;
+    }
+
+    &__tab {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    &__tab-count {
+      font-size: 0.625rem;
     }
   }
 }

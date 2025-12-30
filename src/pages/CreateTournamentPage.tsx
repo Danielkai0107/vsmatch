@@ -54,7 +54,7 @@ export function CreateTournamentPage() {
         setScoreToWin(scoreToWin);
         setUseTiebreaker(!!tiebreaker);
         if (tiebreaker) setTiebreakerScore(tiebreaker.scoreToWin);
-        
+
         // 自動對應 SETS_OPTIONS ID
         if (setsToWin === 1) setSelectedSetsOption("single");
         else if (setsToWin === 2) setSelectedSetsOption("bo3");
@@ -280,8 +280,10 @@ export function CreateTournamentPage() {
                       a. 局數制度
                     </label>
                     <div className="create-tournament__grid create-tournament__grid--3cols">
-                      {SETS_OPTIONS.filter((opt) => 
-                        selectedSport?.defaultRules?.scoringMode === opt.scoringMode
+                      {SETS_OPTIONS.filter(
+                        (opt) =>
+                          selectedSport?.defaultRules?.scoringMode ===
+                          opt.scoringMode
                       ).map((option) => (
                         <button
                           key={option.id}
@@ -329,8 +331,8 @@ export function CreateTournamentPage() {
                           <span className="text-gray-600">分</span>
                         </div>
                         <span className="description">
-                          {selectedSport?.id === "badminton" 
-                            ? "（羽球標準為 21 分）" 
+                          {selectedSport?.id === "badminton"
+                            ? "（羽球標準為 21 分）"
                             : "（建議：羽球 21、排球 25、網球 6）"}
                         </span>
                       </div>
@@ -425,7 +427,7 @@ export function CreateTournamentPage() {
                       <p>
                         <strong>預覽：</strong> {selectedFormat.name} 共有{" "}
                         {selectedFormat.stages.length} 輪，需要{" "}
-                        {selectedFormat.totalSlots} 位選手。
+                        {selectedFormat.totalSlots} 組選手。
                       </p>
                     </div>
                   )}

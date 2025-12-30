@@ -1,18 +1,62 @@
 .home-page {
   width: 100%;
-  padding: 1.7rem 0;
+  padding: 1.7rem 1rem;
+  padding-top: 64px;
+  position: relative;
+  @media (max-width: $breakpoint-mobile) {
+    padding-top: 2rem;
+
+    &::after {
+      content: "";
+      width: 100%;
+      height: 240px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(180deg, #003eb6 0%, #4a80ff00 100%);
+      z-index: 1;
+    }
+  }
 
   &__hero {
     width: 100%;
+    position: relative;
+    z-index: 100;
+  }
+
+  &__logo {
+    display: none; // 預設隱藏（桌面版）
+    margin-bottom: 1.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+
+    @media (max-width: $breakpoint-mobile) {
+      display: block; // 手機版顯示
+    }
+  }
+
+  &__logo-text {
+    text-align: left;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+    color: #fff;
+    padding: 0 8px;
   }
 
   &__actions {
     display: flex;
     gap: 12px;
+    position: relative;
+    z-index: 2;
   }
 
   &__section {
     margin-top: 3rem;
+    position: relative;
+    z-index: 100;
   }
 
   &__section-header {
@@ -21,36 +65,32 @@
     justify-content: space-between;
     margin-bottom: 1.5rem;
     gap: 1rem;
-
-    @media (max-width: $breakpoint-mobile) {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.75rem;
-    }
   }
 
   &__section-title {
-    font-size: 1rem;
+    font-size: 16px;
     font-weight: 700;
     color: #111827;
     margin: 0;
-
-    @media (max-width: $breakpoint-mobile) {
-      font-size: 0.9rem;
-    }
   }
 
   &__sport-filter {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 2rem 0.5rem 1rem;
     border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
+    border-radius: 40px;
     background-color: #ffffff;
     color: #111827;
-    font-size: 0.875rem;
+    font-size: 1rem !important;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 150px;
+    max-width: 150px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
 
     &:hover {
       border-color: $primary-color;
@@ -59,14 +99,8 @@
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
-    }
-
-    @media (max-width: $breakpoint-mobile) {
-      width: 100%;
-      font-size: 0.8rem;
-      padding: 0.4rem 0.75rem;
+      border-color: transparent;
+      box-shadow: none;
     }
   }
 
@@ -87,9 +121,6 @@
   &__empty {
     text-align: center;
     padding: 3rem 1rem;
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
 
   &__empty-text {
@@ -128,27 +159,76 @@
   background: white;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   text-align: left;
   border-radius: $border-radius;
   background: linear-gradient(30deg, #003eb6 0%, #6eafff 100%);
-  border: 1px solid $border-color;
+  border: 1px solid #fff;
+  position: relative;
+  overflow: hidden;
 
-  &--scorer {
-    background: linear-gradient(30deg, #a9f700 0%, #f3ffd7 100%);
+  // 動畫效果 - 光澤掃過
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 3s infinite;
   }
+
+  // 創建賽事卡片 - 藍色漸變
+  &--create {
+    @media (max-width: $breakpoint-mobile) {
+      display: none;
+    }
+    background: linear-gradient(135deg, #003eb6 0%, #4a7fff 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 62, 182, 0.3);
+
+    &:hover {
+      box-shadow: 0 10px 20px -5px rgba(0, 62, 182, 0.4);
+    }
+  }
+
+  // 計分卡片 - 綠色漸變
+  &--scorer {
+    background: linear-gradient(135deg, #a9f700 0%, #d4ff5e 100%);
+    box-shadow: 0 4px 6px -1px rgba(169, 247, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 10px 20px -5px rgba(169, 247, 0, 0.4);
+    }
+  }
+
+  // 報名卡片 - 灰白漸變
   &--join {
-    background: linear-gradient(10deg, #b9c9e8 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #b9c9e8 0%, #e8eef7 100%);
+    box-shadow: 0 4px 6px -1px rgba(185, 201, 232, 0.3);
+
+    &:hover {
+      box-shadow: 0 10px 20px -5px rgba(185, 201, 232, 0.4);
+    }
   }
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(1);
   }
 
   @media (max-width: $breakpoint-mobile) {
-    flex-direction: column;
-    gap: 2px;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   &__icon {
@@ -158,14 +238,19 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 4px;
+    position: relative;
+    z-index: 1;
   }
 
   &__content {
     flex: 1;
+    position: relative;
+    z-index: 1;
     @media (max-width: $breakpoint-mobile) {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      max-width: 64px;
     }
   }
 
@@ -179,10 +264,6 @@
     }
     &--join {
       color: #000;
-    }
-    @media (max-width: $breakpoint-mobile) {
-      font-size: 0.9rem;
-      text-align: center;
     }
   }
 
@@ -218,17 +299,17 @@
   &__content {
     background: linear-gradient(180deg, #a8b7d5 10%, #ffffff 100%);
     padding: 3.5rem 2rem 2rem 2rem;
-    border-radius: 1rem;
+    border-radius: $border-radius;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     max-width: 400px;
     width: 90%;
     position: relative;
     text-align: center;
     transform: translateY(-120px);
+    border: 1px solid white;
+
     &--scorer {
       background: linear-gradient(30deg, #a9f700 0%, #edffc2 100%);
-
-      border: 1px solid $border-color;
     }
   }
 
@@ -274,7 +355,7 @@
   &__input {
     width: 100%;
     padding: 1rem;
-    font-size: 1.5rem;
+    font-size: 1.7rem !important;
     text-align: center;
     border: none;
     border-radius: 0.5rem;
@@ -360,5 +441,15 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+// Action Card 光澤掃過動畫
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }
