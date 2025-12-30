@@ -16,6 +16,48 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
   const format = getFormatById(tournament.config.formatId);
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
 
+  // 格式化比賽時間（開始或結束）
+  const formatTime = () => {
+    // 優先顯示結束時間（已結束的比賽）
+    const finishedAt = (tournament as any).finishedAt;
+    const startedAt = (tournament as any).startedAt;
+
+    let timeStr = null;
+    let isFinished = false;
+
+    if (finishedAt && tournament.status === "finished") {
+      timeStr = finishedAt;
+      isFinished = true;
+    } else if (startedAt && tournament.status === "live") {
+      timeStr = startedAt;
+      isFinished = false;
+    }
+
+    if (!timeStr) return null;
+
+    const date = new Date(timeStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    // 如果是今天
+    if (diffDays === 0) {
+      if (diffHours === 0) {
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        if (diffMins < 1) return isFinished ? "剛結束" : "剛開始";
+        return `${diffMins} 分鐘前`;
+      }
+      return `${diffHours} 小時前`;
+    }
+    // 如果是昨天或前天
+    if (diffDays === 1) return "昨天";
+    if (diffDays === 2) return "前天";
+
+    // 超過兩天，顯示日期
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
   // 監聽進行中的場次
   useEffect(() => {
     if (tournament.status !== "live") {
@@ -77,12 +119,11 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         {/* 進行中的場次 */}
         {liveMatches.length > 0 && (
           <div className="tournament-card__live-matches">
-            <div className="tournament-card__live-header">
-              <span className="tournament-card__live-badge">進行中</span>
+            {/* <div className="tournament-card__live-header">
               <span className="tournament-card__live-count">
                 {liveMatches.length} 場
               </span>
-            </div>
+            </div> */}
             <div className="tournament-card__matches-list">
               {liveMatches.slice(0, 3).map((match) => {
                 const currentSet = match.sets[match.currentSet];
@@ -94,28 +135,24 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
                   <div key={match.matchId} className="tournament-card__match">
                     <div className="tournament-card__match-round">
                       {roundName}
+                      <span className="tournament-card__live-badge">LIVE</span>
                     </div>
                     <div className="tournament-card__match-players">
                       <div className="tournament-card__match-player">
                         <span className="tournament-card__player-name">
                           {match.player1?.name || "TBD"}
                         </span>
-                        {currentSet && (
-                          <span className="tournament-card__player-score">
-                            {currentSet.p1Score}
-                          </span>
-                        )}
+                        <span className="tournament-card__player-score">
+                          {currentSet ? currentSet.p1Score : "-"}
+                        </span>
                       </div>
-                      <div className="tournament-card__match-vs">vs</div>
                       <div className="tournament-card__match-player">
                         <span className="tournament-card__player-name">
                           {match.player2?.name || "TBD"}
                         </span>
-                        {currentSet && (
-                          <span className="tournament-card__player-score">
-                            {currentSet.p2Score}
-                          </span>
-                        )}
+                        <span className="tournament-card__player-score">
+                          {currentSet ? currentSet.p2Score : "-"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -131,7 +168,15 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         )}
 
         <div className="tournament-card__footer">
-          <span>{tournament.players.length} 組選手</span>
+          <span className="tournament-card__footer-players">
+            {tournament.players.length} 組選手
+          </span>
+          {(tournament.status === "live" || tournament.status === "finished") &&
+            formatTime() && (
+              <span className="tournament-card__footer-time">
+                {formatTime()}
+              </span>
+            )}
         </div>
       </div>
     </Link>

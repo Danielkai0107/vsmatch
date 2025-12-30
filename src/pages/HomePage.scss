@@ -1,6 +1,6 @@
 .home-page {
   width: 100%;
-  padding: 1.7rem 1rem;
+  padding: 1.7rem 0;
   padding-top: 64px;
   position: relative;
   @media (max-width: $breakpoint-mobile) {
@@ -13,7 +13,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      background: linear-gradient(180deg, #003eb6 0%, #4a80ff00 100%);
+      background: linear-gradient(180deg, #003eb6 0%, #ffffff00 100%);
       z-index: 1;
     }
   }
@@ -22,6 +22,8 @@
     width: 100%;
     position: relative;
     z-index: 100;
+    padding: 0 1rem;
+    padding-bottom: 1rem;
   }
 
   &__logo {
@@ -53,10 +55,160 @@
     z-index: 2;
   }
 
-  &__section {
-    margin-top: 3rem;
+  &__search {
+    margin-top: 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:focus-within {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+  }
+
+  &__search-icon {
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  &__search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: #111827;
+    background: transparent;
+    padding: 0 0.75rem;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  &__search-clear {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e7eb;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #6b7280;
+
+    &:hover {
+      background-color: #d1d5db;
+      color: #111827;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__draft-section {
+    margin-top: 1rem;
     position: relative;
     z-index: 100;
+  }
+
+  &__draft-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1rem 0;
+    padding: 0 1rem;
+  }
+
+  &__draft-scroll {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scrollbar-color: #cbd5e0 #f7fafc;
+    padding: 4px 1rem 24px 1rem;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f7fafc;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a0aec0;
+      }
+    }
+
+    .tournament-card {
+      min-width: 360px;
+      @media (max-width: $breakpoint-mobile) {
+        width: 100%;
+      }
+    }
+  }
+
+  &__section {
+    margin-top: 1rem;
+    position: relative;
+    z-index: 100;
+    padding: 0 1rem;
+    padding-bottom: 100px;
+
+    // 覆蓋 tournament-card header 顏色為銀白色
+    .tournament-card__header {
+      background: linear-gradient(135deg, #e8eef7 0%, #f5f7fa 100%);
+      border: 1px solid $border-color;
+    }
+
+    // 調整 PIN 碼顏色以適應淺色背景
+    .tournament-card__pin {
+      color: #111827;
+    }
+
+    // 調整運動項目標籤顏色
+    .tournament-card__sport-badge {
+      background-color: rgba(91, 127, 246, 0.15);
+      color: #4961dc;
+      border: 1px solid rgba(91, 127, 246, 0.3);
+    }
+
+    // 調整狀態標籤
+    .tournament-card__status-badge {
+      &--draft {
+        background-color: #5b7ff6;
+        color: white;
+      }
+
+      &--live {
+        background-color: #10b981;
+        color: white;
+      }
+
+      &--finished {
+        background-color: #6b7280;
+        color: white;
+      }
+    }
   }
 
   &__section-header {

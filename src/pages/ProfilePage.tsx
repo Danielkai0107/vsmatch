@@ -177,7 +177,8 @@ export function ProfilePage() {
                           </span>
                         </div>
                         <p className="tournament-item__info">
-                          {sport?.name} • {tournament.players.length} 人報名
+                          <span>{sport?.name}</span>
+                          <span>{tournament.players.length} 人報名</span>
                         </p>
                       </div>
                     </Link>

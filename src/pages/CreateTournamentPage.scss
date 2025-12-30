@@ -527,21 +527,15 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(0, 62, 182, 0.3),
         0 8px 24px rgba(0, 62, 182, 0.2);
-
-      &:hover:not(:disabled) {
-        background-color: $primary-hover;
-      }
     }
 
     &--success {
-      background-color: $primary;
-      color: white;
-      font-weight: 600;
-      padding: 0.9rem 1.5rem;
-
-      &:hover:not(:disabled) {
-        background-color: $primary-hover;
-      }
+      background: linear-gradient(135deg, #003eb6 0%, #4a7fff 100%);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 62, 182, 0.3),
+        0 8px 24px rgba(0, 62, 182, 0.2);
     }
 
     &--secondary {

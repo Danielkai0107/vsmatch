@@ -5,7 +5,7 @@ import { useTournaments } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
 import { usePopup } from "../contexts/PopupContext";
-import { SquareKanban, Trophy, Plus, X } from "lucide-react";
+import { SquareKanban, Trophy, Plus, X, Search } from "lucide-react";
 import {
   findTournamentByScorerPin,
   findTournamentByPin,
@@ -30,6 +30,7 @@ export function HomePage() {
   const [scorerPinError, setScorerPinError] = useState("");
   const [scorerPinLoading, setScorerPinLoading] = useState(false);
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const grantScorePermission = usePermissionStore(
     (state) => state.grantScorePermission
@@ -37,21 +38,50 @@ export function HomePage() {
 
   const allSports = getAllSports();
 
-  // 根據運動項目篩選比賽，並且只顯示進行中的比賽
-  const filteredTournaments = useMemo(() => {
-    // 先過濾出進行中的比賽
-    const liveTournaments = tournaments.filter(
-      (tournament) => tournament.status === "live"
+  // 獲取當前用戶籌備中的比賽
+  const myDraftTournaments = useMemo(() => {
+    if (!user) return [];
+    return tournaments.filter(
+      (tournament) =>
+        tournament.status === "draft" && tournament.organizerId === user.uid
     );
+  }, [tournaments, user]);
+
+  // 根據運動項目和搜尋關鍵字篩選比賽，顯示進行中的比賽和過去兩天已結束的比賽
+  const filteredTournaments = useMemo(() => {
+    const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
+
+    // 過濾出進行中的比賽和過去兩天已結束的比賽
+    let displayTournaments = tournaments.filter((tournament) => {
+      if (tournament.status === "live") {
+        return true;
+      }
+      if (tournament.status === "finished") {
+        // 檢查是否在過去兩天內結束
+        const finishedAt = (tournament as any).finishedAt;
+        if (finishedAt) {
+          const finishedTime = new Date(finishedAt).getTime();
+          return finishedTime >= twoDaysAgo;
+        }
+      }
+      return false;
+    });
+
+    // 根據搜尋關鍵字篩選
+    if (searchQuery.trim()) {
+      displayTournaments = displayTournaments.filter((tournament) =>
+        tournament.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
     // 再根據運動項目篩選
     if (selectedSportFilter === "all") {
-      return liveTournaments;
+      return displayTournaments;
     }
-    return liveTournaments.filter(
+    return displayTournaments.filter(
       (tournament) => tournament.config.sportId === selectedSportFilter
     );
-  }, [tournaments, selectedSportFilter]);
+  }, [tournaments, selectedSportFilter, searchQuery]);
 
   const handleCreateTournament = async () => {
     if (!user) {
@@ -194,6 +224,26 @@ export function HomePage() {
             </div>
           </button>
         </div>
+
+        {/* 搜尋框 */}
+        <div className="home-page__search">
+          <Search size={20} className="home-page__search-icon" />
+          <input
+            type="text"
+            placeholder="搜尋賽事名稱..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="home-page__search-input"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="home-page__search-clear"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 報名 PIN 碼輸入彈窗 */}
@@ -287,10 +337,22 @@ export function HomePage() {
         </div>
       )}
 
+      {/* 我籌備中的比賽 */}
+      {user && myDraftTournaments.length > 0 && (
+        <div className="home-page__draft-section">
+          <h2 className="home-page__draft-title">最近發布</h2>
+          <div className="home-page__draft-scroll">
+            {myDraftTournaments.map((tournament) => (
+              <TournamentCard key={tournament.id} tournament={tournament} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 比賽列表 */}
       <div className="home-page__section">
         <div className="home-page__section-header">
-          <h2 className="home-page__section-title">進行中的比賽</h2>
+          <h2 className="home-page__section-title">探索比賽</h2>
 
           {/* 運動項目篩選下拉選單 */}
           <select
