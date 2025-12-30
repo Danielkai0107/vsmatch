@@ -188,15 +188,6 @@ export const SETS_OPTIONS: SetsOption[] = [
     hasTiebreaker: false,
     allowOvertime: true,
   },
-  {
-    id: "fixed9",
-    label: "9 局（總分制）",
-    setsToWin: 0,
-    totalSets: 9,
-    scoringMode: "cumulative",
-    hasTiebreaker: false,
-    allowOvertime: true,
-  },
 ];
 
 // 輔助函數：根據規則獲取賽制描述

@@ -47,7 +47,7 @@ export function CreateTournamentPage() {
   const handleSportSelect = (sport: Sport) => {
     setSelectedSport(sport);
     if (sport.defaultRules) {
-      const { scoringMode, scoreToWin, setsToWin, totalSets, tiebreaker } =
+      const { scoringMode, scoreToWin, setsToWin, tiebreaker } =
         sport.defaultRules;
 
       if (scoringMode === "sets") {
@@ -61,7 +61,7 @@ export function CreateTournamentPage() {
         else if (setsToWin === 3) setSelectedSetsOption("bo5");
       } else {
         // 累計制
-        setSelectedSetsOption(totalSets === 4 ? "fixed4" : "fixed9");
+        setSelectedSetsOption("fixed4");
       }
     }
   };
