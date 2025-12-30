@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type { Tournament, Match } from "../types";
 import { getSportById, getFormatById } from "../config/sportsData";
 import { getMatchRoundName } from "../utils/bracketLogic";
+import { useCountdown } from "../hooks/useCountdown";
 import "./TournamentCard.scss";
 
 interface TournamentCardProps {
   tournament: Tournament;
 }
 
-export function TournamentCard({ tournament }: TournamentCardProps) {
-  const sport = getSportById(tournament.config.sportId);
-  const format = getFormatById(tournament.config.formatId);
+// 🚀 優化：使用 memo 避免不必要的重新渲染
+function TournamentCardComponent({ tournament }: TournamentCardProps) {
+  // 🚀 優化：使用 useMemo 緩存查詢結果
+  const sport = useMemo(() => getSportById(tournament.config.sportId), [tournament.config.sportId]);
+  const format = useMemo(() => getFormatById(tournament.config.formatId), [tournament.config.formatId]);
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+
+  // 倒數計時（不自動刪除，僅顯示）
+  const { timeLeft, isExpired } = useCountdown(tournament, false);
 
   // 格式化比賽時間（開始或結束）
   const formatTime = () => {
@@ -58,7 +64,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
     return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  // 監聽進行中的場次
+  // 監聽進行中的場次（添加節流以減少監聽頻率）
   useEffect(() => {
     if (tournament.status !== "live") {
       setLiveMatches([]);
@@ -68,24 +74,39 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
     const matchesRef = collection(db, "tournaments", tournament.id, "matches");
     const q = query(matchesRef, where("status", "==", "live"));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const matches: Match[] = [];
-      snapshot.forEach((doc) => {
-        matches.push({
-          ...doc.data(),
-          matchId: doc.id,
-        } as Match);
-      });
-      setLiveMatches(matches);
-    });
+    // 使用 onSnapshot 但限制更新頻率
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        clearTimeout(timeoutId);
+        // 延遲 500ms 更新，避免頻繁觸發渲染
+        timeoutId = setTimeout(() => {
+          const matches: Match[] = [];
+          snapshot.forEach((doc) => {
+            matches.push({
+              ...doc.data(),
+              matchId: doc.id,
+            } as Match);
+          });
+          setLiveMatches(matches);
+        }, 500);
+      },
+      (error) => {
+        console.error("Error fetching live matches:", error);
+      }
+    );
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, [tournament.id, tournament.status]);
 
   const getStatusText = () => {
     switch (tournament.status) {
       case "draft":
-        return "報名中";
+        return `${timeLeft}`;
       case "live":
         return "進行中";
       case "finished":
@@ -95,11 +116,28 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
     }
   };
 
+  // 如果已過期，禁用點擊
+  const handleClick = (e: React.MouseEvent) => {
+    if (tournament.status === "draft" && isExpired) {
+      e.preventDefault();
+    }
+  };
+
   return (
-    <Link to={`/tournament/${tournament.id}`} className="tournament-card">
+    <Link
+      to={`/tournament/${tournament.id}`}
+      className={`tournament-card ${
+        tournament.status === "draft" && isExpired
+          ? "tournament-card--expired"
+          : ""
+      }`}
+      onClick={handleClick}
+    >
       {/* 藍色 Header */}
       <div className="tournament-card__header">
-        <div className="tournament-card__pin">PIN: {tournament.pin}</div>
+        <div className="tournament-card__pin">
+          <span>PIN: {tournament.pin}</span>
+        </div>
         <div className="tournament-card__badges">
           <span className="tournament-card__sport-badge">
             {sport?.name || "未知運動"}
@@ -119,11 +157,6 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         {/* 已結束：顯示冠軍和亞軍 */}
         {tournament.status === "finished" &&
           (() => {
-            console.log("已結束的比賽:", {
-              name: tournament.name,
-              champion: (tournament as any).champion,
-              runnerUp: (tournament as any).runnerUp,
-            });
             return (
               <div className="tournament-card__live-matches">
                 <div className="tournament-card__matches-list">
@@ -206,6 +239,11 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
           <span className="tournament-card__footer-players">
             {tournament.players.length} 組選手
           </span>
+          {tournament.status === "draft" && isExpired && (
+            <span className="tournament-card__footer-countdown tournament-card__footer-countdown--expired">
+              已過期
+            </span>
+          )}
           {(tournament.status === "live" || tournament.status === "finished") &&
             formatTime() && (
               <span className="tournament-card__footer-time">
@@ -217,3 +255,6 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
     </Link>
   );
 }
+
+// 使用 memo 並導出
+export const TournamentCard = memo(TournamentCardComponent);

@@ -1,25 +1,44 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { TournamentCard } from "../components/TournamentCard";
-import { useTournaments } from "../hooks/useFirestore";
+import {
+  useActiveTournaments,
+  useMyDraftTournaments,
+} from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
 import { usePopup } from "../contexts/PopupContext";
-import { SquareKanban, Trophy, Plus, X, Search } from "lucide-react";
+import {
+  SquareKanban,
+  Trophy,
+  Plus,
+  X,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   findTournamentByScorerPin,
   findTournamentByPin,
 } from "../utils/pinCode";
 import { usePermissionStore } from "../stores/permissionStore";
 import { getAllSports } from "../config/sportsData";
+import { doc, deleteDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import Loading from "../components/ui/Loading";
 import "./HomePage.scss";
 
 export function HomePage() {
-  useTournaments(); // 開始監聽比賽列表
-
-  const { tournaments, loading } = useTournamentStore();
   const { user, signInWithGoogle } = useAuth();
+
+  // 使用優化後的查詢：只抓取活躍的比賽
+  useActiveTournaments();
+  // 如果用戶已登入，額外抓取其籌備中的比賽
+  useMyDraftTournaments(user?.uid);
+
+  // 使用 selector 避免不必要的重新渲染
+  const tournaments = useTournamentStore((state) => state.tournaments);
+  const loading = useTournamentStore((state) => state.loading);
   const { showPopup, showConfirm } = usePopup();
   const [showPinModal, setShowPinModal] = useState(false);
   const [showScorerPinModal, setShowScorerPinModal] = useState(false);
@@ -31,6 +50,9 @@ export function HomePage() {
   const [scorerPinLoading, setScorerPinLoading] = useState(false);
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const draftScrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const grantScorePermission = usePermissionStore(
     (state) => state.grantScorePermission
@@ -46,6 +68,114 @@ export function HomePage() {
         tournament.status === "draft" && tournament.organizerId === user.uid
     );
   }, [tournaments, user]);
+
+  // 檢查滾動位置，顯示/隱藏箭頭
+  const checkScroll = () => {
+    const element = draftScrollRef.current;
+    if (!element) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = element;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  useEffect(() => {
+    const element = draftScrollRef.current;
+    if (!element) return;
+
+    checkScroll();
+    element.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+
+    return () => {
+      element.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [myDraftTournaments]);
+
+  // 🚀 使用 ref 追蹤正在刪除的比賽 ID，避免重複刪除
+  const deletingTournamentsRef = useRef<Set<string>>(new Set());
+
+  // 自動刪除過期的比賽
+  const checkExpiredTournaments = useCallback(async () => {
+    const COUNTDOWN_DURATION = 10 * 60 * 1000; // 10分鐘
+    const draftTournaments = tournaments.filter((t) => t.status === "draft");
+    const now = Date.now();
+
+    for (const tournament of draftTournaments) {
+      // 🚀 如果正在刪除，跳過
+      if (deletingTournamentsRef.current.has(tournament.id)) {
+        continue;
+      }
+
+      const createdAt = tournament.createdAt;
+      const createdTime =
+        createdAt instanceof Date
+          ? createdAt.getTime()
+          : new Date(createdAt).getTime();
+      const elapsed = now - createdTime;
+
+      // 如果已過期
+      if (elapsed >= COUNTDOWN_DURATION) {
+        // 🚀 標記為正在刪除
+        deletingTournamentsRef.current.add(tournament.id);
+        
+        console.log(
+          `自動刪除過期比賽: ${tournament.id} (${tournament.name})`
+        );
+
+        try {
+          // 1. 刪除所有 matches 子集合
+          const matchesRef = collection(
+            db,
+            "tournaments",
+            tournament.id,
+            "matches"
+          );
+          const matchesSnapshot = await getDocs(matchesRef);
+          const deleteMatchPromises = matchesSnapshot.docs.map((doc) =>
+            deleteDoc(doc.ref)
+          );
+          await Promise.all(deleteMatchPromises);
+
+          // 2. 刪除比賽本身
+          await deleteDoc(doc(db, "tournaments", tournament.id));
+
+          console.log(`比賽 ${tournament.id} 已自動刪除`);
+        } catch (error) {
+          console.error(`自動刪除比賽 ${tournament.id} 失敗:`, error);
+          // 🚀 刪除失敗，從集合中移除，允許重試
+          deletingTournamentsRef.current.delete(tournament.id);
+        }
+      }
+    }
+  }, [tournaments]);
+
+  useEffect(() => {
+    // 每30秒檢查一次
+    const interval = setInterval(checkExpiredTournaments, 30000);
+    // 立即檢查一次
+    checkExpiredTournaments();
+
+    return () => clearInterval(interval);
+  }, [checkExpiredTournaments]);
+
+  // 滾動函數
+  const scroll = (direction: "left" | "right") => {
+    const element = draftScrollRef.current;
+    if (!element) return;
+
+    const scrollAmount = 380; // 卡片寬度 + gap
+    const newScrollLeft =
+      direction === "left"
+        ? element.scrollLeft - scrollAmount
+        : element.scrollLeft + scrollAmount;
+
+    element.scrollTo({
+      left: newScrollLeft,
+      behavior: "smooth",
+    });
+  };
 
   // 根據運動項目和搜尋關鍵字篩選比賽，顯示進行中的比賽和過去兩天已結束的比賽
   const filteredTournaments = useMemo(() => {
@@ -341,10 +471,28 @@ export function HomePage() {
       {user && myDraftTournaments.length > 0 && (
         <div className="home-page__draft-section">
           <h2 className="home-page__draft-title">最近發布</h2>
-          <div className="home-page__draft-scroll">
-            {myDraftTournaments.map((tournament) => (
-              <TournamentCard key={tournament.id} tournament={tournament} />
-            ))}
+          <div className="home-page__draft-container">
+            {showLeftArrow && (
+              <button
+                className="home-page__scroll-btn home-page__scroll-btn--left"
+                onClick={() => scroll("left")}
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+            <div className="home-page__draft-scroll" ref={draftScrollRef}>
+              {myDraftTournaments.map((tournament) => (
+                <TournamentCard key={tournament.id} tournament={tournament} />
+              ))}
+            </div>
+            {showRightArrow && (
+              <button
+                className="home-page__scroll-btn home-page__scroll-btn--right"
+                onClick={() => scroll("right")}
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
           </div>
         </div>
       )}

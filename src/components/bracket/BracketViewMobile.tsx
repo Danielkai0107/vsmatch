@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 import type { TournamentFormat, Match } from "../../types";
 import { BracketStage } from "./BracketStage";
 import "./BracketViewMobile.scss";
@@ -9,7 +9,8 @@ interface BracketViewMobileProps {
   tournamentId: string;
 }
 
-export function BracketViewMobile({
+// 🚀 優化：使用 memo 避免不必要的重新渲染
+function BracketViewMobileComponent({
   format,
   matches,
   tournamentId,
@@ -18,15 +19,15 @@ export function BracketViewMobile({
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  // 手機版用的輪次縮寫對應
-  const getStageShortName = (stageName: string) => {
+  // 🚀 優化：使用 useMemo 緩存輪次縮寫函數
+  const getStageShortName = useMemo(() => (stageName: string) => {
     if (stageName.includes("16")) return "16 強";
     if (stageName.includes("8")) return "8 強";
     if (stageName.includes("準決賽") || stageName.includes("4"))
       return "準決賽";
     if (stageName.includes("決賽")) return "決賽";
     return stageName;
-  };
+  }, []);
 
   // 處理滑動手勢
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -93,3 +94,5 @@ export function BracketViewMobile({
     </div>
   );
 }
+
+export const BracketViewMobile = memo(BracketViewMobileComponent);

@@ -55,7 +55,7 @@
   }
 
   &__email {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     opacity: 0.9;
     margin: 0;
   }
@@ -83,7 +83,7 @@
   }
 
   &__stat-label {
-    font-size: 0.75rem;
+    font-size: 1rem;
     margin-top: 0.5rem;
     opacity: 0.9;
     color: $text-secondary;
@@ -97,6 +97,11 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 1rem;
+    // 🚀 啟用觸摸滑動
+    touch-action: pan-x;
+    user-select: none;
+    -webkit-user-select: none;
+    
     &::-webkit-scrollbar {
       display: none;
     }
@@ -116,6 +121,9 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    // 🚀 優化觸摸體驗
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 
     &--active {
       background: $blue-gradient;
@@ -177,14 +185,16 @@
   &__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1rem;
 
     @media (min-width: 640px) {
       grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
     }
 
     @media (min-width: 1024px) {
       grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
     }
   }
 
@@ -193,7 +203,6 @@
     padding: 3rem 1rem;
     background: #f9fafb;
     border-radius: 0.5rem;
-    border: 2px dashed #d1d5db;
 
     p {
       color: #6b7280;
@@ -210,10 +219,6 @@
     text-decoration: none;
     font-weight: 600;
     transition: background 0.2s;
-
-    &:hover {
-      background: #059669;
-    }
   }
 
   &__link {
@@ -248,18 +253,12 @@
   display: block;
   background-color: white;
   border-radius: $border-radius;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   text-decoration: none;
   overflow: hidden;
   padding: 1rem;
-
-  &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-  }
 
   &__title-row {
     width: 100%;
@@ -277,7 +276,7 @@
 
   &__name {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #111827;
     margin: 0;
     flex: 1;
@@ -289,7 +288,7 @@
   &__status {
     padding: 0.3rem 0.6rem;
     border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     transition: all 0.3s ease;
     position: relative;
@@ -330,12 +329,29 @@
     }
   }
 
+  &__countdown {
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: #dc2626;
+    flex-shrink: 0;
+    animation: pulse-countdown 2s ease-in-out infinite;
+
+    &--expired {
+      background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
+      color: #6b7280;
+      animation: none;
+    }
+  }
+
   &__info {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #6b7280;
     font-weight: 500;
     margin-top: 1rem;
@@ -353,10 +369,11 @@
     margin-top: 0.5rem;
   }
 
-  &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
+  // 已過期狀態 - 禁用點擊
+  &--expired {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(30%);
   }
 }
 
@@ -386,5 +403,15 @@
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+@keyframes pulse-countdown {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }

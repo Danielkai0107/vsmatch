@@ -7,7 +7,7 @@ interface TournamentState {
   loading: boolean;
   error: string | null;
 
-  setTournaments: (tournaments: Tournament[]) => void;
+  setTournaments: (tournaments: Tournament[] | ((prev: Tournament[]) => Tournament[])) => void;
   setCurrentTournament: (tournament: Tournament | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -19,7 +19,9 @@ export const useTournamentStore = create<TournamentState>((set) => ({
   loading: false,
   error: null,
 
-  setTournaments: (tournaments) => set({ tournaments }),
+  setTournaments: (tournaments) => set((state) => ({ 
+    tournaments: typeof tournaments === 'function' ? tournaments(state.tournaments) : tournaments 
+  })),
   setCurrentTournament: (tournament) => set({ currentTournament: tournament }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),

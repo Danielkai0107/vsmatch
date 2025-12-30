@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, updateDoc, arrayRemove } from "firebase/firestore";
 import { db } from "../../lib/firebase";
@@ -15,7 +16,9 @@ interface MatchCardProps {
   roundName: string;
 }
 
-export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
+// 🚀 優化：使用 memo 避免不必要的重新渲染
+// 只有當 match、tournamentId 或 roundName 改變時才重新渲染
+function MatchCardComponent({ match, tournamentId, roundName }: MatchCardProps) {
   const navigate = useNavigate();
   const { showPopup } = usePopup();
   const { user } = useAuth();
@@ -26,12 +29,14 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     (state) => state.currentTournament
   );
 
+  // 🚀 優化：使用 useMemo 緩存計算結果
   const rule = currentTournament?.config.rules;
   const isCumulative = rule?.scoringMode === "cumulative";
   const sportId = currentTournament?.config.sportId;
   const isOrganizer = user?.uid === currentTournament?.organizerId;
+  const isBye = !match.player1 || !match.player2;
 
-  const getStatusClass = () => {
+  const getStatusClass = useCallback(() => {
     // 輪空比賽使用 pending 樣式
     if (isBye) {
       return "match-card--pending";
@@ -45,9 +50,10 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       default:
         return "match-card--pending";
     }
-  };
+  }, [isBye, match.status]);
 
-  const handleClick = () => {
+  // 🚀 優化：使用 useCallback 緩存事件處理函數
+  const handleClick = useCallback(() => {
     if (!match.matchId) return;
 
     const isBye = !match.player1 || !match.player2;
@@ -59,9 +65,10 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     } else if (match.status === "live") {
       navigate(`/match/${tournamentId}/${match.matchId}`);
     }
-  };
+  }, [match.matchId, match.player1, match.player2, match.status, hasScorePermission, navigate, tournamentId]);
 
-  const handleRemovePlayer = async (
+  // 🚀 優化：使用 useCallback 緩存事件處理函數
+  const handleRemovePlayer = useCallback(async (
     playerIndex: 1 | 2,
     e: React.MouseEvent
   ) => {
@@ -102,15 +109,17 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
       console.error("移除選手失敗:", error);
       showPopup("移除選手失敗", "error");
     }
-  };
+  }, [match.player1, match.player2, currentTournament, tournamentId, showPopup]);
 
-  const isBye = !match.player1 || !match.player2;
-  const isClickable =
-    !isBye &&
-    match.status !== "completed" &&
-    ((hasScorePermission &&
-      (match.status === "pending" || match.status === "live")) ||
-      match.status === "live");
+  const isClickable = useMemo(
+    () =>
+      !isBye &&
+      match.status !== "completed" &&
+      ((hasScorePermission &&
+        (match.status === "pending" || match.status === "live")) ||
+        match.status === "live"),
+    [isBye, match.status, hasScorePermission]
+  );
 
   // 渲染標題狀態標籤
   const renderHeaderBadge = () => {
@@ -384,3 +393,5 @@ export function MatchCard({ match, tournamentId, roundName }: MatchCardProps) {
     </div>
   );
 }
+
+export const MatchCard = memo(MatchCardComponent);

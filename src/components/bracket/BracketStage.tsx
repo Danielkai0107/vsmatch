@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Stage, Match } from '../../types';
 import { MatchCard } from './MatchCard';
 import './BracketStage.scss';
@@ -8,7 +9,8 @@ interface BracketStageProps {
   tournamentId: string;
 }
 
-export function BracketStage({
+// 🚀 優化：使用 memo 避免不必要的重新渲染
+function BracketStageComponent({
   stage,
   matches,
   tournamentId,
@@ -50,4 +52,6 @@ export function BracketStage({
     </div>
   );
 }
+
+export const BracketStage = memo(BracketStageComponent);
 

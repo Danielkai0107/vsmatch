@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import type { TournamentFormat, Match } from '../../types';
-import { BracketStage } from './BracketStage';
-import { BracketViewMobile } from './BracketViewMobile';
-import './BracketView.scss';
+import { useState, useEffect, memo } from "react";
+import type { TournamentFormat, Match } from "../../types";
+import { BracketStage } from "./BracketStage";
+import { BracketViewMobile } from "./BracketViewMobile";
+import "./BracketView.scss";
 
 interface BracketViewProps {
   format: TournamentFormat;
@@ -10,23 +10,31 @@ interface BracketViewProps {
   tournamentId: string;
 }
 
-export function BracketView({
+// 🚀 優化：使用 memo 避免不必要的重新渲染
+function BracketViewComponent({
   format,
   matches,
   tournamentId,
 }: BracketViewProps) {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // 檢測是否為手機版
+  // 🚀 優化：使用 debounce 減少 resize 觸發頻率
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(window.innerWidth <= 768);
+      }, 150); // 150ms debounce
     };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   // 手機版使用獨立組件
@@ -57,3 +65,4 @@ export function BracketView({
   );
 }
 
+export const BracketView = memo(BracketViewComponent);

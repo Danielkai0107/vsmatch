@@ -20,5 +20,34 @@ export default defineConfig({
         additionalData: `@use "@/styles/_variables.scss" as *;`
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // 手動分割代碼塊，提升快取效率
+        manualChunks: {
+          // Firebase 相關（通常是最大的依賴）
+          'vendor-firebase': [
+            'firebase/app',
+            'firebase/auth',
+            'firebase/firestore'
+          ],
+          // React 核心庫
+          'vendor-react': [
+            'react',
+            'react-dom',
+            'react-router-dom'
+          ],
+          // 狀態管理
+          'vendor-state': ['zustand'],
+          // UI 組件庫
+          'vendor-ui': ['lucide-react', 'qrcode.react']
+        }
+      }
+    },
+    // 提高 chunk 大小警告的閾值（Firebase 本身就很大）
+    chunkSizeWarningLimit: 1000,
+    // 啟用壓縮（使用 esbuild，比 terser 更快）
+    minify: 'esbuild'
   }
 })

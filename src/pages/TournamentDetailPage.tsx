@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   doc,
@@ -25,6 +25,7 @@ import { getSetsFormatLabel } from "../types";
 import { ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import Loading from "../components/ui/Loading";
+import { useCountdown } from "../hooks/useCountdown";
 import "./TournamentDetailPage.scss";
 
 export function TournamentDetailPage() {
@@ -38,11 +39,23 @@ export function TournamentDetailPage() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
 
+  // 🚀 優化：先從 store 獲取已有的比賽資料（來自首頁/個人頁）
+  const tournaments = useTournamentStore((state) => state.tournaments);
+  const preloadedTournament = useMemo(
+    () => tournaments.find((t) => t.id === id),
+    [tournaments, id]
+  );
+
+  // 然後再訂閱即時更新
   useTournamentById(id);
   useMatches(id);
 
-  const { currentTournament, loading } = useTournamentStore();
+  const { currentTournament: liveTournament, loading } = useTournamentStore();
   const { matches, loading: matchesLoading } = useMatchStore();
+  
+  // 🚀 優化：優先使用即時資料，否則使用預載入的資料（避免閃爍）
+  const currentTournament = liveTournament || preloadedTournament;
+  
   const [isFixing, setIsFixing] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const [hasAttemptedMatchesLoad, setHasAttemptedMatchesLoad] = useState(false);
@@ -166,7 +179,21 @@ export function TournamentDetailPage() {
     hasAttemptedMatchesLoad,
   ]);
 
-  if (loading || isFixing) {
+  // 🔧 重要：所有 Hooks 必須在任何條件 return 之前調用
+  // 檢查是否為舉辦者
+  const isOrganizer = user?.uid === currentTournament?.organizerId;
+
+  // 倒數計時（僅在 draft 狀態且是舉辦者時自動刪除）
+  const { timeLeft, isExpired } = useCountdown(
+    currentTournament || null,
+    isOrganizer && currentTournament?.status === "draft"
+  );
+
+  // 🚀 優化：只在真正沒有任何資料時才顯示全屏 loading
+  // 如果有預載入的資料，先顯示內容，讓對戰表區域單獨 loading
+  const showFullScreenLoading = (loading || isFixing) && !preloadedTournament;
+  
+  if (showFullScreenLoading) {
     return (
       <Loading
         fullScreen
@@ -182,9 +209,6 @@ export function TournamentDetailPage() {
 
   const format = getFormatById(currentTournament.config.formatId);
   const sport = getSportById(currentTournament.config.sportId);
-
-  // 檢查是否為舉辦者
-  const isOrganizer = user?.uid === currentTournament.organizerId;
 
   // 檢查當前使用者是否已報名
   const hasJoined = user
@@ -326,6 +350,13 @@ export function TournamentDetailPage() {
     }
   };
 
+  // 倒數訊息
+  const getCountdownMessage = () => {
+    if (currentTournament.status !== "draft") return null;
+    if (isExpired) return "比賽已過期";
+    return `${timeLeft}`;
+  };
+
   return (
     <div className="tournament-detail">
       <div className="tournament-detail__header">
@@ -401,17 +432,29 @@ export function TournamentDetailPage() {
         className={`tournament-detail__msg tournament-detail__msg--${currentTournament.status}`}
       >
         {getStatusMessage()}
+        {currentTournament.status === "draft" && getCountdownMessage() && (
+          <div className="tournament-detail__countdown">
+            {getCountdownMessage()}
+          </div>
+        )}
       </div>
 
       {/* 對戰表 */}
       {format && (
         <div className="bracket-view-container">
           {/* <h2 className="bracket-view-container__title">對戰表</h2> */}
-          <BracketView
-            format={format}
-            matches={displayMatches}
-            tournamentId={id || ""}
-          />
+          {/* 🚀 優化：對戰表區域單獨顯示載入狀態 */}
+          {(matchesLoading || isFixing) && currentTournament.status === "live" ? (
+            <div className="bracket-view-container__loading">
+              <Loading text={isFixing ? "正在初始化對戰表..." : "載入對戰表..."} />
+            </div>
+          ) : (
+            <BracketView
+              format={format}
+              matches={displayMatches}
+              tournamentId={id || ""}
+            />
+          )}
         </div>
       )}
 

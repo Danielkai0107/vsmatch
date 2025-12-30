@@ -3,7 +3,7 @@
   flex-direction: column;
   background-color: white;
   border-radius: $border-radius;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   text-decoration: none;
@@ -12,6 +12,19 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
       0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transform: translateY(-2px);
+  }
+
+  // 已過期狀態 - 禁用點擊
+  &--expired {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(30%);
+
+    &:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transform: none;
+    }
   }
 
   &__header {
@@ -104,20 +117,22 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 0.5rem;
+    justify-content: flex-start;
+    gap: 0.8rem;
+    border: 1px solid $border-color;
+    border-top: none;
+    border-radius: 0 0 $border-radius $border-radius;
   }
 
   &__title {
     font-weight: 700;
     font-size: 1.1rem;
     color: #111827;
-    margin: 0 0 1rem 0;
   }
 
   &__live-matches {
     flex: 1;
-    padding: 0 0.5rem;
+    padding: 0 0.5rem 0 2px;
   }
 
   &__live-header {
@@ -194,9 +209,9 @@
   &__player-name {
     flex: 0 0 auto;
     max-width: 60%;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #111827;
+    color: $text-secondary;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -244,18 +259,31 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #6b7280;
-    padding-top: 0.75rem;
     border-top: 1px solid #e5e7eb;
-    margin-top: 1rem;
     font-weight: 500;
+    padding: 0.75rem 0.5rem 0 2px;
   }
 
   &__footer-time {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #9ca3af;
     font-weight: 400;
+  }
+
+  &__footer-countdown {
+    font-size: 0.8rem;
+    color: $primary-color;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+
+    &--expired {
+      color: #6b7280;
+      background-color: rgba(107, 114, 128, 0.1);
+      animation: none;
+    }
   }
 }
 
@@ -266,6 +294,16 @@
   }
   100% {
     left: 100%;
+  }
+}
+
+@keyframes pulse-countdown {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
 
