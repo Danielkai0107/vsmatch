@@ -568,7 +568,7 @@ export function HomePage() {
       {/* 我參加的比賽 */}
       {user && (
         <div className="home-page__draft-section home-page__draft-section--joined">
-          <h2 className="home-page__draft-title">參賽中</h2>
+          <h2 className="home-page__draft-title">我的參賽</h2>
           <div className="home-page__draft-container">
             {myParticipatedTournaments.length > 0 ? (
               <>
@@ -609,7 +609,7 @@ export function HomePage() {
       {/* 比賽列表 */}
       <div className="home-page__section">
         <div className="home-page__section-header">
-          <h2 className="home-page__section-title">觀看比賽</h2>
+          <h2 className="home-page__section-title">觀看</h2>
 
           {/* 運動項目篩選下拉選單 */}
           <select
