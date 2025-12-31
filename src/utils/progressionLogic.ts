@@ -201,13 +201,13 @@ export async function progressWinner(
   completedMatchId: string,
   winner: PlayerRef,
   format: TournamentFormat
-): Promise<void> {
+): Promise<{ isFinished: boolean }> {
   try {
     // 報隊制 (KOTH) 特殊邏輯
     if (format.type === "koth") {
       const tournamentRef = doc(db, "tournaments", tournamentId);
       const tournamentSnap = await getDoc(tournamentRef);
-      if (!tournamentSnap.exists()) return;
+      if (!tournamentSnap.exists()) return { isFinished: false };
       const tournament = tournamentSnap.data() as Tournament;
 
       // 1. 更新勝場統計 (確保使用全新的物件參考)
@@ -228,7 +228,7 @@ export async function progressWinner(
         completedMatchId
       );
       const matchSnap = await getDoc(matchRef);
-      if (!matchSnap.exists()) return;
+      if (!matchSnap.exists()) return { isFinished: false };
       const matchData = matchSnap.data() as Match;
       const loser =
         matchData.player1?.name === winner.name
@@ -264,7 +264,7 @@ export async function progressWinner(
       });
 
       console.log(`✅ KOTH: ${winner.name} 留下, ${loser?.name || "無"} 進入隊末`);
-      return;
+      return { isFinished: false };
     }
 
     // 獲取完成的比賽資料
@@ -324,7 +324,7 @@ export async function progressWinner(
         console.error("更新比賽狀態失敗:", error);
       }
 
-      return;
+      return { isFinished: true };
     }
 
     // 建立來源映射
@@ -382,6 +382,7 @@ export async function progressWinner(
 
     // 檢查當前輪次是否所有比賽都完成了
     await checkAndProcessRoundCompletion(tournamentId, completedMatch, format);
+    return { isFinished: false };
   } catch (error) {
     console.error("晉級處理失敗:", error);
     throw error;

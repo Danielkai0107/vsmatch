@@ -22,6 +22,7 @@ import type { Match, Tournament } from "../types";
 import { getSetsFormatLabel } from "../types";
 import { ArrowLeft } from "lucide-react";
 import Loading from "../components/ui/Loading";
+import ChampionPopup from "../components/ui/ChampionPopup";
 import "./ScorePage.scss";
 
 export function ScorePage() {
@@ -36,6 +37,11 @@ export function ScorePage() {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showChampionPopup, setShowChampionPopup] = useState(false);
+  const [championData, setChampionData] = useState<{
+    champion: string;
+    runnerUp?: string;
+  } | null>(null);
 
   // 檢查權限
   useEffect(() => {
@@ -362,12 +368,28 @@ export function ScorePage() {
 
         // 處理晉級
         const format = getFormatById(tournament.config.formatId);
+        let isFinished = false;
         if (format) {
-          await progressWinner(tournamentId, matchId, winnerPlayer, format);
+          const result = await progressWinner(tournamentId, matchId, winnerPlayer, format);
+          isFinished = result.isFinished;
         }
 
-        showPopup(`比賽結束！勝者：${winnerPlayer.name}`, "success");
-        navigate(`/tournament/${tournamentId}`);
+        if (isFinished) {
+          const runnerUp =
+            match.player1?.name === winnerPlayer.name
+              ? match.player2?.name
+              : match.player1?.name;
+
+          setChampionData({
+            champion: winnerPlayer.name,
+            runnerUp: runnerUp,
+          });
+          setShowChampionPopup(true);
+          // 不立即導航，讓用戶看到彈窗
+        } else {
+          showPopup(`比賽結束！勝者：${winnerPlayer.name}`, "success");
+          navigate(`/tournament/${tournamentId}`);
+        }
       } catch (error) {
         console.error("Error ending match:", error);
         showPopup("結束比賽失敗", "error");
@@ -688,6 +710,21 @@ export function ScorePage() {
           )}
         </div>
       </div>
+
+      {/* 冠軍慶祝彈窗 */}
+      {tournament && championData && (
+        <ChampionPopup
+          isOpen={showChampionPopup}
+          onClose={() => {
+            setShowChampionPopup(false);
+            navigate(`/tournament/${tournamentId}`);
+          }}
+          tournamentName={tournament.name}
+          championName={championData.champion}
+          runnerUpName={championData.runnerUp}
+          tournamentId={tournamentId || ""}
+        />
+      )}
     </div>
   );
 }

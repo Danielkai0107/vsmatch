@@ -33,6 +33,7 @@ import { QRCodeSVG } from "qrcode.react";
 import Loading from "../components/ui/Loading";
 import { useCountdown } from "../hooks/useCountdown";
 import { usePermissionStore } from "../stores/permissionStore";
+import ChampionPopup from "../components/ui/ChampionPopup";
 import "./TournamentDetailPage.scss";
 
 export function TournamentDetailPage() {
@@ -53,6 +54,7 @@ export function TournamentDetailPage() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showJoinPinModal, setShowJoinPinModal] = useState(false);
+  const [showChampionPopup, setShowChampionPopup] = useState(false);
   const [joinPinInput, setJoinPinInput] = useState("");
   const [joinPinError, setJoinPinError] = useState("");
 
@@ -1040,6 +1042,29 @@ export function TournamentDetailPage() {
           {currentTournament.pin}
         </div>
       </button>
+
+      {/* 冠軍慶祝按鈕 (僅在比賽結束時顯示) */}
+      {currentTournament.status === "finished" && (
+        <button
+          className="tournament-detail__champion-btn"
+          onClick={() => setShowChampionPopup(true)}
+          title="查看冠軍資訊"
+        >
+          <div className="champion-btn-placeholder">
+            <span>🏆</span>
+          </div>
+        </button>
+      )}
+
+      {/* 冠軍慶祝彈窗 */}
+      <ChampionPopup
+        isOpen={showChampionPopup}
+        onClose={() => setShowChampionPopup(false)}
+        tournamentName={currentTournament.name}
+        championName={currentTournament.champion || "未知"}
+        runnerUpName={currentTournament.runnerUp || undefined}
+        tournamentId={currentTournament.id}
+      />
     </div>
   );
 }

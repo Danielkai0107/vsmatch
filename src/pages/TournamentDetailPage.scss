@@ -574,6 +574,51 @@
     color: #111827;
     text-align: center;
   }
+
+  &__champion-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 90px;
+    background-color: #ffd700;
+    border: 3px solid white;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+    overflow: hidden;
+
+    &:hover {
+      transform: translateX(-50%) translateY(-5px) scale(1.1);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+      background-color: #ffca00;
+    }
+
+    &:active {
+      transform: translateX(-50%) translateY(0) scale(0.95);
+    }
+
+    .champion-btn-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+
+      span {
+        font-size: 40px;
+        line-height: 1;
+      }
+    }
+  }
 }
 
 // 資訊彈窗
