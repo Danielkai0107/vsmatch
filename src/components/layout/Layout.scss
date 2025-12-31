@@ -13,6 +13,10 @@
   justify-content: flex-start;
   position: relative;
 
+  .navbar--hidden {
+    display: none;
+  }
+
   &__main {
     max-width: 80rem;
     width: 100%;
