@@ -4,6 +4,7 @@ import { TournamentCard } from "../components/TournamentCard";
 import {
   useActiveTournaments,
   useMyDraftTournaments,
+  useMyJoinedTournaments,
 } from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,8 +34,9 @@ export function HomePage() {
 
   // 使用優化後的查詢：只抓取活躍的比賽
   useActiveTournaments();
-  // 如果用戶已登入，額外抓取其籌備中的比賽
+  // 如果用戶已登入，額外抓取其籌備中的比賽和參加的比賽
   useMyDraftTournaments(user?.uid);
+  useMyJoinedTournaments(user?.uid);
 
   // 使用 selector 避免不必要的重新渲染
   const tournaments = useTournamentStore((state) => state.tournaments);
@@ -50,9 +52,17 @@ export function HomePage() {
   const [scorerPinLoading, setScorerPinLoading] = useState(false);
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // 籌備中（最近發布）的滾動狀態
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const draftScrollRef = useRef<HTMLDivElement>(null);
+
+  // 我的比賽的滾動狀態
+  const [showJoinedLeftArrow, setShowJoinedLeftArrow] = useState(false);
+  const [showJoinedRightArrow, setShowJoinedRightArrow] = useState(false);
+  const joinedScrollRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
   const grantScorePermission = usePermissionStore(
     (state) => state.grantScorePermission
@@ -72,29 +82,69 @@ export function HomePage() {
     );
   }, [tournaments, user]);
 
+  // 獲取當前用戶參加的比賽（尚未開始或進行中）
+  const myParticipatedTournaments = useMemo(() => {
+    if (!user) return [];
+    return tournaments.filter((tournament) => {
+      // 排除已結束的比賽，且用戶是參賽選手
+      const isNotFinished = tournament.status !== "finished";
+      const isParticipant = tournament.players?.some(
+        (p) => p.userId === user.uid || p.id === user.uid
+      );
+      return isNotFinished && isParticipant;
+    });
+  }, [tournaments, user]);
+
   // 檢查滾動位置，顯示/隱藏箭頭
-  const checkScroll = () => {
-    const element = draftScrollRef.current;
+  const checkScroll = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    setLeft: (show: boolean) => void,
+    setRight: (show: boolean) => void
+  ) => {
+    const element = ref.current;
     if (!element) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = element;
-    setShowLeftArrow(scrollLeft > 0);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    setLeft(scrollLeft > 0);
+    setRight(scrollLeft < scrollWidth - clientWidth - 10);
   };
 
   useEffect(() => {
-    const element = draftScrollRef.current;
-    if (!element) return;
+    const draftElement = draftScrollRef.current;
+    const joinedElement = joinedScrollRef.current;
 
-    checkScroll();
-    element.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
+    const handleScroll = () => {
+      checkScroll(draftScrollRef, setShowLeftArrow, setShowRightArrow);
+      checkScroll(
+        joinedScrollRef,
+        setShowJoinedLeftArrow,
+        setShowJoinedRightArrow
+      );
+    };
+
+    if (draftElement) {
+      checkScroll(draftScrollRef, setShowLeftArrow, setShowRightArrow);
+      draftElement.addEventListener("scroll", handleScroll);
+    }
+    if (joinedElement) {
+      checkScroll(
+        joinedScrollRef,
+        setShowJoinedLeftArrow,
+        setShowJoinedRightArrow
+      );
+      joinedElement.addEventListener("scroll", handleScroll);
+    }
+
+    window.addEventListener("resize", handleScroll);
 
     return () => {
-      element.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+      if (draftElement)
+        draftElement.removeEventListener("scroll", handleScroll);
+      if (joinedElement)
+        joinedElement.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
     };
-  }, [myDraftTournaments]);
+  }, [myDraftTournaments, myParticipatedTournaments]);
 
   // 🚀 使用 ref 追蹤正在刪除的比賽 ID，避免重複刪除
   const deletingTournamentsRef = useRef<Set<string>>(new Set());
@@ -162,8 +212,11 @@ export function HomePage() {
   }, [checkExpiredTournaments]);
 
   // 滾動函數
-  const scroll = (direction: "left" | "right") => {
-    const element = draftScrollRef.current;
+  const scroll = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    direction: "left" | "right"
+  ) => {
+    const element = ref.current;
     if (!element) return;
 
     const scrollAmount = 380; // 卡片寬度 + gap
@@ -471,31 +524,83 @@ export function HomePage() {
         </div>
       )}
 
-      {/* 我籌備中的比賽 */}
-      {user && myDraftTournaments.length > 0 && (
+      {/* 最近發布的比賽 */}
+      {user && (
         <div className="home-page__draft-section">
           <h2 className="home-page__draft-title">最近發布</h2>
           <div className="home-page__draft-container">
-            {showLeftArrow && (
-              <button
-                className="home-page__scroll-btn home-page__scroll-btn--left"
-                onClick={() => scroll("left")}
-              >
-                <ChevronLeft size={24} />
-              </button>
+            {myDraftTournaments.length > 0 ? (
+              <>
+                {showLeftArrow && (
+                  <button
+                    className="home-page__scroll-btn home-page__scroll-btn--left"
+                    onClick={() => scroll(draftScrollRef, "left")}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                <div className="home-page__draft-scroll" ref={draftScrollRef}>
+                  {myDraftTournaments.map((tournament) => (
+                    <TournamentCard
+                      key={tournament.id}
+                      tournament={tournament}
+                    />
+                  ))}
+                </div>
+                {showRightArrow && (
+                  <button
+                    className="home-page__scroll-btn home-page__scroll-btn--right"
+                    onClick={() => scroll(draftScrollRef, "right")}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="home-page__empty-simple">
+                <p>暫無發布</p>
+              </div>
             )}
-            <div className="home-page__draft-scroll" ref={draftScrollRef}>
-              {myDraftTournaments.map((tournament) => (
-                <TournamentCard key={tournament.id} tournament={tournament} />
-              ))}
-            </div>
-            {showRightArrow && (
-              <button
-                className="home-page__scroll-btn home-page__scroll-btn--right"
-                onClick={() => scroll("right")}
-              >
-                <ChevronRight size={24} />
-              </button>
+          </div>
+        </div>
+      )}
+
+      {/* 我參加的比賽 */}
+      {user && (
+        <div className="home-page__draft-section">
+          <h2 className="home-page__draft-title">參賽中</h2>
+          <div className="home-page__draft-container">
+            {myParticipatedTournaments.length > 0 ? (
+              <>
+                {showJoinedLeftArrow && (
+                  <button
+                    className="home-page__scroll-btn home-page__scroll-btn--left"
+                    onClick={() => scroll(joinedScrollRef, "left")}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                <div className="home-page__draft-scroll" ref={joinedScrollRef}>
+                  {myParticipatedTournaments.map((tournament) => (
+                    <TournamentCard
+                      key={tournament.id}
+                      tournament={tournament}
+                    />
+                  ))}
+                </div>
+                {showJoinedRightArrow && (
+                  <button
+                    className="home-page__scroll-btn home-page__scroll-btn--right"
+                    onClick={() => scroll(joinedScrollRef, "right")}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="home-page__empty-simple">
+                <p>目前沒有參加中的比賽</p>
+              </div>
             )}
           </div>
         </div>
