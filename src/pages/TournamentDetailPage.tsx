@@ -463,7 +463,7 @@ export function TournamentDetailPage() {
                   className="tournament-detail__join-btn tournament-detail__delete-btn"
                   title="刪除比賽"
                 >
-                  {isDeleting ? "刪除中..." : <>結束</>}
+                  {isDeleting ? "刪除中..." : <>刪除</>}
                 </button>
                 <button
                   onClick={handleStartTournament}
