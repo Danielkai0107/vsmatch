@@ -122,10 +122,8 @@ export function HomePage() {
       if (elapsed >= COUNTDOWN_DURATION) {
         // 🚀 標記為正在刪除
         deletingTournamentsRef.current.add(tournament.id);
-        
-        console.log(
-          `自動刪除過期比賽: ${tournament.id} (${tournament.name})`
-        );
+
+        console.log(`自動刪除過期比賽: ${tournament.id} (${tournament.name})`);
 
         try {
           // 1. 刪除所有 matches 子集合
@@ -506,7 +504,7 @@ export function HomePage() {
       {/* 比賽列表 */}
       <div className="home-page__section">
         <div className="home-page__section-header">
-          <h2 className="home-page__section-title">探索比賽</h2>
+          <h2 className="home-page__section-title">觀看比賽</h2>
 
           {/* 運動項目篩選下拉選單 */}
           <select
