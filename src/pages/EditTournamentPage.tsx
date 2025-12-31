@@ -371,11 +371,20 @@ export function EditTournamentPage() {
                       a. 局數制度
                     </label>
                     <div className="create-tournament__grid create-tournament__grid--3cols">
-                      {SETS_OPTIONS.filter(
-                        (opt) =>
+                      {SETS_OPTIONS.filter((opt) => {
+                        // 籃球特殊處理：支援總分制也支援單局制
+                        if (selectedSport?.id === "basketball") {
+                          return (
+                            opt.scoringMode === "cumulative" ||
+                            opt.id === "single"
+                          );
+                        }
+                        // 其他運動：依照預設計分模式過濾
+                        return (
                           selectedSport?.defaultRules?.scoringMode ===
                           opt.scoringMode
-                      ).map((option) => (
+                        );
+                      }).map((option) => (
                         <button
                           key={option.id}
                           onClick={() =>
@@ -523,7 +532,9 @@ export function EditTournamentPage() {
                           {format.name}
                         </div>
                         <div className="create-tournament__select-btn-desc">
-                          {format.totalSlots} 組
+                          {format.totalSlots > 0
+                            ? `${format.totalSlots} 組`
+                            : "不限人數"}
                         </div>
                       </button>
                     ))}
@@ -532,9 +543,10 @@ export function EditTournamentPage() {
                   {selectedFormat && (
                     <div className="create-tournament__preview">
                       <p>
-                        <strong>預覽：</strong> {selectedFormat.name} 共有{" "}
-                        {selectedFormat.stages.length} 輪，需要{" "}
-                        {selectedFormat.totalSlots} 組選手。
+                        <strong>預覽：</strong>{" "}
+                        {selectedFormat.type === "koth"
+                          ? `${selectedFormat.name}：贏家留下繼續比賽，輸家重新排隊。不限參賽人數，主辦人可隨時手動結算排名。`
+                          : `${selectedFormat.name} 共有 ${selectedFormat.stages.length} 輪，需要 ${selectedFormat.totalSlots} 組選手。`}
                       </p>
                     </div>
                   )}

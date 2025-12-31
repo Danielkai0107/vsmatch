@@ -1,4 +1,4 @@
-@import "../styles/variables";
+@use "../styles/variables" as *;
 
 .tournament-detail {
   width: 100dvw;
@@ -238,6 +238,13 @@
     font-size: 1.7rem;
     font-weight: 700;
     color: #000000;
+  }
+
+  &__finish-btn {
+    background-color: #f59e0b;
+    &:hover {
+      background-color: #d97706;
+    }
   }
 
   .info-container {
@@ -838,23 +845,233 @@
   }
 }
 
-// 動畫
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+// 報隊制 (KOTH) 專用樣式
+.koth-display {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 1rem;
+  overflow-y: auto;
+
+  @media (min-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr 350px;
+    padding: 2rem;
   }
-  to {
-    opacity: 1;
+
+  &--draft {
+    display: block;
+    max-width: 800px;
+    margin: 0 auto;
   }
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
+.koth-current-match {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .bracket-view {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+
+    &__container {
+      justify-content: center;
+      padding: 0;
+    }
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+}
+
+.koth-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: $primary-color;
+    border-radius: 2px;
+  }
+}
+
+.koth-side-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.koth-queue,
+.koth-stats {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.koth-queue-list,
+.koth-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.koth-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+
+  .koth-queue-pos {
+    width: 24px;
+    height: 24px;
+    background-color: #e5e7eb;
+    color: #4b5563;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .koth-queue-name {
+    flex: 1;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .koth-queue-remove {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #ef4444;
+    }
+  }
+}
+
+.koth-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+
+  &--first {
+    background-color: #fffbeb;
+    border-color: #fef3c7;
+    .koth-stat-name {
+      font-weight: 700;
+      color: #92400e;
+    }
+  }
+
+  .koth-stat-rank {
+    width: 32px;
+    font-weight: 800;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .koth-stat-name {
+    flex: 1;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .koth-stat-wins {
+    font-weight: 700;
+    color: #15803d;
+    background-color: #bbf7d0;
+    padding: 0.125rem 0.625rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+.koth-empty-msg {
+  text-align: center;
+  color: #9ca3af;
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.koth-finished {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.koth-final-stats {
+  width: 100%;
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+
+  .koth-title {
+    justify-content: center;
+    margin-bottom: 2rem;
+    font-size: 1.25rem;
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.koth-winner-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fbbf24;
+  min-width: 300px;
+
+  .koth-winner-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .koth-winner-name {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #78350f;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }

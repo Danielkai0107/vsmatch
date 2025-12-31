@@ -262,9 +262,14 @@ export function ManageTournamentPage() {
         {/* 已報名選手 */}
         <div className="p-6 border-b">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            已報名選手（{currentTournament.players.length} /{" "}
-            {getFormatById(currentTournament.config.formatId)?.totalSlots || 0}{" "}
-            人）
+            已報名選手（{currentTournament.players.length}
+            {getFormatById(currentTournament.config.formatId)?.type !== "koth"
+              ? ` / ${
+                  getFormatById(currentTournament.config.formatId)
+                    ?.totalSlots || 0
+                } 人`
+              : " 人"}
+            ）
           </h3>
           <div className="bg-gray-50 p-4 rounded-lg max-h-80 overflow-y-auto">
             {currentTournament.players.length === 0 ? (

@@ -5,7 +5,7 @@ export const SPORTS: SportsData = {
   badminton: {
     id: "badminton",
     name: "羽球",
-    icon: "",
+    icon: "🏸",
     modes: ["單打", "雙打"],
     defaultRules: {
       scoringMode: "sets",
@@ -19,15 +19,57 @@ export const SPORTS: SportsData = {
   basketball: {
     id: "basketball",
     name: "籃球",
-    icon: "",
+    icon: "🏀",
     modes: ["3x3", "5x5"],
     defaultRules: {
-      scoringMode: "cumulative",
-      scoreToWin: 0,
-      setsToWin: 0,
-      totalSets: 4,
-      allowOvertime: true,
+      scoringMode: "sets",
+      scoreToWin: 6,
+      setsToWin: 1,
+      totalSets: 1,
+      allowOvertime: false,
       tiebreaker: null,
+    },
+  },
+  table_tennis: {
+    id: "table_tennis",
+    name: "桌球",
+    icon: "🏓",
+    modes: ["單打", "雙打"],
+    defaultRules: {
+      scoringMode: "sets",
+      scoreToWin: 11,
+      setsToWin: 2,
+      totalSets: 3,
+      allowOvertime: false,
+      tiebreaker: null,
+    },
+  },
+  pickleball: {
+    id: "pickleball",
+    name: "匹克球",
+    icon: "🎾",
+    modes: ["單打", "雙打"],
+    defaultRules: {
+      scoringMode: "sets",
+      scoreToWin: 11,
+      setsToWin: 1,
+      totalSets: 1,
+      allowOvertime: false,
+      tiebreaker: null,
+    },
+  },
+  volleyball: {
+    id: "volleyball",
+    name: "排球",
+    icon: "🏐",
+    modes: ["六人制", "混排"],
+    defaultRules: {
+      scoringMode: "sets",
+      scoreToWin: 25,
+      setsToWin: 2,
+      totalSets: 3,
+      allowOvertime: false,
+      tiebreaker: { scoreToWin: 15 },
     },
   },
 };
@@ -174,6 +216,24 @@ export const FORMATS: FormatsData = {
         round: 4,
         name: "決賽",
         matches: [{ id: "r4m1", next: null }],
+      },
+    ],
+  },
+  koth: {
+    id: "koth",
+    name: "報隊制",
+    type: "koth",
+    totalSlots: 0, // 0 表示不限人數
+    stages: [
+      {
+        round: 1,
+        name: "對決中",
+        matches: [
+          {
+            id: "koth_match",
+            next: null,
+          },
+        ],
       },
     ],
   },

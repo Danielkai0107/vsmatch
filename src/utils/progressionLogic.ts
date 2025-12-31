@@ -1,6 +1,6 @@
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import type { Match, PlayerRef, TournamentFormat } from "../types";
+import type { Match, PlayerRef, TournamentFormat, Tournament } from "../types";
 import { buildSourceMapping } from "./bracketLogic";
 
 /**
@@ -203,6 +203,70 @@ export async function progressWinner(
   format: TournamentFormat
 ): Promise<void> {
   try {
+    // 報隊制 (KOTH) 特殊邏輯
+    if (format.type === "koth") {
+      const tournamentRef = doc(db, "tournaments", tournamentId);
+      const tournamentSnap = await getDoc(tournamentRef);
+      if (!tournamentSnap.exists()) return;
+      const tournament = tournamentSnap.data() as Tournament;
+
+      // 1. 更新勝場統計 (確保使用全新的物件參考)
+      const kothStats = { ...(tournament.kothStats || {}) };
+      const currentWins = kothStats[winner.name]?.wins || 0;
+      kothStats[winner.name] = {
+        wins: currentWins + 1,
+      };
+
+      console.log(`🏆 KOTH 勝場更新: ${winner.name} (${currentWins} -> ${currentWins + 1})`);
+
+      // 2. 找出輸家
+      const matchRef = doc(
+        db,
+        "tournaments",
+        tournamentId,
+        "matches",
+        completedMatchId
+      );
+      const matchSnap = await getDoc(matchRef);
+      if (!matchSnap.exists()) return;
+      const matchData = matchSnap.data() as Match;
+      const loser =
+        matchData.player1?.name === winner.name
+          ? matchData.player2
+          : matchData.player1;
+
+      // 3. 處理隊列：輸家到隊末，取隊首作為新對手
+      let queue = [...(tournament.kothQueue || [])];
+      if (loser) {
+        queue.push(loser.name);
+      }
+
+      const nextOpponentName = queue.shift();
+      const nextPlayer2: PlayerRef | null = nextOpponentName
+        ? { name: nextOpponentName }
+        : null;
+
+      // 4. 重置比賽場次
+      await updateDoc(matchRef, {
+        player1: winner, // 勝者留下
+        player2: nextPlayer2,
+        sets: [],
+        currentSet: 0,
+        winner: null,
+        status: nextPlayer2 ? "pending" : "live", // 如果沒人遞補，保持 live 等待
+      });
+
+      // 5. 更新賽事隊列與統計
+      await updateDoc(tournamentRef, {
+        kothQueue: queue,
+        kothStats: kothStats,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log(`✅ KOTH: ${winner.name} 留下, ${loser?.name || "無"} 進入隊末`);
+      return;
+    }
+
     // 獲取完成的比賽資料
     const completedMatchRef = doc(
       db,

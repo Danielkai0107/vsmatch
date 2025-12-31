@@ -12,6 +12,7 @@ import {
   deleteDoc,
   collection,
   getDocs,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useTournamentById, useMatches } from "../hooks/useFirestore";
@@ -54,7 +55,6 @@ export function TournamentDetailPage() {
   const [showJoinPinModal, setShowJoinPinModal] = useState(false);
   const [joinPinInput, setJoinPinInput] = useState("");
   const [joinPinError, setJoinPinError] = useState("");
-  const [joinPinLoading, setJoinPinLoading] = useState(false);
 
   // 🚀 優化：先從 store 獲取已有的比賽資料（來自首頁/個人頁）
   const tournaments = useTournamentStore((state) => state.tournaments);
@@ -318,6 +318,41 @@ export function TournamentDetailPage() {
         return;
       }
 
+      // 報隊制 (KOTH) 特殊初始化邏輯
+      if (format.type === "koth") {
+        const players = [...currentTournament.players];
+        const p1 = players[0];
+        const p2 = players[1];
+        const queue = players.slice(2).map((p) => p.name);
+
+        const initialMatch: Partial<Match> = {
+          matchId: "koth_match",
+          tournamentId: id,
+          player1: { name: p1.name },
+          player2: { name: p2.name },
+          sets: [],
+          currentSet: 0,
+          winner: null,
+          status: "pending",
+          nextMatchId: null,
+        };
+
+        await setDoc(
+          doc(db, "tournaments", id, "matches", "koth_match"),
+          initialMatch
+        );
+
+        await updateDoc(doc(db, "tournaments", id), {
+          status: "live",
+          startedAt: new Date().toISOString(),
+          kothQueue: queue,
+          kothStats: {},
+        });
+
+        console.log("KOTH 比賽初始化成功");
+        return;
+      }
+
       const initialMatches = mapPlayersToMatches(
         format,
         currentTournament.players
@@ -370,12 +405,11 @@ export function TournamentDetailPage() {
       return;
     }
 
-    setJoinPinLoading(true);
     setJoinPinError("");
 
     try {
-      if (joinPinInput === currentTournament.pin) {
-        grantJoinPermission(currentTournament.id);
+      if (joinPinInput === (currentTournament as any).pin) {
+        grantJoinPermission((currentTournament as any).id);
         setShowJoinPinModal(false);
         setJoinPinInput("");
         showPopup("驗證成功", "success");
@@ -385,9 +419,72 @@ export function TournamentDetailPage() {
     } catch (error) {
       console.error("Error validating PIN:", error);
       setJoinPinError("驗證失敗，請重試");
-    } finally {
-      setJoinPinLoading(false);
     }
+  };
+
+  // 處理 KOTH 結束比賽
+  const handleFinishKoth = async () => {
+    if (!id || !currentTournament) return;
+
+    showConfirm("確定要結束報隊比賽並結算排名嗎？", async () => {
+      try {
+        const stats = currentTournament.kothStats || {};
+        let champion = "";
+        let maxWins = -1;
+
+        Object.entries(stats).forEach(([name, stat]) => {
+          if ((stat as any).wins > maxWins) {
+            maxWins = (stat as any).wins;
+            champion = name;
+          }
+        });
+
+        await updateDoc(doc(db, "tournaments", id), {
+          status: "finished",
+          champion: champion || null,
+          finishedAt: new Date().toISOString(),
+        });
+
+        showPopup("比賽已結束", "success");
+      } catch (error) {
+        console.error("結束 KOTH 比賽失敗:", error);
+        showPopup("結束比賽失敗", "error");
+      }
+    });
+  };
+
+  // 處理從 KOTH 隊列移除玩家
+  const handleRemoveFromQueue = async (name: string) => {
+    if (!id || !isOrganizer) return;
+
+    showConfirm(`確定要將「${name}」從排隊名單移除嗎？`, async () => {
+      try {
+        await updateDoc(doc(db, "tournaments", id), {
+          kothQueue: arrayRemove(name),
+        });
+        showPopup("已移除", "success");
+      } catch (error) {
+        console.error("移除排隊玩家失敗:", error);
+        showPopup("移除失敗", "error");
+      }
+    });
+  };
+
+  // 處理從比賽移除選手（籌備階段）
+  const handleRemovePlayerFromTournament = async (player: any) => {
+    if (!id || !isOrganizer) return;
+
+    showConfirm(`確定要將選手「${player.name}」移除嗎？`, async () => {
+      try {
+        await updateDoc(doc(db, "tournaments", id), {
+          players: arrayRemove(player),
+        });
+        showPopup("選手已移除", "success");
+      } catch (error) {
+        console.error("移除選手失敗:", error);
+        showPopup("移除失敗", "error");
+      }
+    });
   };
 
   // 如果還沒有 matches，從 format 創建初始對戰表
@@ -410,8 +507,14 @@ export function TournamentDetailPage() {
         return `等待加入中... (${currentPlayersCount}人)`;
       }
       // 正常情況下比較人數
-      if (currentPlayersCount >= maxPlayersCount) {
+      if (
+        format?.type !== "koth" &&
+        maxPlayersCount > 0 &&
+        currentPlayersCount >= maxPlayersCount
+      ) {
         return `已滿額！(${currentPlayersCount}/${maxPlayersCount})`;
+      } else if (format?.type === "koth") {
+        return `等待加入中... (${currentPlayersCount}人)`;
       } else {
         return `等待加入中... (${currentPlayersCount}/${maxPlayersCount})`;
       }
@@ -479,6 +582,14 @@ export function TournamentDetailPage() {
             {/* 比賽進行中：只顯示計分、刪除 */}
             {currentTournament.status === "live" && (
               <>
+                {format?.type === "koth" && (
+                  <button
+                    onClick={handleFinishKoth}
+                    className="tournament-detail__join-btn tournament-detail__finish-btn"
+                  >
+                    結束
+                  </button>
+                )}
                 <button
                   onClick={() => setShowPinModal(true)}
                   className="tournament-detail__join-btn tournament-detail__scorer-btn"
@@ -514,22 +625,199 @@ export function TournamentDetailPage() {
       {/* 對戰表 */}
       {format && (
         <div className="bracket-view-container">
-          {/* <h2 className="bracket-view-container__title">對戰表</h2> */}
-          {/* 🚀 優化：對戰表區域單獨顯示載入狀態 */}
-          {(matchesLoading || isFixing) &&
-          currentTournament.status === "live" ? (
-            <div className="bracket-view-container__loading">
-              <Loading
-                text={isFixing ? "正在初始化對戰表..." : "載入對戰表..."}
-              />
-            </div>
-          ) : (
-            <BracketView
-              format={format}
-              matches={displayMatches}
-              tournamentId={id || ""}
-            />
+          {/* 報隊制特殊顯示 */}
+          {format.type === "koth" && (
+            <>
+              {/* 籌備階段：顯示報名名單 */}
+              {currentTournament.status === "draft" && (
+                <div className="koth-display koth-display--draft">
+                  <div
+                    className="koth-side-info"
+                    style={{ gridColumn: "1 / -1" }}
+                  >
+                    <div className="koth-queue">
+                      <h3 className="koth-title">
+                        已報名選手 ({currentPlayersCount})
+                      </h3>
+                      <div className="koth-queue-list">
+                        {currentTournament.players &&
+                        currentTournament.players.length > 0 ? (
+                          currentTournament.players.map((player, index) => (
+                            <div key={index} className="koth-queue-item">
+                              <span className="koth-queue-pos">
+                                {index + 1}
+                              </span>
+                              <span className="koth-queue-name">
+                                {player.name}
+                              </span>
+                              {isOrganizer && (
+                                <button
+                                  className="koth-queue-remove"
+                                  onClick={() =>
+                                    handleRemovePlayerFromTournament(player)
+                                  }
+                                  title="移除"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="koth-empty-msg">尚無選手報名</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 進行中階段 */}
+              {currentTournament.status === "live" && (
+                <div className="koth-display">
+                  {/* 目前比賽場次 */}
+                  <div className="koth-current-match">
+                    <h3 className="koth-title">正在對決</h3>
+                    {matches["koth_match"] ? (
+                      <BracketView
+                        format={format}
+                        matches={{ koth_match: matches["koth_match"] }}
+                        tournamentId={id || ""}
+                      />
+                    ) : (
+                      <div className="koth-no-match">暫無比賽</div>
+                    )}
+                  </div>
+
+                  <div className="koth-side-info">
+                    {/* 排隊列表 */}
+                    <div className="koth-queue">
+                      <h3 className="koth-title">
+                        排隊名單 ({currentTournament.kothQueue?.length || 0})
+                      </h3>
+                      <div className="koth-queue-list">
+                        {currentTournament.kothQueue &&
+                        currentTournament.kothQueue.length > 0 ? (
+                          currentTournament.kothQueue.map((name, index) => (
+                            <div key={index} className="koth-queue-item">
+                              <span className="koth-queue-pos">
+                                {index + 1}
+                              </span>
+                              <span className="koth-queue-name">{name}</span>
+                              {isOrganizer && (
+                                <button
+                                  className="koth-queue-remove"
+                                  onClick={() => handleRemoveFromQueue(name)}
+                                  title="移除"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="koth-empty-msg">尚無人排隊</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 勝場統計 */}
+                    <div className="koth-stats">
+                      <h3 className="koth-title">勝場統計</h3>
+                      <div className="koth-stats-list">
+                        {currentTournament.kothStats &&
+                        Object.keys(currentTournament.kothStats).length > 0 ? (
+                          Object.entries(currentTournament.kothStats)
+                            .sort(
+                              (a, b) => (b[1] as any).wins - (a[1] as any).wins
+                            )
+                            .map(([name, stat]) => (
+                              <div key={name} className="koth-stat-item">
+                                <span className="koth-stat-name">{name}</span>
+                                <span className="koth-stat-wins">
+                                  {(stat as any).wins} 勝
+                                </span>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="koth-empty-msg">尚無勝場記錄</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
+
+          {/* 原有淘汰賽顯示 */}
+          {format.type !== "koth" && (
+            <>
+              {(matchesLoading || isFixing) &&
+              currentTournament.status === "live" ? (
+                <div className="bracket-view-container__loading">
+                  <Loading
+                    text={isFixing ? "正在初始化對戰表..." : "載入對戰表..."}
+                  />
+                </div>
+              ) : (
+                <BracketView
+                  format={format}
+                  matches={displayMatches}
+                  tournamentId={id || ""}
+                />
+              )}
+            </>
+          )}
+
+          {/* KOTH 結束後顯示 */}
+          {format.type === "koth" &&
+            currentTournament.status === "finished" && (
+              <div className="koth-finished">
+                <div className="koth-winner-card">
+                  <div className="koth-winner-label">最終贏家</div>
+                  <div className="koth-winner-name">
+                    {currentTournament.champion || "無"}
+                  </div>
+                </div>
+
+                {/* 結束後的勝場總排名 */}
+                <div className="koth-final-stats">
+                  <h3 className="koth-title">最終勝場排名</h3>
+                  <div className="koth-stats-list">
+                    {currentTournament.kothStats &&
+                    Object.keys(currentTournament.kothStats).length > 0 ? (
+                      Object.entries(currentTournament.kothStats)
+                        .sort((a, b) => (b[1] as any).wins - (a[1] as any).wins)
+                        .map(([name, stat], index) => (
+                          <div
+                            key={name}
+                            className={`koth-stat-item ${
+                              index === 0 ? "koth-stat-item--first" : ""
+                            }`}
+                          >
+                            <div className="koth-stat-rank">
+                              {index === 0
+                                ? "🥇"
+                                : index === 1
+                                ? "🥈"
+                                : index === 2
+                                ? "🥉"
+                                : `${index + 1}`}
+                            </div>
+                            <span className="koth-stat-name">{name}</span>
+                            <span className="koth-stat-wins">
+                              {(stat as any).wins} 勝
+                            </span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="koth-empty-msg">尚無勝場記錄</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
       )}
 
@@ -598,48 +886,56 @@ export function TournamentDetailPage() {
             {joinPinError && <p className="pin-modal-error">{joinPinError}</p>}
             <button
               onClick={handleJoinPinSubmit}
-              disabled={joinPinInput.length !== 6 || joinPinLoading}
+              disabled={joinPinInput.length !== 6}
               className="pin-modal-submit-btn"
             >
-              {joinPinLoading ? "驗證中..." : "驗證"}
+              驗證
             </button>
           </div>
         </div>
       )}
 
-      {/* 固定在底部的報名按鈕（僅在籌備階段且尚未報名時顯示） */}
-      {currentTournament.status === "draft" && !hasJoined && (
-        <>
-          {hasJoinPermission || isOrganizer ? (
-            <button
-              onClick={() => {
-                // 檢查是否已滿人
-                if (format && currentPlayersCount >= format.totalSlots) {
-                  showPopup("報名人數已滿", "error");
-                  return;
-                }
-                // 開啟報名彈窗
-                setShowJoinModal(true);
-              }}
-              className="tournament-detail__floating-join-btn"
-            >
-              報名參賽
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowJoinPinModal(true)}
-              className="tournament-detail__floating-join-btn"
-            >
-              輸入 PIN 碼報名
-            </button>
-          )}
-        </>
-      )}
+      {/* 固定在底部的報名按鈕（籌備階段，或報隊制進行中且尚未報名時顯示） */}
+      {(currentTournament.status === "draft" ||
+        (format?.type === "koth" && currentTournament.status === "live")) &&
+        !hasJoined && (
+          <>
+            {hasJoinPermission || isOrganizer ? (
+              <button
+                onClick={() => {
+                  // 檢查是否已滿人（報隊制不限人數）
+                  if (
+                    format?.type !== "koth" &&
+                    format &&
+                    currentPlayersCount >= format.totalSlots
+                  ) {
+                    showPopup("報名人數已滿", "error");
+                    return;
+                  }
+                  // 開啟報名彈窗
+                  setShowJoinModal(true);
+                }}
+                className="tournament-detail__floating-join-btn"
+              >
+                報名參賽
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowJoinPinModal(true)}
+                className="tournament-detail__floating-join-btn"
+              >
+                輸入 PIN 碼報名
+              </button>
+            )}
+          </>
+        )}
 
       {/* 已報名提示（固定在底部） */}
-      {currentTournament.status === "draft" && hasJoined && (
-        <div className="tournament-detail__floating-joined-badge">已報名</div>
-      )}
+      {(currentTournament.status === "draft" ||
+        (format?.type === "koth" && currentTournament.status === "live")) &&
+        hasJoined && (
+          <div className="tournament-detail__floating-joined-badge">已報名</div>
+        )}
 
       {/* 資訊彈窗 */}
       {showInfoModal && (

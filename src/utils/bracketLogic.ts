@@ -46,6 +46,14 @@ export function mapPlayersToMatches(
           match.status = "pending";
         }
       }
+      // 報隊制 (KOTH) 特殊處理：將前兩位選手放入第一場
+      else if (format.type === "koth" && formatMatch.id === "koth_match") {
+        const p1 = players[0];
+        const p2 = players[1];
+        match.player1 = p1 ? { name: p1.name } : null;
+        match.player2 = p2 ? { name: p2.name } : null;
+        match.status = p1 && p2 ? "pending" : "live";
+      }
       // 後續輪次：選手來自前一輪的勝者
       else {
         match.status = "pending";

@@ -81,9 +81,13 @@ export function JoinPage() {
       return;
     }
 
-    // 檢查是否已滿人
+    // 檢查是否已滿人（報隊制不限人數）
     const format = getFormatById(tournament.config.formatId);
-    if (format && tournament.players.length >= format.totalSlots) {
+    if (
+      format?.type !== "koth" &&
+      format &&
+      tournament.players.length >= format.totalSlots
+    ) {
       setError("比賽人數已滿");
       return;
     }
@@ -169,7 +173,8 @@ export function JoinPage() {
                 <span>{format?.name}</span>
               </div>
               <div className="join-page__tournament-stats">
-                目前報名人數：{tournament.players.length} / {format?.totalSlots}
+                目前報名人數：{tournament.players.length}{" "}
+                {format?.type !== "koth" ? `/ ${format?.totalSlots}` : "人"}
               </div>
             </div>
 

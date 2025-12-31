@@ -38,8 +38,12 @@ export function JoinModal({
       return;
     }
 
-    // 檢查是否已滿人
-    if (format && tournament.players.length >= format.totalSlots) {
+    // 檢查是否已滿人（報隊制不限人數）
+    if (
+      format?.type !== "koth" &&
+      format &&
+      tournament.players.length >= format.totalSlots
+    ) {
       setError("比賽人數已滿");
       return;
     }
@@ -57,8 +61,13 @@ export function JoinModal({
         ...(user ? { userId: user.uid } : {}), // 如果有登入，記錄 userId
       };
 
+      // 如果是 KOTH 且已開始，新加入的人應直接進入排隊名單
+      const isKothLive =
+        format?.type === "koth" && tournament.status === "live";
+
       await updateDoc(tournamentRef, {
         players: arrayUnion(playerData),
+        ...(isKothLive ? { kothQueue: arrayUnion(playerName.trim()) } : {}),
       });
 
       showPopup("報名成功！", "success");

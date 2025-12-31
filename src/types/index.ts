@@ -36,7 +36,7 @@ export interface RulePreset {
 export interface TournamentFormat {
   id: string;
   name: string;
-  type: "knockout" | "round-robin";
+  type: "knockout" | "round-robin" | "koth";
   totalSlots: number;
   stages: Stage[];
 }
@@ -76,6 +76,11 @@ export interface Tournament {
   players: Player[];
   createdAt: Date;
   updatedAt: Date;
+  kothQueue?: string[]; // 報隊制：排隊中的選手姓名列表
+  kothStats?: Record<string, { wins: number }>; // 報隊制：記錄每位選手的勝場數
+  champion?: string;
+  runnerUp?: string;
+  finishedAt?: string;
 }
 
 export interface TournamentConfig {
