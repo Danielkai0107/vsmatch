@@ -206,7 +206,7 @@ export function EditTournamentPage() {
       });
 
       showPopup("更新成功！", "success");
-      navigate(`/tournament/${id}`);
+      navigate(`/tournament/${id}`, { replace: true });
     } catch (error) {
       console.error("Error updating tournament:", error);
       showPopup("更新失敗，請重試", "error");
@@ -235,7 +235,7 @@ export function EditTournamentPage() {
           {/* Header */}
           <div className="create-tournament__header">
             <button
-              onClick={() => navigate(`/tournament/${id}`)}
+              onClick={() => navigate(-1)}
               className="create-tournament__back-btn"
             >
               <ArrowLeft />

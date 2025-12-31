@@ -154,7 +154,9 @@ export function PinModal({
                   {tournamentId && (
                     <button
                       onClick={() => {
-                        navigate(`/tournament/${tournamentId}`);
+                        navigate(`/tournament/${tournamentId}`, {
+                          replace: true,
+                        });
                       }}
                       className="pin-modal__btn pin-modal__btn--outline"
                     >

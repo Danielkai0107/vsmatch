@@ -513,7 +513,13 @@ export function TournamentDetailPage() {
     <div className="tournament-detail">
       <div className="tournament-detail__header">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/");
+            }
+          }}
           className="tournament-detail__back-btn mb-4"
         >
           <ArrowLeft />
