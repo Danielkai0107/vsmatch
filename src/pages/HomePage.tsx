@@ -57,6 +57,9 @@ export function HomePage() {
   const grantScorePermission = usePermissionStore(
     (state) => state.grantScorePermission
   );
+  const grantJoinPermission = usePermissionStore(
+    (state) => state.grantJoinPermission
+  );
 
   const allSports = getAllSports();
 
@@ -249,6 +252,9 @@ export function HomePage() {
           setPinError("此比賽已不接受報名");
           return;
         }
+
+        // 授予報名權限
+        grantJoinPermission(tournament.id);
 
         // 找到比賽，直接跳轉到詳情頁
         setShowPinModal(false);

@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useMyOrganizedTournaments } from "../hooks/useFirestore";
+import {
+  useMyOrganizedTournaments,
+  useMyJoinedTournaments,
+} from "../hooks/useFirestore";
 import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
 import { useCountdown } from "../hooks/useCountdown";
@@ -13,8 +16,9 @@ export function ProfilePage() {
   const { user, firebaseUser } = useAuth();
   const navigate = useNavigate();
 
-  // 只查詢用戶舉辦的比賽（大幅減少資料量）
+  // 同時查詢舉辦的和參加的比賽
   useMyOrganizedTournaments(user?.uid);
+  useMyJoinedTournaments(user?.uid);
   const tournaments = useTournamentStore((state) => state.tournaments);
   const loading = useTournamentStore((state) => state.loading);
 
@@ -71,8 +75,12 @@ export function ProfilePage() {
     setTimeout(() => setIsSwiping(false), 50);
   };
 
-  // 我舉辦的比賽（已由查詢過濾，無需再次過濾）
-  const myTournaments = useMemo(() => tournaments, [tournaments]);
+  // 我舉辦的比賽（過濾出 organizerId 等於當前用戶 ID 的比賽）
+  const myTournaments = useMemo(
+    () =>
+      user ? tournaments.filter((t) => t.organizerId === user.uid) : [],
+    [tournaments, user?.uid]
+  );
 
   // 我參加的比賽（檢查 players 列表中的 userId）
   const joinedTournaments = useMemo(

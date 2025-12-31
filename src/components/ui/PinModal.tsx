@@ -28,8 +28,12 @@ export function PinModal({
 
   // 取得完整網址
   const baseUrl = window.location.origin;
-  const publicUrl = tournamentId ? `${baseUrl}/tournament/${tournamentId}` : "";
-  const scorerUrl = tournamentId ? `${baseUrl}/tournament/${tournamentId}/scorer?pin=${scorerPin}` : "";
+  const publicUrl = tournamentId
+    ? `${baseUrl}/tournament/${tournamentId}?pin=${pin}`
+    : "";
+  const scorerUrl = tournamentId
+    ? `${baseUrl}/tournament/${tournamentId}/scorer?pin=${scorerPin}`
+    : "";
 
   // 處理觸摸滑動
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -135,7 +139,9 @@ export function PinModal({
                       level="H"
                       includeMargin={true}
                     />
-                    <div className="pin-modal__qrcode-tip">掃碼查看比賽</div>
+                    <div className="pin-modal__qrcode-tip">
+                      掃碼獲得報名資格
+                    </div>
                   </div>
                 )}
 
@@ -181,7 +187,9 @@ export function PinModal({
                       level="H"
                       includeMargin={true}
                     />
-                    <div className="pin-modal__qrcode-tip">掃碼快速獲得權限</div>
+                    <div className="pin-modal__qrcode-tip">
+                      掃碼快速獲得權限
+                    </div>
                   </div>
                 )}
 

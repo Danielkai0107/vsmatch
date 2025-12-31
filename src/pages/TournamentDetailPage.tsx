@@ -1,5 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef } from "react";
+import {
+  useParams,
+  useNavigate,
+  Link,
+  useSearchParams,
+} from "react-router-dom";
 import {
   doc,
   updateDoc,
@@ -26,18 +31,30 @@ import { ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import Loading from "../components/ui/Loading";
 import { useCountdown } from "../hooks/useCountdown";
+import { usePermissionStore } from "../stores/permissionStore";
 import "./TournamentDetailPage.scss";
 
 export function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showPopup, showConfirm } = usePopup();
+  const joinPermissions = usePermissionStore((state) => state.joinPermissions);
+  const hasJoinPermission = id ? !!joinPermissions[id] : false;
+
+  const grantJoinPermission = usePermissionStore(
+    (state) => state.grantJoinPermission
+  );
   const [isStarting, setIsStarting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showJoinPinModal, setShowJoinPinModal] = useState(false);
+  const [joinPinInput, setJoinPinInput] = useState("");
+  const [joinPinError, setJoinPinError] = useState("");
+  const [joinPinLoading, setJoinPinLoading] = useState(false);
 
   // 🚀 優化：先從 store 獲取已有的比賽資料（來自首頁/個人頁）
   const tournaments = useTournamentStore((state) => state.tournaments);
@@ -52,13 +69,42 @@ export function TournamentDetailPage() {
 
   const { currentTournament: liveTournament, loading } = useTournamentStore();
   const { matches, loading: matchesLoading } = useMatchStore();
-  
+
   // 🚀 優化：優先使用即時資料，否則使用預載入的資料（避免閃爍）
   const currentTournament = liveTournament || preloadedTournament;
-  
+
   const [isFixing, setIsFixing] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const [hasAttemptedMatchesLoad, setHasAttemptedMatchesLoad] = useState(false);
+  const hasAutoGrantedRef = useRef(false); // 追蹤是否已自動授權過
+  const pinFromUrl = searchParams.get("pin");
+
+  // 🚀 自動授權邏輯：如果 URL 中有正確的 PIN，自動授予報名權限
+  useEffect(() => {
+    // 只在尚未授權過且有 ID 的情況下執行
+    if (!id || hasAutoGrantedRef.current || hasJoinPermission || !pinFromUrl)
+      return;
+
+    if (currentTournament && pinFromUrl === currentTournament.pin) {
+      hasAutoGrantedRef.current = true; // 標記已授權，避免重複
+
+      // 延遲執行以避免在渲染過程中觸發狀態更新
+      const timer = setTimeout(() => {
+        grantJoinPermission(currentTournament.id);
+        showPopup("已透過連結獲得報名資格", "success");
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    id,
+    currentTournament?.id,
+    currentTournament?.pin,
+    pinFromUrl,
+    hasJoinPermission,
+    grantJoinPermission,
+    showPopup,
+  ]);
 
   // 追踪載入狀態：只有在真正載入過後才標記為已嘗試
   useEffect(() => {
@@ -192,7 +238,7 @@ export function TournamentDetailPage() {
   // 🚀 優化：只在真正沒有任何資料時才顯示全屏 loading
   // 如果有預載入的資料，先顯示內容，讓對戰表區域單獨 loading
   const showFullScreenLoading = (loading || isFixing) && !preloadedTournament;
-  
+
   if (showFullScreenLoading) {
     return (
       <Loading
@@ -315,6 +361,32 @@ export function TournamentDetailPage() {
       alert("開始比賽失敗，請稍後再試");
     } finally {
       setIsStarting(false);
+    }
+  };
+
+  const handleJoinPinSubmit = async () => {
+    if (joinPinInput.length !== 6) {
+      setJoinPinError("PIN 碼必須是 6 位數");
+      return;
+    }
+
+    setJoinPinLoading(true);
+    setJoinPinError("");
+
+    try {
+      if (joinPinInput === currentTournament.pin) {
+        grantJoinPermission(currentTournament.id);
+        setShowJoinPinModal(false);
+        setJoinPinInput("");
+        showPopup("驗證成功", "success");
+      } else {
+        setJoinPinError("PIN 碼不正確，請確認後重試");
+      }
+    } catch (error) {
+      console.error("Error validating PIN:", error);
+      setJoinPinError("驗證失敗，請重試");
+    } finally {
+      setJoinPinLoading(false);
     }
   };
 
@@ -444,9 +516,12 @@ export function TournamentDetailPage() {
         <div className="bracket-view-container">
           {/* <h2 className="bracket-view-container__title">對戰表</h2> */}
           {/* 🚀 優化：對戰表區域單獨顯示載入狀態 */}
-          {(matchesLoading || isFixing) && currentTournament.status === "live" ? (
+          {(matchesLoading || isFixing) &&
+          currentTournament.status === "live" ? (
             <div className="bracket-view-container__loading">
-              <Loading text={isFixing ? "正在初始化對戰表..." : "載入對戰表..."} />
+              <Loading
+                text={isFixing ? "正在初始化對戰表..." : "載入對戰表..."}
+              />
             </div>
           ) : (
             <BracketView
@@ -481,22 +556,84 @@ export function TournamentDetailPage() {
         />
       )}
 
+      {/* 報名 PIN 碼輸入彈窗 */}
+      {showJoinPinModal && (
+        <div
+          className="pin-modal-overlay"
+          onClick={() => setShowJoinPinModal(false)}
+        >
+          <div
+            className="pin-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="pin-modal-close"
+              onClick={() => {
+                setShowJoinPinModal(false);
+                setJoinPinInput("");
+                setJoinPinError("");
+              }}
+            >
+              ✕
+            </button>
+            <h3 className="pin-modal-title">輸入報名碼</h3>
+            <p className="pin-modal-subtitle">
+              請輸入 6 位數報名 PIN 碼以獲得報名權限
+            </p>
+            <input
+              type="text"
+              placeholder="輸入 6 位數 PIN 碼"
+              value={joinPinInput}
+              onChange={(e) => {
+                setJoinPinInput(e.target.value.replace(/\D/g, "").slice(0, 6));
+                setJoinPinError("");
+              }}
+              className={`pin-modal-input ${
+                joinPinError ? "pin-modal-input--error" : ""
+              }`}
+              maxLength={6}
+              autoFocus
+            />
+
+            {joinPinError && <p className="pin-modal-error">{joinPinError}</p>}
+            <button
+              onClick={handleJoinPinSubmit}
+              disabled={joinPinInput.length !== 6 || joinPinLoading}
+              className="pin-modal-submit-btn"
+            >
+              {joinPinLoading ? "驗證中..." : "驗證"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 固定在底部的報名按鈕（僅在籌備階段且尚未報名時顯示） */}
       {currentTournament.status === "draft" && !hasJoined && (
-        <button
-          onClick={() => {
-            // 檢查是否已滿人
-            if (format && currentPlayersCount >= format.totalSlots) {
-              showPopup("報名人數已滿", "error");
-              return;
-            }
-            // 開啟報名彈窗
-            setShowJoinModal(true);
-          }}
-          className="tournament-detail__floating-join-btn"
-        >
-          報名參賽
-        </button>
+        <>
+          {hasJoinPermission || isOrganizer ? (
+            <button
+              onClick={() => {
+                // 檢查是否已滿人
+                if (format && currentPlayersCount >= format.totalSlots) {
+                  showPopup("報名人數已滿", "error");
+                  return;
+                }
+                // 開啟報名彈窗
+                setShowJoinModal(true);
+              }}
+              className="tournament-detail__floating-join-btn"
+            >
+              報名參賽
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowJoinPinModal(true)}
+              className="tournament-detail__floating-join-btn"
+            >
+              輸入 PIN 碼報名
+            </button>
+          )}
+        </>
       )}
 
       {/* 已報名提示（固定在底部） */}
@@ -573,7 +710,7 @@ export function TournamentDetailPage() {
                 <div className="info-container__right">
                   <div className="info-container__pin-QR">
                     <QRCodeSVG
-                      value={`${window.location.origin}/tournament/${currentTournament.id}`}
+                      value={`${window.location.origin}/tournament/${currentTournament.id}?pin=${currentTournament.pin}`}
                       size={80}
                       level="M"
                       includeMargin={false}
@@ -597,7 +734,7 @@ export function TournamentDetailPage() {
       >
         <div className="tournament-detail__floating-info-qr">
           <QRCodeSVG
-            value={`${window.location.origin}/tournament/${currentTournament.id}`}
+            value={`${window.location.origin}/tournament/${currentTournament.id}?pin=${currentTournament.pin}`}
             size={60}
             level="M"
             includeMargin={false}
