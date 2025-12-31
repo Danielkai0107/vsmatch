@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePopup } from "../../contexts/PopupContext";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import "./PinModal.scss";
 
 interface PinModalProps {
@@ -24,6 +25,11 @@ export function PinModal({
   const [currentSlide, setCurrentSlide] = useState(initialSlide);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+
+  // 取得完整網址
+  const baseUrl = window.location.origin;
+  const publicUrl = tournamentId ? `${baseUrl}/tournament/${tournamentId}` : "";
+  const scorerUrl = tournamentId ? `${baseUrl}/tournament/${tournamentId}/scorer?pin=${scorerPin}` : "";
 
   // 處理觸摸滑動
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -120,6 +126,19 @@ export function PinModal({
                 <div className="pin-modal__pin-code pin-modal__pin-code--public">
                   {pin}
                 </div>
+
+                {publicUrl && (
+                  <div className="pin-modal__qrcode">
+                    <QRCodeCanvas
+                      value={publicUrl}
+                      size={140}
+                      level="H"
+                      includeMargin={true}
+                    />
+                    <div className="pin-modal__qrcode-tip">掃碼查看比賽</div>
+                  </div>
+                )}
+
                 <ul className="pin-modal__pin-desc">
                   <li>給選手報名使用</li>
                   <li>給觀眾查看對戰表使用</li>
@@ -153,6 +172,19 @@ export function PinModal({
                 <div className="pin-modal__pin-code pin-modal__pin-code--scorer">
                   {scorerPin}
                 </div>
+
+                {scorerUrl && (
+                  <div className="pin-modal__qrcode">
+                    <QRCodeCanvas
+                      value={scorerUrl}
+                      size={140}
+                      level="H"
+                      includeMargin={true}
+                    />
+                    <div className="pin-modal__qrcode-tip">掃碼快速獲得權限</div>
+                  </div>
+                )}
+
                 <ul className="pin-modal__pin-desc">
                   <li>只給志工計分員使用</li>
                   <li>請勿公開分享</li>
