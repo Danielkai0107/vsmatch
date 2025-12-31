@@ -1,5 +1,5 @@
 .match-view {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
   color: white;
@@ -196,7 +196,7 @@
 .match-view-loading,
 .match-view-waiting,
 .match-view-error {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;

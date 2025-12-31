@@ -1,7 +1,7 @@
 @import "../styles/common.scss";
 
 .score-page-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: #f3f4f6;
   padding: 1rem;
   max-width: 800px;
@@ -64,7 +64,8 @@
   background: white;
   border-radius: 1.5rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -77,9 +78,14 @@
       align-items: center;
       margin-bottom: 0.75rem;
       font-size: 0.875rem;
-      
-      span:first-child { color: #6b7280; }
-      .current-status { font-weight: 600; color: #111827; }
+
+      span:first-child {
+        color: #6b7280;
+      }
+      .current-status {
+        font-weight: 600;
+        color: #111827;
+      }
     }
 
     .progress-steps {
@@ -91,13 +97,17 @@
         flex: 1;
         border-radius: 9999px;
         background: #e5e7eb;
-        
-        &.completed { background: #10b981; }
-        &.active { 
-          background: #f59e0b; 
+
+        &.completed {
+          background: #10b981;
+        }
+        &.active {
+          background: #f59e0b;
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        &.overtime { background: #f97316; }
+        &.overtime {
+          background: #f97316;
+        }
       }
     }
   }
@@ -127,8 +137,12 @@
         line-height: 1;
       }
 
-      &.team-1 .score-value { color: #2563eb; }
-      &.team-2 .score-value { color: #dc2626; }
+      &.team-1 .score-value {
+        color: #2563eb;
+      }
+      &.team-2 .score-value {
+        color: #dc2626;
+      }
     }
 
     .score-divider {
@@ -269,23 +283,33 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       transition: all 0.2s;
 
-      &:active { transform: scale(0.95); }
+      &:active {
+        transform: scale(0.95);
+      }
     }
 
     .btn-undo {
       font-size: 0.75rem;
       color: #6b7280;
       padding: 0.25rem;
-      
-      &:disabled { opacity: 0.3; }
+
+      &:disabled {
+        opacity: 0.3;
+      }
     }
   }
 
   &.p1-card {
     border-left: 6px solid #2563eb;
-    .color-indicator { background: #2563eb; }
-    .player-info .current-points { color: #2563eb; }
-    .button-group .btn-add { background: #2563eb; }
+    .color-indicator {
+      background: #2563eb;
+    }
+    .player-info .current-points {
+      color: #2563eb;
+    }
+    .button-group .btn-add {
+      background: #2563eb;
+    }
   }
 
   &.p2-card {
@@ -294,9 +318,15 @@
       border-left: none;
       border-right: 6px solid #dc2626;
     }
-    .color-indicator { background: #dc2626; }
-    .player-info .current-points { color: #dc2626; }
-    .button-group .btn-add { background: #dc2626; }
+    .color-indicator {
+      background: #dc2626;
+    }
+    .player-info .current-points {
+      color: #dc2626;
+    }
+    .button-group .btn-add {
+      background: #dc2626;
+    }
   }
 }
 
@@ -310,7 +340,10 @@
     font-size: 0.75rem;
     color: #9ca3af;
     font-weight: 500;
-    span { color: #111827; font-weight: 700; }
+    span {
+      color: #111827;
+      font-weight: 700;
+    }
   }
 
   .btn-next-set {
@@ -324,8 +357,12 @@
     white-space: nowrap;
     transition: all 0.2s;
 
-    &:hover { background: #d97706; }
-    &:active { transform: scale(0.95); }
+    &:hover {
+      background: #d97706;
+    }
+    &:active {
+      transform: scale(0.95);
+    }
   }
 
   .period-name.finished {
@@ -360,7 +397,10 @@
       box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
       cursor: pointer;
 
-      &:hover { background: #059669; transform: translateY(-2px); }
+      &:hover {
+        background: #059669;
+        transform: translateY(-2px);
+      }
     }
   }
 
@@ -372,6 +412,11 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
