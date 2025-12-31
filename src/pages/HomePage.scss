@@ -115,6 +115,34 @@
     margin-top: 1rem;
     position: relative;
     z-index: 100;
+
+    &--joined {
+      .tournament-card__header {
+        background: linear-gradient(30deg, #a9f700 0%, #f3ffd7 100%);
+        border: 1px solid rgba(169, 247, 0, 0.2);
+      }
+
+      .tournament-card__pin {
+        color: #111827;
+      }
+
+      .tournament-card__sport-badge {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: #111827;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .tournament-card__status-badge {
+        &--live {
+          background-color: #10b981;
+          color: white;
+        }
+        &--draft {
+          background-color: #111827;
+          color: white;
+        }
+      }
+    }
   }
 
   &__draft-title {

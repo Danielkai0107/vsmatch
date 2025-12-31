@@ -567,7 +567,7 @@ export function HomePage() {
 
       {/* 我參加的比賽 */}
       {user && (
-        <div className="home-page__draft-section">
+        <div className="home-page__draft-section home-page__draft-section--joined">
           <h2 className="home-page__draft-title">參賽中</h2>
           <div className="home-page__draft-container">
             {myParticipatedTournaments.length > 0 ? (
