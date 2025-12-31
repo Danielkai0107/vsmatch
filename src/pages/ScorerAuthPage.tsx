@@ -58,7 +58,7 @@ export function ScorerAuthPage() {
 
   return (
     <div className="scorer-auth">
-      <button 
+      <button
         onClick={() => navigate(`/tournament/${id}`)}
         className="scorer-auth__back-btn "
       >
@@ -104,7 +104,7 @@ export function ScorerAuthPage() {
         </div>
 
         <button
-          onClick={handleSubmit}
+          onClick={() => handleSubmit()}
           disabled={pin.length !== 6 || loading}
           className="scorer-auth__submit-btn"
         >
