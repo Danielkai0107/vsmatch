@@ -14,7 +14,7 @@ import {
   Trophy,
   Plus,
   X,
-  Search,
+  // Search,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -23,10 +23,10 @@ import {
   findTournamentByPin,
 } from "../utils/pinCode";
 import { usePermissionStore } from "../stores/permissionStore";
-import { getAllSports } from "../config/sportsData";
+// import { getAllSports } from "../config/sportsData";
 import { doc, deleteDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import Loading from "../components/ui/Loading";
+// import Loading from "../components/ui/Loading";
 import "./HomePage.scss";
 
 export function HomePage() {
@@ -40,7 +40,7 @@ export function HomePage() {
 
   // 使用 selector 避免不必要的重新渲染
   const tournaments = useTournamentStore((state) => state.tournaments);
-  const loading = useTournamentStore((state) => state.loading);
+  // const loading = useTournamentStore((state) => state.loading);
   const { showPopup, showConfirm } = usePopup();
   const [showPinModal, setShowPinModal] = useState(false);
   const [showScorerPinModal, setShowScorerPinModal] = useState(false);
@@ -50,8 +50,8 @@ export function HomePage() {
   const [scorerPinInput, setScorerPinInput] = useState("");
   const [scorerPinError, setScorerPinError] = useState("");
   const [scorerPinLoading, setScorerPinLoading] = useState(false);
-  const [selectedSportFilter, setSelectedSportFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [selectedSportFilter /*, setSelectedSportFilter*/] = useState<string>("all");
+  // const [searchQuery /*, setSearchQuery*/] = useState("");
 
   // 籌備中（最近發布）的滾動狀態
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -71,7 +71,7 @@ export function HomePage() {
     (state) => state.grantJoinPermission
   );
 
-  const allSports = getAllSports();
+  // const allSports = getAllSports();
 
   // 獲取當前用戶籌備中的比賽
   const myDraftTournaments = useMemo(() => {
@@ -232,6 +232,7 @@ export function HomePage() {
   };
 
   // 根據運動項目和搜尋關鍵字篩選比賽，顯示進行中的比賽和過去兩天已結束的比賽
+  /*
   const filteredTournaments = useMemo(() => {
     const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
 
@@ -266,6 +267,7 @@ export function HomePage() {
       (tournament) => tournament.config.sportId === selectedSportFilter
     );
   }, [tournaments, selectedSportFilter, searchQuery]);
+  */
 
   const handleCreateTournament = async () => {
     if (!user) {
@@ -587,11 +589,11 @@ export function HomePage() {
       )}
 
       {/* 比賽列表 */}
+      {/* 
       <div className="home-page__section">
         <div className="home-page__section-header">
           <h2 className="home-page__section-title">觀看</h2>
 
-          {/* 運動項目篩選下拉選單 */}
           <select
             value={selectedSportFilter}
             onChange={(e) => setSelectedSportFilter(e.target.value)}
@@ -606,7 +608,6 @@ export function HomePage() {
           </select>
         </div>
 
-        {/* 搜尋框 */}
         <div className="home-page__search home-page__search--inline">
           <Search size={20} className="home-page__search-icon" />
           <input
@@ -644,6 +645,7 @@ export function HomePage() {
           </div>
         )}
       </div>
+      */}
     </div>
   );
 }

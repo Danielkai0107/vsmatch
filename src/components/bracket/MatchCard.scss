@@ -7,6 +7,7 @@
   background-color: $card-bg;
   transition: all 0.2s;
   border: 1px solid $border-color;
+  position: relative;
 
   &--pending {
   }
@@ -19,6 +20,7 @@
 
   &--clickable {
     cursor: pointer;
+    border: 2px solid $primary-color;
   }
 
   &__header {
@@ -28,7 +30,6 @@
     font-size: 0.75rem;
     color: #6b7280;
     margin-bottom: 0.625rem;
-    position: relative;
   }
 
   &__round {
@@ -38,9 +39,6 @@
   }
 
   &__period {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     font-weight: 500;
     font-size: 0.9rem;
     color: $text-secondary;
@@ -76,9 +74,18 @@
   }
 
   &__clickable-hint {
-    color: #2563eb;
-    font-size: 0.625rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    z-index: 500;
+    color: #ffffff;
+    font-size: 0.9rem;
     font-weight: 500;
+    background-color: $primary-color;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem 1rem 0 0;
+    text-align: center;
   }
 
   &__scores {
@@ -193,7 +200,7 @@
     color: #dc2626;
     border: 1px solid #fecaca;
     border-radius: 50%;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     line-height: 1;
     cursor: pointer;

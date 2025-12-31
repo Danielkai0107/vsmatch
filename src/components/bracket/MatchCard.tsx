@@ -18,7 +18,11 @@ interface MatchCardProps {
 
 // 🚀 優化：使用 memo 避免不必要的重新渲染
 // 只有當 match、tournamentId 或 roundName 改變時才重新渲染
-function MatchCardComponent({ match, tournamentId, roundName }: MatchCardProps) {
+function MatchCardComponent({
+  match,
+  tournamentId,
+  roundName,
+}: MatchCardProps) {
   const navigate = useNavigate();
   const { showPopup } = usePopup();
   const { user } = useAuth();
@@ -65,51 +69,59 @@ function MatchCardComponent({ match, tournamentId, roundName }: MatchCardProps) 
     } else if (match.status === "live") {
       navigate(`/match/${tournamentId}/${match.matchId}`);
     }
-  }, [match.matchId, match.player1, match.player2, match.status, hasScorePermission, navigate, tournamentId]);
+  }, [
+    match.matchId,
+    match.player1,
+    match.player2,
+    match.status,
+    hasScorePermission,
+    navigate,
+    tournamentId,
+  ]);
 
   // 🚀 優化：使用 useCallback 緩存事件處理函數
-  const handleRemovePlayer = useCallback(async (
-    playerIndex: 1 | 2,
-    e: React.MouseEvent
-  ) => {
-    e.stopPropagation(); // 防止觸發卡片點擊事件
+  const handleRemovePlayer = useCallback(
+    async (playerIndex: 1 | 2, e: React.MouseEvent) => {
+      e.stopPropagation(); // 防止觸發卡片點擊事件
 
-    const playerRef = playerIndex === 1 ? match.player1 : match.player2;
-    const playerName = playerRef?.name;
-    if (!playerName || !currentTournament) return;
+      const playerRef = playerIndex === 1 ? match.player1 : match.player2;
+      const playerName = playerRef?.name;
+      if (!playerName || !currentTournament) return;
 
-    // 只允許在賽事還沒開始時移除選手
-    if (
-      currentTournament.status !== "draft" &&
-      currentTournament.status !== "locked"
-    ) {
-      showPopup("比賽已開始，無法移除選手", "error");
-      return;
-    }
-
-    const confirmed = window.confirm(`確定要移除選手「${playerName}」嗎？`);
-    if (!confirmed) return;
-
-    try {
-      // 從賽事的 players 陣列中移除該選手
-      const playerToRemove = currentTournament.players.find(
-        (p) => p.name === playerName
-      );
-
-      if (playerToRemove) {
-        const tournamentRef = doc(db, "tournaments", tournamentId);
-        await updateDoc(tournamentRef, {
-          players: arrayRemove(playerToRemove),
-        });
-        showPopup("選手已移除", "success");
-      } else {
-        showPopup("找不到該選手", "error");
+      // 只允許在賽事還沒開始時移除選手
+      if (
+        currentTournament.status !== "draft" &&
+        currentTournament.status !== "locked"
+      ) {
+        showPopup("比賽已開始，無法移除選手", "error");
+        return;
       }
-    } catch (error) {
-      console.error("移除選手失敗:", error);
-      showPopup("移除選手失敗", "error");
-    }
-  }, [match.player1, match.player2, currentTournament, tournamentId, showPopup]);
+
+      const confirmed = window.confirm(`確定要移除選手「${playerName}」嗎？`);
+      if (!confirmed) return;
+
+      try {
+        // 從賽事的 players 陣列中移除該選手
+        const playerToRemove = currentTournament.players.find(
+          (p) => p.name === playerName
+        );
+
+        if (playerToRemove) {
+          const tournamentRef = doc(db, "tournaments", tournamentId);
+          await updateDoc(tournamentRef, {
+            players: arrayRemove(playerToRemove),
+          });
+          showPopup("選手已移除", "success");
+        } else {
+          showPopup("找不到該選手", "error");
+        }
+      } catch (error) {
+        console.error("移除選手失敗:", error);
+        showPopup("移除選手失敗", "error");
+      }
+    },
+    [match.player1, match.player2, currentTournament, tournamentId, showPopup]
+  );
 
   const isClickable = useMemo(
     () =>
@@ -280,7 +292,7 @@ function MatchCardComponent({ match, tournamentId, roundName }: MatchCardProps) 
         {hasScorePermission &&
           (match.status === "pending" || match.status === "live") &&
           !isBye && (
-            <span className="match-card__clickable-hint">點擊計分</span>
+            <span className="match-card__clickable-hint">可點擊計分</span>
           )}
       </div>
 
