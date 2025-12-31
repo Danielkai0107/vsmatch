@@ -411,26 +411,6 @@ export function HomePage() {
             </div>
           </button>
         </div>
-
-        {/* 搜尋框 */}
-        <div className="home-page__search">
-          <Search size={20} className="home-page__search-icon" />
-          <input
-            type="text"
-            placeholder="搜尋賽事名稱..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="home-page__search-input"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="home-page__search-clear"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
       </div>
 
       {/* 報名 PIN 碼輸入彈窗 */}
@@ -624,6 +604,26 @@ export function HomePage() {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* 搜尋框 */}
+        <div className="home-page__search home-page__search--inline">
+          <Search size={20} className="home-page__search-icon" />
+          <input
+            type="text"
+            placeholder="搜尋賽事名稱..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="home-page__search-input"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="home-page__search-clear"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         {loading ? (
