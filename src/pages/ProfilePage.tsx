@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopup } from "../contexts/PopupContext";
 import {
   useMyOrganizedTournaments,
   useMyJoinedTournaments,
@@ -9,11 +10,13 @@ import { useTournamentStore } from "../stores/tournamentStore";
 import { getSportById } from "../config/sportsData";
 import { useCountdown } from "../hooks/useCountdown";
 import Loading from "../components/ui/Loading";
+import { LogOut } from "lucide-react";
 import type { Tournament } from "../types";
 import "./ProfilePage.scss";
 
 export function ProfilePage() {
-  const { user, firebaseUser } = useAuth();
+  const { user, firebaseUser, signOut } = useAuth();
+  const { showConfirm } = usePopup();
   const navigate = useNavigate();
 
   // 同時查詢舉辦的和參加的比賽
@@ -33,6 +36,16 @@ export function ProfilePage() {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
+
+  const handleLogout = () => {
+    showConfirm("確定要登出嗎？", async () => {
+      try {
+        await signOut();
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    });
+  };
 
   // 滑動狀態
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -113,6 +126,13 @@ export function ProfilePage() {
             <h1 className="profile-page__username">{user.displayName}</h1>
             <p className="profile-page__email">{user.email}</p>
           </div>
+          <button 
+            className="profile-page__logout-btn" 
+            onClick={handleLogout}
+            title="登出"
+          >
+            <LogOut size={20} />
+          </button>
         </div>
 
         <div className="profile-page__stats">

@@ -1,27 +1,48 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Home, Plus, User, LogOut, LogIn } from "lucide-react";
+import { usePopup } from "../../contexts/PopupContext";
+import { Home, Plus, User } from "lucide-react";
 import "./Navbar.scss";
 
 export function Navbar() {
-  const { user, firebaseUser, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, firebaseUser, loading, signInWithGoogle } = useAuth();
+  const { showConfirm } = usePopup();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLoginRequired = (message: string, onSuccess?: () => void) => {
+    showConfirm(
+      message,
+      async () => {
+        try {
+          await signInWithGoogle();
+          if (onSuccess) onSuccess();
+        } catch (error) {
+          console.error("Login failed:", error);
+        }
+      },
+      () => {
+        console.log("Login cancelled");
+      }
+    );
+  };
 
   const handleCreateClick = () => {
     if (user) {
       navigate("/create");
     } else {
-      // 未登入時提示登入
-      if (window.confirm("需要登入才能創建賽事，是否立即登入？")) {
-        signInWithGoogle();
-      }
+      handleLoginRequired("需要登入才能創建賽事，是否立即登入？", () => {
+        navigate("/create");
+      });
     }
   };
 
-  const handleLogout = async () => {
-    if (window.confirm("確定要登出嗎？")) {
-      await signOut();
+  const handleProfileClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      handleLoginRequired("請先登入，然後點擊登入", () => {
+        navigate("/profile");
+      });
     }
   };
 
@@ -40,36 +61,29 @@ export function Navbar() {
             <div className="navbar__actions">
               {loading ? (
                 <span className="navbar__loading">載入中...</span>
-              ) : user ? (
-                <>
-                  <div className="navbar__user">
-                    <Link to="/profile" className="navbar__user-link">
-                      {firebaseUser?.photoURL && (
-                        <img
-                          src={firebaseUser.photoURL}
-                          alt={user.displayName}
-                          className="navbar__avatar"
-                        />
-                      )}
-                      <span className="navbar__username">
-                        {user.displayName}
-                      </span>
-                    </Link>
-                    <button
-                      onClick={signOut}
-                      className="navbar__btn navbar__btn--text"
-                    >
-                      登出
-                    </button>
-                  </div>
-                </>
               ) : (
-                <button
-                  onClick={signInWithGoogle}
-                  className="navbar__btn navbar__btn--primary"
-                >
-                  登入
-                </button>
+                <div className="navbar__user">
+                  <Link
+                    to="/profile"
+                    className="navbar__user-link"
+                    onClick={handleProfileClick}
+                  >
+                    {user && firebaseUser?.photoURL ? (
+                      <img
+                        src={firebaseUser.photoURL}
+                        alt={user.displayName}
+                        className="navbar__avatar"
+                      />
+                    ) : (
+                      <div className="navbar__avatar navbar__avatar--placeholder">
+                        <User size={20} />
+                      </div>
+                    )}
+                    <span className="navbar__username">
+                      {user ? user.displayName : "未登入"}
+                    </span>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -89,28 +103,15 @@ export function Navbar() {
             <Home size={22} />
           </Link>
 
-          {user && (
-            <Link
-              to="/profile"
-              className={`navbar__mobile-item ${
-                location.pathname === "/profile"
-                  ? "navbar__mobile-item--active"
-                  : ""
-              }`}
-            >
-              <User size={22} />
-            </Link>
-          )}
-
-          {user ? (
-            <button onClick={handleLogout} className="navbar__mobile-item">
-              <LogOut size={22} />
-            </button>
-          ) : (
-            <button onClick={signInWithGoogle} className="navbar__mobile-item">
-              <LogIn size={22} />
-            </button>
-          )}
+          <Link
+            to="/profile"
+            className={`navbar__mobile-item ${
+              location.pathname === "/profile" ? "navbar__mobile-item--active" : ""
+            }`}
+            onClick={handleProfileClick}
+          >
+            <User size={22} />
+          </Link>
         </nav>
         {/* 創建按鈕 - 獨立 */}
         <button onClick={handleCreateClick} className="navbar__mobile-create">
