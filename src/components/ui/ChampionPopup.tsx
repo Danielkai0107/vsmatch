@@ -1,5 +1,5 @@
 import React from "react";
-import { Share2, X } from "lucide-react";
+import { X } from "lucide-react";
 import "./ChampionPopup.scss";
 
 interface ChampionPopupProps {
@@ -57,35 +57,35 @@ const ChampionPopup: React.FC<ChampionPopupProps> = ({
           <X size={24} />
         </button>
 
+        {/* 泡泡特效 */}
+        <div className="champion-popup-bubbles">
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+          <div className="bubble"></div>
+        </div>
+
         <div className="champion-popup-header">
-          <div className="champion-popup-trophy">🏆</div>
-          <h2 className="champion-popup-title">恭喜冠軍誕生！</h2>
+          <h2 className="champion-popup-logo">VsMatch</h2>
+          <h2 className="champion-popup-title">WINNER</h2>
           <p className="champion-popup-tournament">{tournamentName}</p>
         </div>
 
         <div className="champion-popup-results">
           <div className="champion-popup-rank champion-popup-rank--gold">
-            <div className="rank-icon">🥇</div>
+            <div className="rank-icon"></div>
             <div className="rank-info">
-              <span className="rank-label">冠軍</span>
               <span className="rank-name">{championName}</span>
             </div>
           </div>
-
-          {runnerUpName && (
-            <div className="champion-popup-rank champion-popup-rank--silver">
-              <div className="rank-icon">🥈</div>
-              <div className="rank-info">
-                <span className="rank-label">亞軍</span>
-                <span className="rank-name">{runnerUpName}</span>
-              </div>
-            </div>
-          )}
         </div>
 
         <button className="champion-popup-share-btn" onClick={handleShare}>
-          <Share2 size={20} />
-          <span>分享比賽結果</span>
+          <span>SHARE</span>
         </button>
       </div>
     </div>

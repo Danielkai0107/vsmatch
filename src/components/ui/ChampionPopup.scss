@@ -16,37 +16,121 @@
 }
 
 .champion-popup-content {
-  background: white;
   border-radius: 20px;
   width: 100%;
   max-width: 400px;
+  height: 580px;
   padding: 2.5rem 2rem;
   position: relative;
   text-align: center;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background-image: url("../../assets/banner.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden; // 確保泡泡不會超出邊界
+}
+
+.champion-popup-bubbles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+
+  .bubble {
+    position: absolute;
+    bottom: -20px;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.1)
+    );
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
+      inset 0 0 5px rgba(255, 255, 255, 0.2);
+    animation: float-bubble var(--duration) ease-in infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+    left: var(--left);
+    width: var(--size);
+    height: var(--size);
+  }
+
+  .bubble:nth-child(1) {
+    --left: 10%;
+    --size: 20px;
+    --duration: 4s;
+    --delay: 0s;
+  }
+  .bubble:nth-child(2) {
+    --left: 25%;
+    --size: 15px;
+    --duration: 3s;
+    --delay: 1s;
+  }
+  .bubble:nth-child(3) {
+    --left: 40%;
+    --size: 25px;
+    --duration: 5s;
+    --delay: 0.5s;
+  }
+  .bubble:nth-child(4) {
+    --left: 55%;
+    --size: 18px;
+    --duration: 3.5s;
+    --delay: 2s;
+  }
+  .bubble:nth-child(5) {
+    --left: 70%;
+    --size: 22px;
+    --duration: 4.5s;
+    --delay: 1.5s;
+  }
+  .bubble:nth-child(6) {
+    --left: 85%;
+    --size: 12px;
+    --duration: 3s;
+    --delay: 0.2s;
+  }
+  .bubble:nth-child(7) {
+    --left: 20%;
+    --size: 30px;
+    --duration: 6s;
+    --delay: 2.5s;
+  }
+  .bubble:nth-child(8) {
+    --left: 80%;
+    --size: 16px;
+    --duration: 4s;
+    --delay: 3s;
+  }
 }
 
 .champion-popup-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: none;
-  border: none;
-  color: $text-secondary;
-  cursor: pointer;
-  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: #f3f4f6;
-    color: $text-primary;
-  }
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .champion-popup-header {
   margin-bottom: 2rem;
+  position: relative;
+  z-index: 2;
 }
 
 .champion-popup-trophy {
@@ -54,18 +138,30 @@
   margin-bottom: 1rem;
   display: inline-block;
   animation: bounce 2s infinite;
+  position: relative;
+  z-index: 2;
+}
+
+.champion-popup-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .champion-popup-title {
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-weight: 800;
-  color: $text-primary;
+  color: white;
   margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .champion-popup-tournament {
-  font-size: 0.9rem;
-  color: $text-secondary;
+  font-size: 1.2rem;
+  color: white;
+  font-weight: 500;
 }
 
 .champion-popup-results {
@@ -75,80 +171,71 @@
   margin-bottom: 2.5rem;
 }
 
-.champion-popup-rank {
+.champion-popup-rank--gold {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  z-index: 2;
+}
+
+.champion-popup-rank--silver {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  text-align: left;
+  margin-bottom: 2.5rem;
+}
 
-  .rank-icon {
-    font-size: 2rem;
-  }
+.rank-icon {
+  width: 8rem;
+  height: 8rem;
+  background-image: url("../../assets/cup.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
-  .rank-info {
-    display: flex;
-    flex-direction: column;
-
-    .rank-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .rank-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-  }
-
-  &--gold {
-    background: linear-gradient(135deg, #fffcf0 0%, #fff3c4 100%);
-    border: 1px solid #ffd700;
-    .rank-label { color: #b8860b; }
-    .rank-name { color: #8b4513; }
-  }
-
-  &--silver {
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border: 1px solid #d1d5db;
-    .rank-label { color: #6b7280; }
-    .rank-name { color: #374151; }
-  }
+.rank-info {
+  font-size: 2rem;
+  color: white;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .champion-popup-share-btn {
-  width: 100%;
-  background-color: $primary;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 1rem;
-  font-size: 1rem;
-  font-weight: 600;
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: $primary-dark;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba($primary, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+  transition: all 0.2s ease;
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  z-index: 2;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -163,14 +250,46 @@
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-20px); }
-  60% { transform: translateY(-10px); }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
+@keyframes float-bubble {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-600px) scale(1.5);
+    opacity: 0;
+  }
+}
