@@ -20,14 +20,17 @@ function BracketViewMobileComponent({
   const [touchEnd, setTouchEnd] = useState(0);
 
   // 🚀 優化：使用 useMemo 緩存輪次縮寫函數
-  const getStageShortName = useMemo(() => (stageName: string) => {
-    if (stageName.includes("16")) return "16 強";
-    if (stageName.includes("8")) return "8 強";
-    if (stageName.includes("準決賽") || stageName.includes("4"))
-      return "準決賽";
-    if (stageName.includes("決賽")) return "決賽";
-    return stageName;
-  }, []);
+  const getStageShortName = useMemo(
+    () => (stageName: string) => {
+      if (stageName.includes("16")) return "16 強";
+      if (stageName.includes("8")) return "8 強";
+      if (stageName.includes("準決賽") || stageName.includes("4"))
+        return "準決賽";
+      if (stageName.includes("決賽")) return "決賽";
+      return stageName;
+    },
+    []
+  );
 
   // 處理滑動手勢
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -89,6 +92,8 @@ function BracketViewMobileComponent({
           stage={format.stages[activeTab]}
           matches={matches}
           tournamentId={tournamentId}
+          isFirst={activeTab === 0}
+          isFinal={activeTab === format.stages.length - 1}
         />
       </div>
     </div>

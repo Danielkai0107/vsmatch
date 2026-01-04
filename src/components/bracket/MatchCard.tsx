@@ -14,6 +14,8 @@ interface MatchCardProps {
   match: Partial<Match>;
   tournamentId: string;
   roundName: string;
+  isFirst?: boolean;
+  isFinal?: boolean;
 }
 
 // 🚀 優化：使用 memo 避免不必要的重新渲染
@@ -22,6 +24,8 @@ function MatchCardComponent({
   match,
   tournamentId,
   roundName,
+  isFirst = false,
+  isFinal = false,
 }: MatchCardProps) {
   const navigate = useNavigate();
   const { showPopup } = usePopup();
@@ -260,7 +264,7 @@ function MatchCardComponent({
     <div
       className={`match-card ${getStatusClass()} ${
         isClickable ? "match-card--clickable" : ""
-      }`}
+      } ${isFirst ? "match-card--first" : ""} ${isFinal ? "match-card--final" : ""}`}
       onClick={handleClick}
     >
       {/* 頭部 */}

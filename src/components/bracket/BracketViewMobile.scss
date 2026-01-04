@@ -51,7 +51,7 @@
     height: 100%;
     flex: 1;
     min-height: 0;
-    padding: 0.5rem 1rem 8rem 1rem; // 底部增加 3rem 空間
+    padding-bottom: 8rem;
     touch-action: pan-y;
     user-select: none;
     overflow-y: auto;

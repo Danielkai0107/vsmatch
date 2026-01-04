@@ -514,10 +514,16 @@ export function TournamentDetailPage() {
       <div className="tournament-detail__header">
         <button
           onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
+            // 如果歷史堆疊只有當前頁面（表示是直接從連結進入），則導向首頁
+            // 否則回退到上一頁
+            if (
+              window.history.length <= 1 ||
+              document.referrer === "" ||
+              !document.referrer.includes(window.location.host)
+            ) {
+              navigate("/", { replace: true });
             } else {
-              navigate("/");
+              navigate(-1);
             }
           }}
           className="tournament-detail__back-btn mb-4"

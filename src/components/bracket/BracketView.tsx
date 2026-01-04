@@ -52,12 +52,14 @@ function BracketViewComponent({
   return (
     <div className="bracket-view">
       <div className="bracket-view__container">
-        {format.stages.map((stage) => (
+        {format.stages.map((stage, index) => (
           <BracketStage
             key={stage.round}
             stage={stage}
             matches={matches}
             tournamentId={tournamentId}
+            isFirst={index === 0}
+            isFinal={index === format.stages.length - 1}
           />
         ))}
       </div>

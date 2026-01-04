@@ -1,21 +1,60 @@
 @import "../../styles/common.scss";
 
 .match-card {
-  width: 100%;
+  width: 90%;
   border-radius: $border-radius;
   padding: 0.8rem 1rem;
   background-color: $card-bg;
   transition: all 0.2s;
   border: 1px solid $border-color;
   position: relative;
+  margin-left: 1rem;
+  position: relative;
 
-  &--pending {
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 1.2px;
+    background-color: $border-color;
+    z-index: -1;
   }
 
-  &--live {
+  &:nth-child(odd) {
+    &::before {
+      content: "";
+      position: absolute;
+      right: -36px;
+      top: 49%;
+      width: 1.2px;
+      height: 78px;
+      background-color: $border-color;
+      z-index: -1;
+    }
   }
 
-  &--completed {
+  &:nth-child(even) {
+    &::before {
+      content: "";
+      position: absolute;
+      right: -36px;
+      bottom: 49%;
+      width: 1.2px;
+      height: 78px;
+      background-color: $border-color;
+      z-index: -1;
+    }
+  }
+
+  &--first {
+    margin-left: 0;
+  }
+
+  &--final {
+    margin-left: auto;
   }
 
   &--clickable {
